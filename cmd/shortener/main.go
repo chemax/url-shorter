@@ -100,12 +100,9 @@ func (u *urlManger) ServeGET(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	res.Header().Set("Location", parsedURL.String())
 	res.WriteHeader(http.StatusTemporaryRedirect)
-	_, err := res.Write([]byte(fmt.Sprintf("Location: %s", parsedURL.String())))
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	//http.Redirect(res, req, parsedURL.String(), http.StatusTemporaryRedirect)
+
 }
 
 func (u *urlManger) ServeHTTP(res http.ResponseWriter, req *http.Request) {
@@ -122,7 +119,7 @@ func (u *urlManger) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 func main() {
 	u := &urlManger{urls: make(map[string]*url.URL)}
 
-	err := http.ListenAndServe("localhost:8080", u)
+	err := http.ListenAndServe(":8080", u)
 	if err != nil {
 		panic(err)
 	}
