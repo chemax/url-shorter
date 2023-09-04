@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	CODE_LENGTH             = 8
-	MAX_CODE_GENERATE_TRYES = 20
+	CodeLength           = 8
+	CodeGenerateAttempts = 20
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
@@ -28,19 +28,19 @@ type urlManger struct {
 	urls map[string]*url.URL
 }
 
-func (u *urlManger) addNewUrl(parsedUrl *url.URL) (code string, err error) {
+func (u *urlManger) addNewURL(parsedURL *url.URL) (code string, err error) {
 	var ok = true
 	var loop int
 	for ok {
-		code = RandStringRunes(CODE_LENGTH)
+		code = RandStringRunes(CodeLength)
 		_, ok = u.urls[code]
 		loop++
-		if loop > MAX_CODE_GENERATE_TRYES {
+		if loop > CodeGenerateAttempts {
 			code = ""
 			return code, fmt.Errorf("can not found free code for short url")
 		}
 	}
-	u.urls[code] = parsedUrl
+	u.urls[code] = parsedURL
 	return
 }
 
@@ -56,13 +56,13 @@ func (u *urlManger) ServeCreate(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 	}
 	fmt.Println(string(body))
-	parsedUrl, err := url.ParseRequestURI(string(body))
+	parsedURL, err := url.ParseRequestURI(string(body))
 	if err != nil {
 		fmt.Println(err.Error())
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	code, err := u.addNewUrl(parsedUrl)
+	code, err := u.addNewURL(parsedURL)
 	if err != nil {
 		fmt.Println(err.Error())
 		res.WriteHeader(http.StatusBadRequest)
@@ -89,16 +89,16 @@ func (u *urlManger) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		shortCode := strings.TrimPrefix(req.URL.Path, "/")
-		if len(shortCode) != CODE_LENGTH {
+		if len(shortCode) != CodeLength {
 			res.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		parsedUrl, ok := u.urls[shortCode]
+		parsedURL, ok := u.urls[shortCode]
 		if !ok {
 			res.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		http.Redirect(res, req, parsedUrl.String(), http.StatusTemporaryRedirect)
+		http.Redirect(res, req, parsedURL.String(), http.StatusTemporaryRedirect)
 	} else {
 		res.WriteHeader(http.StatusBadRequest)
 		return
