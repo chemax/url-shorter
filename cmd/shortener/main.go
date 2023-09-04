@@ -16,6 +16,10 @@ const (
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 
+func checkHeader(header string) bool {
+	return strings.Contains(header, "text/plain")
+}
+
 func RandStringRunes(n int) string {
 	b := make([]rune, n)
 	for i := range b {
@@ -45,7 +49,7 @@ func (u *urlManger) addNewURL(parsedURL *url.URL) (code string, err error) {
 }
 
 func (u *urlManger) ServeCreate(res http.ResponseWriter, req *http.Request) {
-	if req.Header.Get("Content-Type") != "text/plain" {
+	if !checkHeader(req.Header.Get("Content-Type")) {
 		fmt.Println("not plain text", req.Header.Get("Content-Type"))
 		res.WriteHeader(http.StatusBadRequest)
 		return
