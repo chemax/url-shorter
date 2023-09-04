@@ -86,6 +86,7 @@ func (u *urlManger) ServeCreate(res http.ResponseWriter, req *http.Request) {
 }
 
 func (u *urlManger) ServeGET(res http.ResponseWriter, req *http.Request) {
+	fmt.Println("URL requested: ", req.URL)
 	if req.URL.Path == "/" {
 		res.WriteHeader(http.StatusBadRequest)
 		return
