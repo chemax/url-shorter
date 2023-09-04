@@ -84,25 +84,35 @@ func (u *urlManger) ServeCreate(res http.ResponseWriter, req *http.Request) {
 		fmt.Println(err.Error())
 	}
 }
+
+func (u *urlManger) ServeGET(res http.ResponseWriter, req *http.Request) {
+	if req.URL.Path == "/" {
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	shortCode := strings.TrimPrefix(req.URL.Path, "/")
+	if len(shortCode) != CodeLength {
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	parsedURL, ok := u.urls[shortCode]
+	if !ok {
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	res.WriteHeader(http.StatusTemporaryRedirect)
+	_, err := res.Write([]byte(fmt.Sprintf("Location: %s", parsedURL.String())))
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	//http.Redirect(res, req, parsedURL.String(), http.StatusTemporaryRedirect)
+}
+
 func (u *urlManger) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		u.ServeCreate(res, req)
 	} else if req.Method == http.MethodGet {
-		if req.URL.Path == "/" {
-			res.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		shortCode := strings.TrimPrefix(req.URL.Path, "/")
-		if len(shortCode) != CodeLength {
-			res.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		parsedURL, ok := u.urls[shortCode]
-		if !ok {
-			res.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		http.Redirect(res, req, parsedURL.String(), http.StatusTemporaryRedirect)
+		u.ServeGET(res, req)
 	} else {
 		res.WriteHeader(http.StatusBadRequest)
 		return
