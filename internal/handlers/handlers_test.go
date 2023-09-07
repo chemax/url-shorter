@@ -1,7 +1,8 @@
-package main
+package handlers
 
 import (
 	"bytes"
+	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -14,7 +15,7 @@ import (
 
 func Test_urlManger_ServeHTTP(t *testing.T) {
 	var tmpCode string
-	const urlUrl = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
+	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
 	type fields struct {
 		urls map[string]*url.URL
 	}
@@ -104,7 +105,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			fields: fields{urls: urls},
 			args: args{
 				target: "/",
-				body:   bytes.NewBuffer([]byte(urlUrl)),
+				body:   bytes.NewBuffer([]byte(urlURL)),
 				method: http.MethodPost,
 			},
 			want: want{
@@ -121,14 +122,14 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusTemporaryRedirect,
-				Location: urlUrl,
+				Location: urlURL,
 			},
 		},
 		{name: "8",
 			fields: fields{urls: urls},
 			args: args{
 				target: "/",
-				body:   bytes.NewBuffer([]byte("urlUrl")),
+				body:   bytes.NewBuffer([]byte("urlURL")),
 				method: http.MethodPost,
 			},
 			want: want{
@@ -139,7 +140,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := &urlManger{
+			u := storage.UrlManger{
 				urls: tt.fields.urls,
 			}
 			if tt.args.target == "replaceme" {
@@ -150,9 +151,10 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 				request.Header.Set("Content-Type", "text/plain")
 			}
 			w := httptest.NewRecorder()
-			u.ServeHTTP(w, request)
+			ServeHTTP(w, request)
 
 			res := w.Result()
+			defer res.Body.Close()
 			assert.Equal(t, tt.want.httpCode, res.StatusCode)
 			if tt.want.httpCode == http.StatusOK && tt.args.method == http.MethodGet {
 				assert.Equal(t, tt.want.Location, res.Header.Get("Location"))
