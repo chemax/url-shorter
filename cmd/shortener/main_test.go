@@ -1,15 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 )
 
 func Test_urlManger_ServeHTTP(t *testing.T) {
+	var tmpCode string
+	const urlUrl = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
 	type fields struct {
 		urls map[string]*url.URL
 	}
@@ -83,20 +88,82 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 				Location: "",
 			},
 		},
+		{name: "5",
+			fields: fields{urls: urls},
+			args: args{
+				target: "/",
+				body:   nil,
+				method: http.MethodPost,
+			},
+			want: want{
+				httpCode: http.StatusBadRequest,
+				Location: "",
+			},
+		},
+		{name: "6",
+			fields: fields{urls: urls},
+			args: args{
+				target: "/",
+				body:   bytes.NewBuffer([]byte(urlUrl)),
+				method: http.MethodPost,
+			},
+			want: want{
+				httpCode: http.StatusCreated,
+				Location: "",
+			},
+		},
+		{name: "7",
+			fields: fields{urls: urls},
+			args: args{
+				target: "replaceme",
+				body:   nil,
+				method: http.MethodGet,
+			},
+			want: want{
+				httpCode: http.StatusTemporaryRedirect,
+				Location: urlUrl,
+			},
+		},
+		{name: "8",
+			fields: fields{urls: urls},
+			args: args{
+				target: "/",
+				body:   bytes.NewBuffer([]byte("urlUrl")),
+				method: http.MethodPost,
+			},
+			want: want{
+				httpCode: http.StatusBadRequest,
+				Location: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			u := &urlManger{
 				urls: tt.fields.urls,
 			}
+			if tt.args.target == "replaceme" {
+				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
+			}
 			request := httptest.NewRequest(tt.args.method, tt.args.target, tt.args.body)
+			if tt.args.body != nil {
+				request.Header.Set("Content-Type", "text/plain")
+			}
 			w := httptest.NewRecorder()
 			u.ServeHTTP(w, request)
 
 			res := w.Result()
 			assert.Equal(t, tt.want.httpCode, res.StatusCode)
-			if tt.want.httpCode == http.StatusOK {
+			if tt.want.httpCode == http.StatusOK && tt.args.method == http.MethodGet {
 				assert.Equal(t, tt.want.Location, res.Header.Get("Location"))
+			}
+			if tt.args.body != nil {
+				body, err := io.ReadAll(res.Body)
+				require.Equal(t, tt.want.httpCode, res.StatusCode)
+				require.Nil(t, err)
+				require.NotNil(t, body)
+				tmpCode = string(body)
+
 			}
 		})
 	}
