@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/chemax/url-shorter/internal/storage"
 	. "github.com/chemax/url-shorter/util"
 	"io"
 	"net/http"
 	"net/url"
 )
 
-func (h *Handlers) serveCreate(res http.ResponseWriter, req *http.Request, u *storage.UrlManger) {
+func (h *Handlers) serveCreate(res http.ResponseWriter, req *http.Request) {
 	if !CheckHeader(req.Header.Get("Content-Type")) {
 		fmt.Println("not plain text", req.Header.Get("Content-Type"))
 		res.WriteHeader(http.StatusBadRequest)
@@ -27,7 +26,7 @@ func (h *Handlers) serveCreate(res http.ResponseWriter, req *http.Request, u *st
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	code, err := u.AddNewURL(parsedURL)
+	code, err := h.storage.AddNewURL(parsedURL)
 	if err != nil {
 		fmt.Println(err.Error())
 		res.WriteHeader(http.StatusBadRequest)

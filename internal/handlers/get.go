@@ -2,24 +2,23 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/chemax/url-shorter/internal/storage"
-	. "github.com/chemax/url-shorter/util"
+	util "github.com/chemax/url-shorter/util"
 	"net/http"
 	"strings"
 )
 
-func (h *Handlers) serveGET(res http.ResponseWriter, req *http.Request, u *storage.UrlManger) {
+func (h *Handlers) serveGET(res http.ResponseWriter, req *http.Request) {
 	fmt.Println("URL requested: ", req.URL)
 	if req.URL.Path == "/" {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	shortCode := strings.TrimPrefix(req.URL.Path, "/")
-	if len(shortCode) != CodeLength {
+	if len(shortCode) != util.CodeLength {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	parsedURL, err := u.GetUrl(shortCode)
+	parsedURL, err := h.storage.GetUrl(shortCode)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return
