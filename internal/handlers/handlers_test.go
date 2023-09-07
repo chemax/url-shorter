@@ -48,13 +48,13 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			args: args{
 				target: "/rrrrrrrr",
 				body:   nil,
-				method: http.MethodGet,
+				method: http.MethodPut,
 			},
 			want: want{
-				httpCode: http.StatusTemporaryRedirect,
-				Location: urls["rrrrrrrr"].String(),
+				httpCode: http.StatusBadRequest,
 			},
-		}, {name: "2",
+		},
+		{name: "2",
 			fields: fields{urls: urls},
 			args: args{
 				target: "/",
@@ -63,7 +63,6 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				Location: "",
 			},
 		}, {name: "3",
 			fields: fields{urls: urls},
@@ -74,7 +73,6 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				Location: "",
 			},
 		},
 		{name: "4",
@@ -86,7 +84,6 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				Location: "",
 			},
 		},
 		{name: "5",
@@ -98,7 +95,6 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusBadRequest,
-				Location: "",
 			},
 		},
 		{name: "6",
@@ -110,7 +106,6 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			},
 			want: want{
 				httpCode: http.StatusCreated,
-				Location: "",
 			},
 		},
 		{name: "7",
@@ -140,9 +135,8 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			u := storage.UrlManger{
-				urls: tt.fields.urls,
-			}
+			u := storage.Get()
+			h := New(u)
 			if tt.args.target == "replaceme" {
 				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
 			}
@@ -151,7 +145,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 				request.Header.Set("Content-Type", "text/plain")
 			}
 			w := httptest.NewRecorder()
-			ServeHTTP(w, request)
+			h.ServeHTTP(w, request)
 
 			res := w.Result()
 			defer res.Body.Close()
