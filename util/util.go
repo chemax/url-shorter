@@ -7,7 +7,7 @@ import (
 )
 
 type StorageInterface interface {
-	GetUrl(code string) (parsedURL *url.URL, err error)
+	GetURL(code string) (parsedURL *url.URL, err error)
 	AddNewURL(parsedURL *url.URL) (code string, err error)
 }
 

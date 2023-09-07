@@ -18,7 +18,7 @@ func (h *Handlers) serveGET(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	parsedURL, err := h.storage.GetUrl(shortCode)
+	parsedURL, err := h.storage.GetURL(shortCode)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return

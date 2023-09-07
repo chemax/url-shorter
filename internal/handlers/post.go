@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"fmt"
-	. "github.com/chemax/url-shorter/util"
+	util "github.com/chemax/url-shorter/util"
 	"io"
 	"net/http"
 	"net/url"
 )
 
 func (h *Handlers) serveCreate(res http.ResponseWriter, req *http.Request) {
-	if !CheckHeader(req.Header.Get("Content-Type")) {
+	if !util.CheckHeader(req.Header.Get("Content-Type")) {
 		fmt.Println("not plain text", req.Header.Get("Content-Type"))
 		res.WriteHeader(http.StatusBadRequest)
 		return

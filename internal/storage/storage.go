@@ -6,17 +6,17 @@ import (
 	"net/url"
 )
 
-type UrlManger struct {
+type URLManager struct {
 	urls map[string]*url.URL
 }
 
-var manager = &UrlManger{urls: make(map[string]*url.URL)}
+var manager = &URLManager{urls: make(map[string]*url.URL)}
 
-func Get() *UrlManger {
+func Get() *URLManager {
 	return manager
 }
 
-func (u *UrlManger) GetUrl(code string) (parsedURL *url.URL, err error) {
+func (u *URLManager) GetURL(code string) (parsedURL *url.URL, err error) {
 	parsedURL, ok := u.urls[code]
 	if !ok {
 		return nil, fmt.Errorf("404")
@@ -24,7 +24,7 @@ func (u *UrlManger) GetUrl(code string) (parsedURL *url.URL, err error) {
 	return parsedURL, nil
 }
 
-func (u *UrlManger) AddNewURL(parsedURL *url.URL) (code string, err error) {
+func (u *URLManager) AddNewURL(parsedURL *url.URL) (code string, err error) {
 	var ok = true
 	var loop int
 	for ok {
