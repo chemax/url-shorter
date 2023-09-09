@@ -47,7 +47,6 @@ func New(s util.StorageInterface) *Handlers {
 	}
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
-		return
 	})
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
