@@ -13,6 +13,16 @@ import (
 	"testing"
 )
 
+type cfgMock struct {
+}
+
+func (c *cfgMock) GetHTTPAddr() string {
+	return "http://localhost:8080"
+}
+func (c *cfgMock) GetNetAddr() string {
+	return "localhost:8080"
+}
+
 func Test_urlManger_ServeHTTP(t *testing.T) {
 	var tmpCode string
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
@@ -137,7 +147,8 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			u := storage.Get()
-			h := New(u)
+
+			h := New(u, &cfgMock{})
 			if tt.args.target == "replaceme" {
 				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
 			}

@@ -11,6 +11,11 @@ type StorageInterface interface {
 	AddNewURL(parsedURL *url.URL) (code string, err error)
 }
 
+type ConfigInterface interface {
+	GetNetAddr() string
+	GetHTTPAddr() string
+}
+
 const (
 	CodeLength           = 8
 	CodeGenerateAttempts = 20

@@ -8,12 +8,7 @@ import (
 
 func (h *Handlers) serveGET(res http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	//fmt.Println("URL requested: ", req.URL)
-	//if req.URL.Path == "/" {
-	//	res.WriteHeader(http.StatusBadRequest)
-	//	return
-	//}
-	//shortCode := strings.TrimPrefix(req.URL.Path, "/")
+
 	if len(id) != util.CodeLength {
 		res.WriteHeader(http.StatusBadRequest)
 		return

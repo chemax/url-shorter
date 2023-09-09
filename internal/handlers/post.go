@@ -39,7 +39,7 @@ func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
 	}
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
-	_, err = res.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", code)))
+	_, err = res.Write([]byte(fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)))
 	if err != nil {
 		fmt.Println(err.Error())
 	}

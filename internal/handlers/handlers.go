@@ -12,10 +12,10 @@ import (
 type Handlers struct {
 	storage util.StorageInterface
 	Router  *chi.Mux
+	Cfg     util.ConfigInterface
 }
 
 func init() {
-	fmt.Println("####################")
 	render.Respond = func(w http.ResponseWriter, r *http.Request, v interface{}) {
 		if err, ok := v.(error); ok {
 
@@ -38,12 +38,13 @@ func init() {
 	}
 }
 
-func New(s util.StorageInterface) *Handlers {
+func New(s util.StorageInterface, cfg util.ConfigInterface) *Handlers {
 
 	r := chi.NewRouter()
 	h := &Handlers{
 		storage: s,
 		Router:  r,
+		Cfg:     cfg,
 	}
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
