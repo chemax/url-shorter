@@ -134,6 +134,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+
 		t.Run(tt.name, func(t *testing.T) {
 			u := storage.Get()
 			h := New(u)
@@ -145,7 +146,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 				request.Header.Set("Content-Type", "text/plain")
 			}
 			w := httptest.NewRecorder()
-			h.ServeHTTP(w, request)
+			h.Router.ServeHTTP(w, request)
 
 			res := w.Result()
 			defer res.Body.Close()

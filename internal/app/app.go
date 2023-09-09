@@ -10,7 +10,7 @@ func Run() error {
 	s := storage.Get()
 	h := handlers.New(s)
 
-	err := http.ListenAndServe(":8080", h)
+	err := http.ListenAndServe(":8080", h.Router)
 	return err
 
 }

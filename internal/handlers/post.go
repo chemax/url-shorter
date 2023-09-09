@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-func (h *Handlers) serveCreate(res http.ResponseWriter, req *http.Request) {
+func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
 	if !util.CheckHeader(req.Header.Get("Content-Type")) {
 		fmt.Println("not plain text", req.Header.Get("Content-Type"))
 		res.WriteHeader(http.StatusBadRequest)
