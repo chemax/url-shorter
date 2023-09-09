@@ -13,8 +13,8 @@ type HTTPAddr struct {
 	addr string
 }
 
-func (a HTTPAddr) String() string {
-	return a.addr
+func (h HTTPAddr) String() string {
+	return h.addr
 }
 
 func (h *HTTPAddr) Set(s string) error {
@@ -39,7 +39,7 @@ func (a NetAddr) String() string {
 func (a *NetAddr) Set(s string) error {
 	hp := strings.Split(s, ":")
 	if len(hp) != 2 {
-		return errors.New("Need address in a form host:port")
+		return errors.New("need address in a form host:port")
 	}
 	port, err := strconv.Atoi(hp[1])
 	if err != nil {
