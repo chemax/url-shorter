@@ -82,15 +82,12 @@ func MustConfig() {
 		if err != nil {
 			panic(err)
 		}
-	} else {
-
 	}
 	if baseURL, ok := os.LookupEnv(util.BaseURLEnv); ok && baseURL != "" {
 		err := cfg.HTTPAddr.Set(baseURL)
 		if err != nil {
 			panic(err)
 		}
-	} else {
 	}
 }
 
