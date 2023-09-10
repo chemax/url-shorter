@@ -5,9 +5,31 @@ import (
 	"flag"
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
+
+type Config struct {
+	NetAddr  *NetAddr
+	HTTPAddr *HTTPAddr
+}
+
+const serverAddressEnv = "SERVER_ADDRESS"
+const baseUrlEnv = "BASE_URL"
+
+var (
+	cfg = &Config{
+		NetAddr:  &NetAddr{host: "localhost", port: 8080},
+		HTTPAddr: &HTTPAddr{addr: "http://localhost:8080"},
+	}
+)
+
+type NetAddr struct {
+	host string
+	port int
+}
 
 type HTTPAddr struct {
 	addr string
@@ -25,11 +47,6 @@ func (h *HTTPAddr) Set(s string) error {
 	s = strings.TrimSuffix(s, "/")
 	h.addr = s
 	return nil
-}
-
-type NetAddr struct {
-	host string
-	port int
 }
 
 func (a NetAddr) String() string {
@@ -50,18 +67,6 @@ func (a *NetAddr) Set(s string) error {
 	return nil
 }
 
-type Config struct {
-	NetAddr  *NetAddr
-	HTTPAddr *HTTPAddr
-}
-
-var (
-	cfg = &Config{
-		NetAddr:  &NetAddr{host: "localhost", port: 8080},
-		HTTPAddr: &HTTPAddr{addr: "http://localhost:8080"},
-	}
-)
-
 func (c *Config) GetNetAddr() string {
 	return c.NetAddr.String()
 }
@@ -69,14 +74,28 @@ func (c *Config) GetHTTPAddr() string {
 	return c.HTTPAddr.String()
 }
 
-func init() {
-
-	flag.Var(cfg.NetAddr, "a", "Net address host:port")
-	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
+func MustConfig() {
+	if srvAddr, ok := os.LookupEnv(serverAddressEnv); ok {
+		err := cfg.NetAddr.Set(srvAddr)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		flag.Var(cfg.NetAddr, "a", "Net address host:port")
+	}
+	if baseUrl, ok := os.LookupEnv(baseUrlEnv); ok {
+		err := cfg.HTTPAddr.Set(baseUrl)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
+	}
 	flag.Parse()
-
 }
 
 func Get() *Config {
+	var once sync.Once
+	once.Do(MustConfig)
 	return cfg
 }
