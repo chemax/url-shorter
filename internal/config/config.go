@@ -73,14 +73,17 @@ func (c *Config) GetHTTPAddr() string {
 }
 
 func MustConfig() {
+	flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
+	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
 
+	flag.Parse()
 	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
+
 	}
 	if baseURL, ok := os.LookupEnv(util.BaseURLEnv); ok && baseURL != "" {
 		err := cfg.HTTPAddr.Set(baseURL)
@@ -88,9 +91,7 @@ func MustConfig() {
 			panic(err)
 		}
 	} else {
-		flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
 	}
-	flag.Parse()
 }
 
 func Get() *Config {
