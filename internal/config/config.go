@@ -17,7 +17,7 @@ type Config struct {
 }
 
 const serverAddressEnv = "SERVER_ADDRESS"
-const baseUrlEnv = "BASE_URL"
+const baseURLEnv = "BASE_URL"
 
 var (
 	cfg = &Config{
@@ -83,8 +83,8 @@ func MustConfig() {
 	} else {
 		flag.Var(cfg.NetAddr, "a", "Net address host:port")
 	}
-	if baseUrl, ok := os.LookupEnv(baseUrlEnv); ok {
-		err := cfg.HTTPAddr.Set(baseUrl)
+	if baseURL, ok := os.LookupEnv(baseURLEnv); ok {
+		err := cfg.HTTPAddr.Set(baseURL)
 		if err != nil {
 			panic(err)
 		}
