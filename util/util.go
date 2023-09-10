@@ -17,6 +17,8 @@ type ConfigInterface interface {
 }
 
 const (
+	ServerAddressEnv     = "SERVER_ADDRESS"
+	BaseURLEnv           = "BASE_URL"
 	CodeLength           = 8
 	CodeGenerateAttempts = 20
 )

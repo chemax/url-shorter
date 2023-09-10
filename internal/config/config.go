@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/chemax/url-shorter/util"
 	"net/url"
 	"os"
 	"strconv"
@@ -15,9 +16,6 @@ type Config struct {
 	NetAddr  *NetAddr
 	HTTPAddr *HTTPAddr
 }
-
-const serverAddressEnv = "SERVER_ADDRESS"
-const baseURLEnv = "BASE_URL"
 
 var (
 	cfg = &Config{
@@ -75,7 +73,8 @@ func (c *Config) GetHTTPAddr() string {
 }
 
 func MustConfig() {
-	if srvAddr, ok := os.LookupEnv(serverAddressEnv); ok && srvAddr != "" {
+
+	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {
 			panic(err)
@@ -83,7 +82,7 @@ func MustConfig() {
 	} else {
 		flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
 	}
-	if baseURL, ok := os.LookupEnv(baseURLEnv); ok && baseURL != "" {
+	if baseURL, ok := os.LookupEnv(util.BaseURLEnv); ok && baseURL != "" {
 		err := cfg.HTTPAddr.Set(baseURL)
 		if err != nil {
 			panic(err)
@@ -97,6 +96,5 @@ func MustConfig() {
 func Get() *Config {
 	var once sync.Once
 	once.Do(MustConfig)
-
 	return cfg
 }
