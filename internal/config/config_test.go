@@ -20,8 +20,8 @@ func TestNetAddr_Set(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	if addr.host != "localhost" || addr.port != 8080 {
-		t.Errorf("unexpected result: %s:%d", addr.host, addr.port)
+	if addr.Host != "localhost" || addr.Port != 8080 {
+		t.Errorf("unexpected result: %s:%d", addr.Host, addr.Port)
 	}
 
 	err = addr.Set("invalid_address")
@@ -38,8 +38,8 @@ func TestHTTPAddr_Set(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	if httpAddr.addr != "http://localhost:8080" {
-		t.Errorf("unexpected result: %s", httpAddr.addr)
+	if httpAddr.Addr != "http://localhost:8080" {
+		t.Errorf("unexpected result: %s", httpAddr.Addr)
 	}
 
 	err = httpAddr.Set("invalid_address")
@@ -50,7 +50,7 @@ func TestHTTPAddr_Set(t *testing.T) {
 
 func TestConfig_GetNetAddr(t *testing.T) {
 	cfg := &Config{
-		NetAddr: &NetAddr{host: "localhost", port: 8080},
+		NetAddr: &NetAddr{Host: "localhost", Port: 8080},
 	}
 
 	result := cfg.GetNetAddr()
@@ -63,7 +63,7 @@ func TestConfig_GetNetAddr(t *testing.T) {
 
 func TestConfig_GetHTTPAddr(t *testing.T) {
 	cfg := &Config{
-		HTTPAddr: &HTTPAddr{addr: "http://localhost:8080"},
+		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
 	}
 
 	result := cfg.GetHTTPAddr()
@@ -85,12 +85,12 @@ func TestInit(t *testing.T) {
 
 	//init()
 
-	expectedNetAddr := &NetAddr{host: "localhost", port: 8080}
+	expectedNetAddr := &NetAddr{Host: "localhost", Port: 8080}
 	if !reflect.DeepEqual(cfg.NetAddr, expectedNetAddr) {
 		t.Errorf("unexpected NetAddr: %+v", cfg.NetAddr)
 	}
 
-	expectedHTTPAddr := &HTTPAddr{addr: "http://localhost:8080"}
+	expectedHTTPAddr := &HTTPAddr{Addr: "http://localhost:8080"}
 	if !reflect.DeepEqual(cfg.HTTPAddr, expectedHTTPAddr) {
 		t.Errorf("unexpected HTTPAddr: %+v", cfg.HTTPAddr)
 	}

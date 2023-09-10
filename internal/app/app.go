@@ -8,10 +8,10 @@ import (
 )
 
 func Run() error {
+
 	cfg := config.Get()
 	s := storage.Get()
 	h := handlers.New(s, cfg)
-
 	err := http.ListenAndServe(cfg.GetNetAddr(), h.Router)
 	return err
 

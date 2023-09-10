@@ -21,22 +21,22 @@ const baseURLEnv = "BASE_URL"
 
 var (
 	cfg = &Config{
-		NetAddr:  &NetAddr{host: "localhost", port: 8080},
-		HTTPAddr: &HTTPAddr{addr: "http://localhost:8080"},
+		NetAddr:  &NetAddr{Host: "localhost", Port: 8080},
+		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
 	}
 )
 
 type NetAddr struct {
-	host string
-	port int
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }
 
 type HTTPAddr struct {
-	addr string
+	Addr string `json:"addr"`
 }
 
 func (h HTTPAddr) String() string {
-	return h.addr
+	return h.Addr
 }
 
 func (h *HTTPAddr) Set(s string) error {
@@ -45,25 +45,25 @@ func (h *HTTPAddr) Set(s string) error {
 		return err
 	}
 	s = strings.TrimSuffix(s, "/")
-	h.addr = s
+	h.Addr = s
 	return nil
 }
 
 func (a NetAddr) String() string {
-	return fmt.Sprintf("%s:%d", a.host, a.port)
+	return fmt.Sprintf("%s:%d", a.Host, a.Port)
 }
 
 func (a *NetAddr) Set(s string) error {
 	hp := strings.Split(s, ":")
 	if len(hp) != 2 {
-		return errors.New("need address in a form host:port")
+		return errors.New("need address in a form Host:Port")
 	}
 	port, err := strconv.Atoi(hp[1])
 	if err != nil {
 		return err
 	}
-	a.host = hp[0]
-	a.port = port
+	a.Host = hp[0]
+	a.Port = port
 	return nil
 }
 
@@ -75,15 +75,15 @@ func (c *Config) GetHTTPAddr() string {
 }
 
 func MustConfig() {
-	if srvAddr, ok := os.LookupEnv(serverAddressEnv); ok {
+	if srvAddr, ok := os.LookupEnv(serverAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		flag.Var(cfg.NetAddr, "a", "Net address host:port")
+		flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
 	}
-	if baseURL, ok := os.LookupEnv(baseURLEnv); ok {
+	if baseURL, ok := os.LookupEnv(baseURLEnv); ok && baseURL != "" {
 		err := cfg.HTTPAddr.Set(baseURL)
 		if err != nil {
 			panic(err)
@@ -97,5 +97,6 @@ func MustConfig() {
 func Get() *Config {
 	var once sync.Once
 	once.Do(MustConfig)
+
 	return cfg
 }
