@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	util "github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -15,21 +15,13 @@ type Handlers struct {
 	Cfg     util.ConfigInterface
 }
 
-func init() {
+func initRender() {
 	render.Respond = func(w http.ResponseWriter, r *http.Request, v interface{}) {
 		if err, ok := v.(error); ok {
-
-			// We set a default error status response code if one hasn't been set.
 			if _, ok := r.Context().Value(render.StatusCtxKey).(int); !ok {
-				w.WriteHeader(400)
+				w.WriteHeader(http.StatusBadRequest)
 			}
-
-			// We log the error
 			fmt.Printf("Logging err: %s\n", err.Error())
-
-			// We change the response to not reveal the actual error message,
-			// instead we can transform the message something more friendly or mapped
-			// to some code / language, etc.
 			render.DefaultResponder(w, r, render.M{"status": "error"})
 			return
 		}
@@ -39,7 +31,7 @@ func init() {
 }
 
 func New(s util.StorageInterface, cfg util.ConfigInterface) *Handlers {
-
+	initRender()
 	r := chi.NewRouter()
 	h := &Handlers{
 		storage: s,

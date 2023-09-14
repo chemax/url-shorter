@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	util "github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )

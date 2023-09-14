@@ -19,7 +19,7 @@ func Get() *URLManager {
 func (u *URLManager) GetURL(code string) (parsedURL *url.URL, err error) {
 	parsedURL, ok := u.urls[code]
 	if !ok {
-		return nil, fmt.Errorf("404")
+		return nil, fmt.Errorf("requested url not found")
 	}
 	return parsedURL, nil
 }
@@ -37,5 +37,5 @@ func (u *URLManager) AddNewURL(parsedURL *url.URL) (code string, err error) {
 		}
 	}
 	u.urls[code] = parsedURL
-	return
+	return code, err
 }

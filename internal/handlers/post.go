@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	util "github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/util"
 	"io"
 	"net/http"
 	"net/url"
