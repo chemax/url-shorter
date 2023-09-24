@@ -2,9 +2,14 @@ package util
 
 import (
 	"math/rand"
+	"net/http"
 	"net/url"
 	"strings"
 )
+
+type LoggerInterface interface {
+	Middleware(next http.Handler) http.Handler
+}
 
 type StorageInterface interface {
 	GetURL(code string) (parsedURL *url.URL, err error)

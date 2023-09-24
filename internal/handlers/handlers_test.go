@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,6 +14,7 @@ import (
 	"testing"
 )
 
+// TODO mockgen
 type cfgMock struct {
 }
 
@@ -24,6 +26,7 @@ func (c *cfgMock) GetNetAddr() string {
 }
 
 func Test_urlManger_ServeHTTP(t *testing.T) {
+	lg := logger.New()
 	var tmpCode string
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
 	type fields struct {
@@ -148,7 +151,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			u := storage.Get()
 
-			h := New(u, &cfgMock{})
+			h := New(u, &cfgMock{}, lg)
 			if tt.args.target == "replaceme" {
 				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
 			}

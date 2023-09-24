@@ -30,7 +30,7 @@ func initRender() {
 	}
 }
 
-func New(s util.StorageInterface, cfg util.ConfigInterface) *Handlers {
+func New(s util.StorageInterface, cfg util.ConfigInterface, log util.LoggerInterface) *Handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &Handlers{
@@ -41,7 +41,7 @@ func New(s util.StorageInterface, cfg util.ConfigInterface) *Handlers {
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 	})
-	r.Use(middleware.Logger)
+	r.Use(log.Middleware)
 	r.Use(middleware.Recoverer)
 	r.Post("/", h.ServeCreate)
 	r.Get("/{id}", h.serveGET)
