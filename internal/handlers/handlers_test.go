@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/stretchr/testify/assert"
@@ -175,6 +176,105 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 				require.NotNil(t, body)
 				tmpCode = string(body)
 
+			}
+		})
+	}
+}
+
+func Test_urlManger_ApiServeCreate(t *testing.T) {
+	lg := logger.New()
+	path := "/api/shorten"
+	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
+	type fields struct {
+		urls map[string]*url.URL
+	}
+	urls := map[string]*url.URL{
+		"xxxxxxxx": &url.URL{Path: "http://yandex.ru"},
+		"yyyyyyyy": &url.URL{Path: "http://ya.ru"},
+		"zzzzzzzz": &url.URL{Path: "http://google.com"},
+		"vvvvvvvv": &url.URL{Path: "http://habr.com"},
+		"qqqqqqqq": &url.URL{Path: "https://pikabu.ru"},
+		"wwwwwwww": &url.URL{Path: "http://ixbt.games"},
+		"rrrrrrrr": &url.URL{Path: "https://habr.com"},
+	}
+	type want struct {
+		httpCode int
+		Location string
+	}
+	type args struct {
+		body   io.Reader
+		method string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   want
+	}{
+		{name: "5",
+			fields: fields{urls: urls},
+			args: args{
+				body:   nil,
+				method: http.MethodPost,
+			},
+			want: want{
+				httpCode: http.StatusBadRequest,
+			},
+		},
+		{name: "6",
+			fields: fields{urls: urls},
+			args: args{
+				body:   bytes.NewBuffer([]byte(fmt.Sprintf("{\"url\": \"%s\"}", urlURL))),
+				method: http.MethodPost,
+			},
+			want: want{
+				httpCode: http.StatusCreated,
+			},
+		},
+		{name: "7",
+			fields: fields{urls: urls},
+			args: args{
+				body:   bytes.NewBuffer([]byte("")),
+				method: http.MethodPost,
+			},
+			want: want{
+				httpCode: http.StatusBadRequest,
+			},
+		},
+		{name: "8",
+			fields: fields{urls: urls},
+			args: args{
+				body:   bytes.NewBuffer([]byte("{\"url\": \"url\"}")),
+				method: http.MethodPost,
+			},
+			want: want{
+				httpCode: http.StatusBadRequest,
+				Location: "",
+			},
+		},
+	}
+	for _, tt := range tests {
+
+		t.Run(tt.name, func(t *testing.T) {
+			u := storage.Get()
+
+			h := New(u, &cfgMock{}, lg)
+			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
+
+			if tt.args.body != nil {
+				request.Header.Set("content-type", "application/json")
+			}
+			w := httptest.NewRecorder()
+			h.Router.ServeHTTP(w, request)
+
+			res := w.Result()
+			defer res.Body.Close()
+			assert.Equal(t, tt.want.httpCode, res.StatusCode)
+			if tt.args.body != nil {
+				body, err := io.ReadAll(res.Body)
+				require.Equal(t, tt.want.httpCode, res.StatusCode)
+				require.Nil(t, err)
+				require.NotNil(t, body)
 			}
 		})
 	}

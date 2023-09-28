@@ -9,6 +9,9 @@ import (
 
 type LoggerInterface interface {
 	Middleware(next http.Handler) http.Handler
+	Debug(args ...interface{})
+	Info(args ...interface{})
+	Warn(args ...interface{})
 }
 
 type StorageInterface interface {
@@ -30,6 +33,9 @@ const (
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 
+func CheckHeaderJsonType(header string) bool {
+	return strings.Contains(header, "application/json")
+}
 func CheckHeader(header string) bool {
 	return strings.Contains(header, "text/plain")
 }

@@ -39,13 +39,13 @@ type Logger struct {
 
 func New() *Logger {
 	l := &Logger{}
-	logger, err := zap.NewDevelopment()
+	cfgLogger := zap.NewDevelopmentConfig()
+	cfgLogger.DisableStacktrace = true
+	lx, err := cfgLogger.Build()
 	if err != nil {
 		panic(err)
 	}
-	//logger.Sync()
-
-	l.sugar = logger.Sugar()
+	l.sugar = lx.Sugar()
 	return l
 }
 
@@ -53,6 +53,18 @@ func (l *Logger) Sync() error {
 	return l.sugar.Sync()
 }
 
+func (l *Logger) Debug(args ...interface{}) {
+	l.sugar.Debugln(args)
+}
+func (l *Logger) Info(args ...interface{}) {
+	l.sugar.Infoln(args)
+}
+func (l *Logger) Warn(args ...interface{}) {
+	l.sugar.Warnln(args)
+}
+func (l *Logger) Error(args ...interface{}) {
+	l.sugar.Errorln(args)
+}
 func (l *Logger) Middleware(next http.Handler) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {

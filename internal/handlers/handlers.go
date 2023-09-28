@@ -13,6 +13,7 @@ type Handlers struct {
 	storage util.StorageInterface
 	Router  *chi.Mux
 	Cfg     util.ConfigInterface
+	Log     util.LoggerInterface
 }
 
 func initRender() {
@@ -37,12 +38,14 @@ func New(s util.StorageInterface, cfg util.ConfigInterface, log util.LoggerInter
 		storage: s,
 		Router:  r,
 		Cfg:     cfg,
+		Log:     log,
 	}
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 	})
 	r.Use(log.Middleware)
 	r.Use(middleware.Recoverer)
+	r.Post("/api/shorten", h.ApiServeCreate)
 	r.Post("/", h.ServeCreate)
 	r.Get("/{id}", h.serveGET)
 	return h
