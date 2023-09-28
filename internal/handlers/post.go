@@ -54,7 +54,7 @@ func (h *Handlers) APIServeCreate(res http.ResponseWriter, req *http.Request) {
 	type ResultStruct struct {
 		Result string `json:"result"`
 	}
-	if !util.CheckHeaderJsonType(req.Header.Get("Content-Type")) {
+	if !util.CheckHeaderJSONType(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
 	}
