@@ -45,7 +45,7 @@ func New(s util.StorageInterface, cfg util.ConfigInterface, log util.LoggerInter
 	})
 	r.Use(log.Middleware)
 	r.Use(middleware.Recoverer)
-	r.Post("/api/shorten", h.ApiServeCreate)
+	r.Post("/api/shorten", h.APIServeCreate)
 	r.Post("/", h.ServeCreate)
 	r.Get("/{id}", h.serveGET)
 	return h

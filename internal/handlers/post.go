@@ -40,7 +40,7 @@ func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handlers) ApiServeCreate(res http.ResponseWriter, req *http.Request) {
+func (h *Handlers) APIServeCreate(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
