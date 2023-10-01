@@ -2,7 +2,6 @@ package compress
 
 import (
 	"compress/gzip"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -14,7 +13,7 @@ type gzipWriter struct {
 	compress bool
 }
 
-func (w *gzipWriter) WriteHeader(code int) {
+func (w *gzipWriter) WriteHeader(statusCode int) {
 	if strings.Contains(w.Header().Get("Content-Type"), "application/json") ||
 		strings.Contains(w.Header().Get("Content-Type"), "text/html") {
 		w.compress = true
@@ -22,15 +21,13 @@ func (w *gzipWriter) WriteHeader(code int) {
 	}
 	if w.Header().Get("Content-Encoding") != "" {
 		w.Header().Del("Content-Length")
-		return
 	}
+	w.ResponseWriter.WriteHeader(statusCode)
 
-	w.ResponseWriter.WriteHeader(code)
 }
 
 func (w *gzipWriter) Write(b []byte) (int, error) {
 	if w.compress {
-		fmt.Println("GzWriter")
 		gz, err := gzip.NewWriterLevel(w.ResponseWriter, gzip.BestSpeed)
 		if err != nil {
 			io.WriteString(w.ResponseWriter, err.Error())
@@ -38,7 +35,6 @@ func (w *gzipWriter) Write(b []byte) (int, error) {
 		defer gz.Close()
 		return gz.Write(b)
 	} else {
-		fmt.Println("ResponseWriter")
 		return w.ResponseWriter.Write(b)
 	}
 }
