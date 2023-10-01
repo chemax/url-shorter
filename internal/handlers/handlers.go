@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/chemax/url-shorter/internal/compress"
 	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -44,6 +45,7 @@ func New(s util.StorageInterface, cfg util.ConfigInterface, log util.LoggerInter
 		res.WriteHeader(http.StatusBadRequest)
 	})
 	r.Use(log.Middleware)
+	r.Use(compress.Middleware)
 	r.Use(middleware.Recoverer)
 	r.Post("/api/shorten", h.APIServeCreate)
 	r.Post("/", h.ServeCreate)

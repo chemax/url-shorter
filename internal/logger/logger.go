@@ -68,7 +68,7 @@ func (l *Logger) Error(args ...interface{}) {
 func (l *Logger) Middleware(next http.Handler) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
-
+		w.Header().Del("Content-Length")
 		responseData := &responseData{
 			status: 0,
 			size:   0,
