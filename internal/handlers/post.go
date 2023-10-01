@@ -1,13 +1,31 @@
 package handlers
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
+
+func getBody(req *http.Request) ([]byte, error) {
+	var body []byte
+	var err error
+	var reader *gzip.Reader
+	if strings.Contains(req.Header.Get("Content-Type"), "gzip") {
+		reader, err = gzip.NewReader(req.Body)
+		if err != nil {
+			return body, err
+		}
+		body, err = io.ReadAll(reader)
+	} else {
+		body, err = io.ReadAll(req.Body)
+	}
+	return body, err
+}
 
 func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
 	var err error
@@ -21,11 +39,10 @@ func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("not plain text: %s", req.Header.Get("Content-Type"))
 		return
 	}
-	body, err := io.ReadAll(req.Body)
+	body, err := getBody(req)
 	if err != nil {
 		return
 	}
-	fmt.Println(string(body))
 	parsedURL, err := url.ParseRequestURI(string(body))
 	if err != nil {
 		return
@@ -58,7 +75,7 @@ func (h *Handlers) APIServeCreate(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
 	}
-	body, err := io.ReadAll(req.Body)
+	body, err := getBody(req)
 	if err != nil {
 		return
 	}

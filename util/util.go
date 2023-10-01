@@ -34,10 +34,10 @@ const (
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 
 func CheckHeaderJSONType(header string) bool {
-	return strings.Contains(header, "application/json")
+	return strings.Contains(header, "application/json") || strings.Contains(header, "application/x-gzip")
 }
 func CheckHeader(header string) bool {
-	return strings.Contains(header, "text/plain")
+	return strings.Contains(header, "text/plain") || strings.Contains(header, "application/x-gzip")
 }
 
 func RandStringRunes(n int) string {
