@@ -3,7 +3,6 @@ package util
 import (
 	"math/rand"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -12,11 +11,12 @@ type LoggerInterface interface {
 	Debug(args ...interface{})
 	Info(args ...interface{})
 	Warn(args ...interface{})
+	Error(args ...interface{})
 }
 
 type StorageInterface interface {
-	GetURL(code string) (parsedURL *url.URL, err error)
-	AddNewURL(parsedURL *url.URL) (code string, err error)
+	GetURL(code string) (parsedURL string, err error)
+	AddNewURL(parsedURL string) (code string, err error)
 }
 
 type ConfigInterface interface {
@@ -27,6 +27,7 @@ type ConfigInterface interface {
 const (
 	ServerAddressEnv     = "SERVER_ADDRESS"
 	BaseURLEnv           = "BASE_URL"
+	SavePath             = "FILE_STORAGE_PATH"
 	CodeLength           = 8
 	CodeGenerateAttempts = 20
 )

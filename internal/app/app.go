@@ -12,7 +12,7 @@ func Run() error {
 	cfg := config.Get()
 	log := logger.New()
 	defer log.Sync()
-	handler := handlers.New(storage.Get(), cfg, log)
+	handler := handlers.New(storage.Get(cfg.SavePath.String(), log), cfg, log)
 	err := http.ListenAndServe(cfg.GetNetAddr(), handler.Router)
 	return err
 }

@@ -109,7 +109,7 @@ func (h *Handlers) APIServeCreate(res http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handlers) store(parsedURL *url.URL) (string, error) {
-	code, err := h.storage.AddNewURL(parsedURL)
+	code, err := h.storage.AddNewURL(parsedURL.String())
 	if err != nil {
 		return "", err
 	}

@@ -15,14 +15,29 @@ import (
 type Config struct {
 	NetAddr  *NetAddr
 	HTTPAddr *HTTPAddr
+	SavePath *PathForSave
 }
 
 var (
 	cfg = &Config{
 		NetAddr:  &NetAddr{Host: "localhost", Port: 8080},
 		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
+		SavePath: &PathForSave{path: "/tmp/short-url-db.json"},
 	}
 )
+
+type PathForSave struct {
+	path string
+}
+
+func (p *PathForSave) Set(s string) error {
+	p.path = s
+	return nil
+}
+
+func (p PathForSave) String() string {
+	return p.path
+}
 
 type NetAddr struct {
 	Host string `json:"host"`
@@ -75,8 +90,9 @@ func (c *Config) GetHTTPAddr() string {
 func MustConfig() {
 	flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
 	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
-
+	flag.Var(cfg.SavePath, "f", "full path to file for save url's")
 	flag.Parse()
+
 	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {
@@ -85,6 +101,12 @@ func MustConfig() {
 	}
 	if baseURL, ok := os.LookupEnv(util.BaseURLEnv); ok && baseURL != "" {
 		err := cfg.HTTPAddr.Set(baseURL)
+		if err != nil {
+			panic(err)
+		}
+	}
+	if savePath, ok := os.LookupEnv(util.SavePath); ok && savePath != "" {
+		err := cfg.SavePath.Set(savePath)
 		if err != nil {
 			panic(err)
 		}

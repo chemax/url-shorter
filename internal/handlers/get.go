@@ -18,6 +18,6 @@ func (h *Handlers) serveGET(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	res.Header().Set("Location", parsedURL.String())
+	res.Header().Set("Location", parsedURL)
 	res.WriteHeader(http.StatusTemporaryRedirect)
 }
