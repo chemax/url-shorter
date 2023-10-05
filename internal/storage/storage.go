@@ -24,20 +24,22 @@ type URLManager struct {
 
 var manager = &URLManager{URLs: make(map[string]*URL)}
 
-func Get(savePath string, logger util.LoggerInterface) *URLManager {
+func Init(savePath string, logger util.LoggerInterface) (*URLManager, error) {
 	manager.SavePath = savePath
 	manager.logger = logger
-	once := sync.Once{}
-	once.Do(manager.restore)
-	return manager
+	err := manager.restore()
+	if err != nil {
+		return nil, fmt.Errorf("restore err: %w",err)
+	}
+	return manager, nil
 }
-func (u *URLManager) restore() {
+func (u *URLManager) restore() error {
 	if u.SavePath == "" {
-		return
+		return nil
 	}
 	file, err := os.OpenFile(u.SavePath, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
-		u.logger.Error("error restore db", err.Error())
+		return fmt.Errorf("error restore db: %w", err)
 	}
 	defer file.Close()
 
@@ -53,6 +55,7 @@ func (u *URLManager) restore() {
 		u.URLs[parsedURL.Code] = parsedURL
 		u.logger.Debug("restored: ", scanner.Text())
 	}
+	return nil
 }
 
 func (u *URLManager) GetURL(code string) (parsedURL string, err error) {

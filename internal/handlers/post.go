@@ -48,11 +48,14 @@ func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	code, err := h.store(parsedURL)
+	if err != nil {
+		return
+	}
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
 	_, err = res.Write([]byte(fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)))
 	if err != nil {
-		fmt.Println(err.Error())
+		h.Log.Warn(err.Error())
 		err = nil
 	}
 }

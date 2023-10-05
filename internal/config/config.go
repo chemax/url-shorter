@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type Config struct {
@@ -87,7 +86,7 @@ func (c *Config) GetHTTPAddr() string {
 	return c.HTTPAddr.String()
 }
 
-func MustConfig() {
+func Init() (*Config, error){
 	flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
 	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
 	flag.Var(cfg.SavePath, "f", "full path to file for save url's")
@@ -96,25 +95,22 @@ func MustConfig() {
 	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("error setup server address: %w",err)
 		}
 	}
 	if baseURL, ok := os.LookupEnv(util.BaseURLEnv); ok && baseURL != "" {
 		err := cfg.HTTPAddr.Set(baseURL)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("error setup base url: %w",err)
 		}
 	}
 	if savePath, ok := os.LookupEnv(util.SavePath); ok && savePath != "" {
 		err := cfg.SavePath.Set(savePath)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("error setup save path: %w",err)
 		}
 	}
+	return cfg, nil
 }
 
-func Get() *Config {
-	var once sync.Once
-	once.Do(MustConfig)
-	return cfg
-}
+

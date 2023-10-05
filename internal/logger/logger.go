@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -37,19 +38,19 @@ type Logger struct {
 	sugar *zap.SugaredLogger
 }
 
-func New() *Logger {
+func Init() (*Logger, error) {
 	l := &Logger{}
 	cfgLogger := zap.NewDevelopmentConfig()
 	cfgLogger.DisableStacktrace = true
 	lx, err := cfgLogger.Build()
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("build logger error: %w",err)
 	}
 	l.sugar = lx.Sugar()
-	return l
+	return l, nil
 }
 
-func (l *Logger) Sync() error {
+func (l *Logger) Shutdown() error {
 	return l.sugar.Sync()
 }
 

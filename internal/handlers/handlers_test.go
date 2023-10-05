@@ -27,7 +27,7 @@ func (c *cfgMock) GetNetAddr() string {
 }
 
 func Test_urlManger_ServeHTTP(t *testing.T) {
-	lg := logger.New()
+	lg, _ := logger.Init()
 	var tmpCode string
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
 	type fields struct {
@@ -150,7 +150,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			u := storage.Get("", lg)
+			u, _ := storage.Init("", lg)
 
 			h := New(u, &cfgMock{}, lg)
 			if tt.args.target == "replaceme" {
@@ -182,7 +182,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 }
 
 func Test_urlManger_ApiServeCreate(t *testing.T) {
-	lg := logger.New()
+	lg, _ := logger.Init()
 	path := "/api/shorten"
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
 	type fields struct {
@@ -256,7 +256,7 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			u := storage.Get("", lg)
+			u, _ := storage.Init("", lg)
 
 			h := New(u, &cfgMock{}, lg)
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
