@@ -18,16 +18,19 @@ func getBody(req *http.Request) ([]byte, error) {
 	if strings.Contains(req.Header.Get("Content-Type"), "gzip") {
 		reader, err = gzip.NewReader(req.Body)
 		if err != nil {
-			return body, err
+			return body, fmt.Errorf("gzip newReader error: %w", err)
 		}
 		body, err = io.ReadAll(reader)
 	} else {
 		body, err = io.ReadAll(req.Body)
 	}
-	return body, err
+	if err != nil {
+		return nil, fmt.Errorf("get body error: %w", err)
+	}
+	return body, nil
 }
 
-func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
+func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -41,26 +44,29 @@ func (h *Handlers) ServeCreate(res http.ResponseWriter, req *http.Request) {
 	}
 	body, err := getBody(req)
 	if err != nil {
+		err = fmt.Errorf("get body error: %w", err)
 		return
 	}
 	parsedURL, err := url.ParseRequestURI(string(body))
 	if err != nil {
+		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
 	code, err := h.store(parsedURL)
 	if err != nil {
+		err = fmt.Errorf("store error: %w", err)
 		return
 	}
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
 	_, err = res.Write([]byte(fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)))
 	if err != nil {
-		h.Log.Warn(err.Error())
+		h.Log.Warn("response write error: ", err.Error())
 		err = nil
 	}
 }
 
-func (h *Handlers) APIServeCreate(res http.ResponseWriter, req *http.Request) {
+func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -80,19 +86,23 @@ func (h *Handlers) APIServeCreate(res http.ResponseWriter, req *http.Request) {
 	}
 	body, err := getBody(req)
 	if err != nil {
+		err = fmt.Errorf("get body error: %w", err)
 		return
 	}
 	URLObj := URLStruct{}
 	err = json.Unmarshal(body, &URLObj)
 	if err != nil {
+		err = fmt.Errorf("JSON unmarshal error: %w", err)
 		return
 	}
 	parsedURL, err := url.ParseRequestURI(URLObj.URL)
 	if err != nil {
+		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
 	code, err := h.store(parsedURL)
 	if err != nil {
+		err = fmt.Errorf("store error: %w", err)
 		return
 	}
 
@@ -106,7 +116,7 @@ func (h *Handlers) APIServeCreate(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusCreated)
 	_, err = res.Write(resultData)
 	if err != nil {
-		h.Log.Warn(err.Error())
+		h.Log.Warn("response write error: ", err.Error())
 		err = nil
 	}
 }

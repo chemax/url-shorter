@@ -29,7 +29,7 @@ func Init(savePath string, logger util.LoggerInterface) (*URLManager, error) {
 	manager.logger = logger
 	err := manager.restore()
 	if err != nil {
-		return nil, fmt.Errorf("restore err: %w",err)
+		return nil, fmt.Errorf("restore err: %w", err)
 	}
 	return manager, nil
 }
@@ -109,5 +109,5 @@ func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
 	}
 	u.URLs[code] = &URL{URL: parsedURL, Code: code}
 	u.saveToFile(code)
-	return code, err
+	return code, nil
 }

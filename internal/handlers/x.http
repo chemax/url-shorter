@@ -1,0 +1,13 @@
+### Send POST request with json body
+POST http://localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "http://yandex.ru"
+}
+
+### Send POST request with json body
+POST http://localhost:8080/
+Content-Type: text/plain
+
+http://yandex.ru
