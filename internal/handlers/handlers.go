@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/chemax/url-shorter/internal/compress"
 	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,6 +14,7 @@ type Handlers struct {
 	storage util.StorageInterface
 	Router  *chi.Mux
 	Cfg     util.ConfigInterface
+	Log     util.LoggerInterface
 }
 
 func initRender() {
@@ -30,19 +32,22 @@ func initRender() {
 	}
 }
 
-func New(s util.StorageInterface, cfg util.ConfigInterface) *Handlers {
+func New(s util.StorageInterface, cfg util.ConfigInterface, log util.LoggerInterface) *Handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &Handlers{
 		storage: s,
 		Router:  r,
 		Cfg:     cfg,
+		Log:     log,
 	}
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 	})
-	r.Use(middleware.Logger)
+	r.Use(log.Middleware)
+	r.Use(compress.Middleware)
 	r.Use(middleware.Recoverer)
+	r.Post("/api/shorten", h.APIServeCreate)
 	r.Post("/", h.ServeCreate)
 	r.Get("/{id}", h.serveGET)
 	return h

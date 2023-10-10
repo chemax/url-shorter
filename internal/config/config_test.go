@@ -97,7 +97,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	result := Get()
+	result, _ := Init()
 
 	if !reflect.DeepEqual(result, cfg) {
 		t.Errorf("unexpected result: %+v", result)
