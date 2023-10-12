@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
+	mock_util "github.com/chemax/url-shorter/mocks/storage"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -280,11 +282,64 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 	}
 }
 
-//func TestHandlers(t *testing.T) {
-//	ctrl := gomock.NewController(t)
-//	defer ctrl.Finish()
-//	st := mock_storage.
-//		t.Run("1", func(t *testing.T) {
-//
-//	})
-//}
+func TestHandlers(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	cfg := mock_util.NewMockConfigInterface(ctrl)
+	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
+	st := mock_util.NewMockStorageInterface(ctrl)
+	st.EXPECT().AddNewURL(gomock.Any()).Return("12345678", nil).Times(1)
+	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
+	st.EXPECT().Ping().AnyTimes()
+	log, _ := logger.Init()
+	handlers := New(st, cfg, log)
+	assert.NotNil(t, handlers)
+	JSONURL := "{\"url\": \"http://ya.ru\"}"
+	JSONBadURL := "{\"url\": \".ru\"}"
+	t.Run("all ok", func(t *testing.T) {
+		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL)))
+		request.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		handlers.Router.ServeHTTP(w, request)
+		res := w.Result()
+		defer res.Body.Close()
+		assert.Equal(t, http.StatusCreated, res.StatusCode)
+	})
+	t.Run("bad json", func(t *testing.T) {
+		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte("JSONURL")))
+		request.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		handlers.Router.ServeHTTP(w, request)
+		res := w.Result()
+		defer res.Body.Close()
+		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+	})
+	t.Run("bad URL", func(t *testing.T) {
+		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONBadURL)))
+		request.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		handlers.Router.ServeHTTP(w, request)
+		res := w.Result()
+		defer res.Body.Close()
+		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+	})
+	t.Run("bad content type", func(t *testing.T) {
+		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONBadURL)))
+		request.Header.Set("Content-Type", "alication/js")
+		w := httptest.NewRecorder()
+		handlers.Router.ServeHTTP(w, request)
+		res := w.Result()
+		defer res.Body.Close()
+		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+	})
+	st.EXPECT().AddNewURL(gomock.Any()).Times(1).Return("", fmt.Errorf("test error"))
+	t.Run("store URL error", func(t *testing.T) {
+		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL)))
+		request.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		handlers.Router.ServeHTTP(w, request)
+		res := w.Result()
+		defer res.Body.Close()
+		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+	})
+}
