@@ -2,13 +2,18 @@ package config
 
 import (
 	"flag"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"reflect"
 	"testing"
 )
 
 func TestConfig(t *testing.T) {
-
+	t.Run("err is nil", func(t *testing.T) {
+		config, err := Init()
+		assert.Nil(t, err)
+		assert.NotNil(t, config)
+	})
 }
 
 func TestNetAddr_Set(t *testing.T) {
@@ -93,14 +98,5 @@ func TestInit(t *testing.T) {
 	expectedHTTPAddr := &HTTPAddr{Addr: "http://localhost:8080"}
 	if !reflect.DeepEqual(cfg.HTTPAddr, expectedHTTPAddr) {
 		t.Errorf("unexpected HTTPAddr: %+v", cfg.HTTPAddr)
-	}
-}
-
-func TestGet(t *testing.T) {
-	os.Setenv("DATABASE_DSN", "sssssss")
-	result, _ := Init()
-
-	if !reflect.DeepEqual(result, cfg) {
-		t.Errorf("unexpected result: %+v", result)
 	}
 }

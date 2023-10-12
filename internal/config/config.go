@@ -41,7 +41,7 @@ func Init() (*Config, error) {
 			return nil, fmt.Errorf("error setup save path: %w", err)
 		}
 	}
-	if connectString, ok := os.LookupEnv(util.DBConnectString); ok && connectString != "" {
+	if connectString, ok := os.LookupEnv(util.DBConnectString); ok {
 		err := cfg.DBConfig.Set(connectString)
 		if err != nil {
 			return nil, fmt.Errorf("error setup save path: %w", err)
