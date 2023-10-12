@@ -27,6 +27,7 @@ func (db *DB) Ping() error {
 }
 
 func (db *DB) pingAllTime() {
+	defer db.conn.Close(db.ctx)
 	for {
 		select {
 		case <-db.ctx.Done():
@@ -45,7 +46,7 @@ func (db *DB) pingAllTime() {
 			}
 		}
 	}
-	db.conn.Close(db.ctx)
+
 }
 
 func (db *DB) connect() error {
