@@ -16,3 +16,11 @@ func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
 	res.Header().Set("Location", parsedURL)
 	res.WriteHeader(http.StatusTemporaryRedirect)
 }
+
+func (h *Handlers) PingHandler(res http.ResponseWriter, r *http.Request) {
+	if h.storage.Ping() {
+		res.WriteHeader(http.StatusOK)
+		return
+	}
+	res.WriteHeader(http.StatusInternalServerError)
+}

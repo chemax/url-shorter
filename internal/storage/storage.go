@@ -16,6 +16,7 @@ type URL struct {
 	Code string `json:"code"`
 }
 type URLManager struct {
+	db       util.DBInterface
 	URLs     map[string]*URL
 	URLMx    sync.RWMutex
 	SavePath string
@@ -24,7 +25,8 @@ type URLManager struct {
 
 var manager = &URLManager{URLs: make(map[string]*URL)}
 
-func Init(savePath string, logger util.LoggerInterface) (*URLManager, error) {
+func Init(savePath string, logger util.LoggerInterface, db util.DBInterface) (*URLManager, error) {
+	manager.db = db
 	manager.SavePath = savePath
 	manager.logger = logger
 	err := manager.restore()
@@ -110,4 +112,13 @@ func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
 	u.URLs[code] = &URL{URL: parsedURL, Code: code}
 	u.saveToFile(code)
 	return code, nil
+}
+
+func (u *URLManager) Ping() bool {
+	err := u.db.Ping()
+	if err != nil {
+		u.logger.Error(fmt.Errorf("ping db error: %w", err))
+		return false
+	}
+	return true
 }

@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+type DBInterface interface {
+	Ping() error
+}
 type LoggerInterface interface {
 	Middleware(next http.Handler) http.Handler
 	Debug(args ...interface{})
@@ -17,6 +20,7 @@ type LoggerInterface interface {
 type StorageInterface interface {
 	GetURL(code string) (parsedURL string, err error)
 	AddNewURL(parsedURL string) (code string, err error)
+	Ping() bool
 }
 
 type ConfigInterface interface {
@@ -28,6 +32,7 @@ const (
 	ServerAddressEnv     = "SERVER_ADDRESS"
 	BaseURLEnv           = "BASE_URL"
 	SavePath             = "FILE_STORAGE_PATH"
+	DBConnectString      = "DATABASE_DSN"
 	CodeLength           = 8
 	CodeGenerateAttempts = 20
 )

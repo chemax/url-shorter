@@ -150,7 +150,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			u, _ := storage.Init("", lg)
+			u, _ := storage.Init("", lg, nil)
 
 			h := New(u, &cfgMock{}, lg)
 			if tt.args.target == "replaceme" {
@@ -256,7 +256,7 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			u, _ := storage.Init("", lg)
+			u, _ := storage.Init("", lg, nil)
 
 			h := New(u, &cfgMock{}, lg)
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
@@ -279,3 +279,12 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 		})
 	}
 }
+
+//func TestHandlers(t *testing.T) {
+//	ctrl := gomock.NewController(t)
+//	defer ctrl.Finish()
+//	st := mock_storage.
+//		t.Run("1", func(t *testing.T) {
+//
+//	})
+//}

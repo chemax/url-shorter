@@ -97,6 +97,7 @@ func TestInit(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
+	os.Setenv("DATABASE_DSN", "sssssss")
 	result, _ := Init()
 
 	if !reflect.DeepEqual(result, cfg) {
