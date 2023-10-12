@@ -47,8 +47,5 @@ func Init() (*Config, error) {
 			return nil, fmt.Errorf("error setup save path: %w", err)
 		}
 	}
-	if cfg.DBConfig.String() == "" {
-		return nil, fmt.Errorf("db connect string is empty")
-	}
 	return cfg, nil
 }

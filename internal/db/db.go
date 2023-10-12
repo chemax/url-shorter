@@ -50,6 +50,9 @@ func (db *DB) pingAllTime() {
 }
 
 func (db *DB) connect() error {
+	if db.url == "" {
+		return nil
+	}
 	conn, err := pgx.Connect(db.ctx, db.url)
 	if err != nil {
 		return fmt.Errorf("connect error: %w", err)
