@@ -1,3 +1,8 @@
+# Migrations
+`go install github.com/jackc/tern/v2@latest`  
+
+`tern migrate -m ./migrations --conn-string postgres://username:password@localhost:5432/database_name`
+
 # go-musthave-shortener-tpl
 
 Шаблон репозитория для трека «Сервис сокращения URL».
