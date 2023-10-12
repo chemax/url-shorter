@@ -26,7 +26,6 @@ type DBConfig struct {
 // Also in the future, we can make some logic or parse for connect string for some reason. Validation, for example.
 
 func (p *DBConfig) Set(s string) error {
-	fmt.Println(s)
 	p.connectString = s
 	return nil
 }
