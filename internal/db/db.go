@@ -18,6 +18,10 @@ type DB struct {
 var db *DB
 
 func (db *DB) Ping() error {
+	// мьютекс нужен, потому что я использую пинг для реконнекта
+	// если мьютекса нет, возможны коллизии и ошибка conn busy
+	// потом, возможно, эту проблему решит пул коннектов
+	// пока он один, я сделал так
 	db.pingSync.Lock()
 	defer db.pingSync.Unlock()
 	if db.conn == nil {
