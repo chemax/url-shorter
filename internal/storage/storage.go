@@ -26,7 +26,12 @@ type URLManager struct {
 var manager = &URLManager{URLs: make(map[string]*URL)}
 
 func Init(savePath string, logger util.LoggerInterface, db util.DBInterface) (*URLManager, error) {
-	manager.db = db
+	if db.Use() {
+		manager.db = db
+	} else {
+		manager.db = nil
+	}
+	//manager.db = db
 	manager.SavePath = savePath
 	manager.logger = logger
 	err := manager.restore()

@@ -12,7 +12,7 @@ var (
 		NetAddr:  &NetAddr{Host: "localhost", Port: 8080},
 		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
 		SavePath: &PathForSave{path: "/tmp/short-url-db.json"},
-		DBConfig: &DBConfig{},
+		DBConfig: &DBConfig{connectString: ""},
 	}
 )
 

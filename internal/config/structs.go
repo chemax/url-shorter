@@ -30,7 +30,7 @@ func (p *DBConfig) Set(s string) error {
 	return nil
 }
 
-func (p DBConfig) String() string {
+func (p *DBConfig) String() string {
 	return p.connectString
 }
 
@@ -44,7 +44,7 @@ func (p *PathForSave) Set(s string) error {
 	return nil
 }
 
-func (p PathForSave) String() string {
+func (p *PathForSave) String() string {
 	return p.path
 }
 
@@ -52,7 +52,7 @@ type HTTPAddr struct {
 	Addr string `json:"addr"`
 }
 
-func (h HTTPAddr) String() string {
+func (h *HTTPAddr) String() string {
 	return h.Addr
 }
 
@@ -72,7 +72,7 @@ type NetAddr struct {
 	Port int    `json:"port"`
 }
 
-func (a NetAddr) String() string {
+func (a *NetAddr) String() string {
 	return fmt.Sprintf("%s:%d", a.Host, a.Port)
 }
 

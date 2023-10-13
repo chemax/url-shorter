@@ -9,13 +9,14 @@ import (
 )
 
 type DB struct {
-	conn     *pgx.Conn
-	url      string
-	ctx      context.Context
-	pingSync sync.Mutex
+	conn       *pgx.Conn
+	url        string
+	ctx        context.Context
+	pingSync   sync.Mutex
+	configured bool
 }
 
-var db *DB
+var database *DB
 
 func (db *DB) createURLsTable() error {
 	//это должно миграциями делаться, но как вкрутить миграции внутрь сервиса я пока не знаю. Обычно они снаружи.
@@ -29,6 +30,9 @@ func (db *DB) createURLsTable() error {
 		return fmt.Errorf("create table 'URLs' error: %w", err)
 	}
 	return nil
+}
+func (db *DB) Use() bool {
+	return db.configured
 }
 func (db *DB) Get(shortcode string) (string, error) {
 	var URL string
@@ -97,16 +101,20 @@ func (db *DB) connect() error {
 }
 
 func Init(ctx context.Context, url string) (*DB, error) {
-	if db == nil {
-		db = &DB{
-			url: url,
-			ctx: ctx,
+	if database == nil {
+		database = &DB{
+			url:        url,
+			ctx:        ctx,
+			configured: false,
 		}
-		err := db.connect()
-		if err != nil {
-			return nil, fmt.Errorf("db init error: %w", err)
+		if url != "" {
+			err := database.connect()
+			if err != nil {
+				return nil, fmt.Errorf("database init error: %w", err)
+			}
+			database.configured = true
 		}
 	}
 
-	return db, nil
+	return database, nil
 }
