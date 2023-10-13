@@ -7,6 +7,21 @@ Content-Type: application/json
 }
 
 ### Send POST request with json body
+POST http://localhost:8080/api/shorten/batch
+Content-Type: application/json
+
+[{
+  "correlation_id": "1",
+  "original_url": "http://habr.com"
+},    {
+"correlation_id": "2",
+"original_url": "http://ya.ru"
+},    {
+"correlation_id": "3",
+"original_url": "http://vk.com"
+}]
+
+### Send POST request with json body
 POST http://localhost:8080/
 Content-Type: text/plain
 

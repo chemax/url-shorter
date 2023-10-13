@@ -66,6 +66,48 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Request) {
+	var err error
+	defer func() {
+		if err != nil {
+			h.Log.Warn(err.Error())
+			res.WriteHeader(http.StatusBadRequest)
+		}
+	}()
+
+	if !util.CheckHeaderIsValidType(req.Header.Get("Content-Type")) {
+		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
+		return
+	}
+
+	var URLBatchArr []*util.URLStructForBatch
+	body, err := getBody(req)
+	if err != nil {
+		err = fmt.Errorf("get body error: %w", err)
+		return
+	}
+	err = json.Unmarshal(body, &URLBatchArr)
+	if err != nil {
+		err = fmt.Errorf("JSON unmarshal error: %w", err)
+		return
+	}
+	save, err := h.storage.BatchSave(URLBatchArr, h.Cfg.GetHTTPAddr())
+	if err != nil {
+		return
+	}
+	resultData, err := json.Marshal(save)
+	if err != nil {
+		return
+	}
+	res.Header().Set("content-type", "application/json")
+	res.WriteHeader(http.StatusCreated)
+	_, err = res.Write(resultData)
+	if err != nil {
+		h.Log.Warn("response write error: ", err.Error())
+		err = nil
+	}
+	//TODO как-то тут многовато общего кода с JSONPostHandler, DRY or not DRY?
+}
 func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {

@@ -24,8 +24,16 @@ type StorageInterface interface {
 	GetURL(code string) (parsedURL string, err error)
 	AddNewURL(parsedURL string) (code string, err error)
 	Ping() bool
+	BatchSave(arr []*URLStructForBatch, httpPrefix string) (responseArr []URLStructForBatchResponse, err error)
 }
-
+type URLStructForBatch struct {
+	CorrelationId string `json:"correlation_id"`
+	OriginalURL   string `json:"original_url"`
+}
+type URLStructForBatchResponse struct {
+	CorrelationId string `json:"correlation_id"`
+	ShortURL      string `json:"short_url"`
+}
 type ConfigInterface interface {
 	GetNetAddr() string
 	GetHTTPAddr() string

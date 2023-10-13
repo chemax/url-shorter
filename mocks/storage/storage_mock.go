@@ -8,6 +8,7 @@ import (
 	http "net/http"
 	reflect "reflect"
 
+	util "github.com/chemax/url-shorter/util"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -34,6 +35,21 @@ func (m *MockDBInterface) EXPECT() *MockDBInterfaceMockRecorder {
 	return m.recorder
 }
 
+// Get mocks base method.
+func (m *MockDBInterface) Get(code string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", code)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockDBInterfaceMockRecorder) Get(code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDBInterface)(nil).Get), code)
+}
+
 // Ping mocks base method.
 func (m *MockDBInterface) Ping() error {
 	m.ctrl.T.Helper()
@@ -46,6 +62,34 @@ func (m *MockDBInterface) Ping() error {
 func (mr *MockDBInterfaceMockRecorder) Ping() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockDBInterface)(nil).Ping))
+}
+
+// SaveURL mocks base method.
+func (m *MockDBInterface) SaveURL(code, URL string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveURL", code, URL)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveURL indicates an expected call of SaveURL.
+func (mr *MockDBInterfaceMockRecorder) SaveURL(code, URL interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveURL", reflect.TypeOf((*MockDBInterface)(nil).SaveURL), code, URL)
+}
+
+// Use mocks base method.
+func (m *MockDBInterface) Use() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Use")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// Use indicates an expected call of Use.
+func (mr *MockDBInterfaceMockRecorder) Use() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Use", reflect.TypeOf((*MockDBInterface)(nil).Use))
 }
 
 // MockLoggerInterface is a mock of LoggerInterface interface.
@@ -185,6 +229,21 @@ func (m *MockStorageInterface) AddNewURL(parsedURL string) (string, error) {
 func (mr *MockStorageInterfaceMockRecorder) AddNewURL(parsedURL interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewURL", reflect.TypeOf((*MockStorageInterface)(nil).AddNewURL), parsedURL)
+}
+
+// BatchSave mocks base method.
+func (m *MockStorageInterface) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) ([]util.URLStructForBatchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchSave", arr, httpPrefix)
+	ret0, _ := ret[0].([]util.URLStructForBatchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BatchSave indicates an expected call of BatchSave.
+func (mr *MockStorageInterfaceMockRecorder) BatchSave(arr, httpPrefix interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchSave", reflect.TypeOf((*MockStorageInterface)(nil).BatchSave), arr, httpPrefix)
 }
 
 // GetURL mocks base method.

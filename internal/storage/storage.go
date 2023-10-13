@@ -67,27 +67,6 @@ func (u *URLManager) restore() error {
 	}
 	return nil
 }
-
-func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
-	parsedURL, err = u.db.Get(code)
-	if err != nil {
-		return "", fmt.Errorf("get url from db error: %w", err)
-	}
-	return parsedURL, nil
-}
-func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
-	if u.db != nil {
-		return u.dbGetURL(code)
-	}
-	u.URLMx.RLock()
-	defer u.URLMx.RUnlock()
-	urlObj, ok := u.URLs[code]
-	if !ok {
-		return "", fmt.Errorf("requested url not found")
-	}
-	return urlObj.URL, nil
-}
-
 func (u *URLManager) saveToFile(code string) {
 	if u.SavePath == "" {
 		return
@@ -113,6 +92,39 @@ func (u *URLManager) saveToFile(code string) {
 
 }
 
+// Переиспользование во все поля. Нет четких критериев, что делать при сбое в середине процесса, я решил не прерывать,
+// а значит, я могу переиспользовать имеющийся функционал.
+func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error) {
+	var errorArr []error
+	for _, v := range arr {
+		shortcode, err := u.AddNewURL(v.OriginalURL)
+		if err != nil {
+			errorArr = append(errorArr, err)
+			continue
+		}
+		responseArr = append(responseArr, util.URLStructForBatchResponse{
+			CorrelationId: v.CorrelationId,
+			ShortURL:      fmt.Sprintf("%s/%s", httpPrefix, shortcode),
+		})
+	}
+	if len(errorArr) > 0 {
+		var stringError string
+		for _, e := range errorArr {
+			stringError = fmt.Sprintf("%s\r\n%s", stringError, e.Error())
+		}
+		return responseArr, fmt.Errorf("add URLs list errors: %s", stringError)
+	}
+	return responseArr, nil
+}
+
+func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
+	parsedURL, err = u.db.Get(code)
+	if err != nil {
+		return "", fmt.Errorf("get url from db error: %w", err)
+	}
+	return parsedURL, nil
+}
+
 func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
 	var loop int
 	for {
@@ -129,6 +141,19 @@ func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
 		}
 		return code, nil
 	}
+}
+
+func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
+	if u.db != nil {
+		return u.dbGetURL(code)
+	}
+	u.URLMx.RLock()
+	defer u.URLMx.RUnlock()
+	urlObj, ok := u.URLs[code]
+	if !ok {
+		return "", fmt.Errorf("requested url not found")
+	}
+	return urlObj.URL, nil
 }
 
 func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {

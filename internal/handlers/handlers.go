@@ -48,6 +48,7 @@ func New(s util.StorageInterface, cfg util.ConfigInterface, log util.LoggerInter
 	r.Use(compress.Middleware)
 	r.Use(middleware.Recoverer)
 	r.Post("/api/shorten", h.JSONPostHandler)
+	r.Post("/api/shorten/batch", h.JSONBatchPostHandler)
 	r.Post("/", h.PostHandler)
 	r.Get("/ping", h.PingHandler)
 	r.Get("/{id}", h.GetHandler)
