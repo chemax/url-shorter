@@ -403,10 +403,10 @@ func TestHandlers(t *testing.T) {
 	})
 	t.Run("all ok BATCH", func(t *testing.T) {
 		st.EXPECT().BatchSave(gomock.Any(), gomock.Any()).Return([]util.URLStructForBatchResponse{{
-			CorrelationId: "1",
+			CorrelationID: "1",
 			ShortURL:      "12345678",
 		}, {
-			CorrelationId: "2",
+			CorrelationID: "2",
 			ShortURL:      "92345678",
 		}}, nil).Times(1)
 		request := httptest.NewRequest(http.MethodPost, "/api/shorten/batch", bytes.NewBuffer([]byte(JSONURLArray)))

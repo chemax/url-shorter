@@ -103,7 +103,7 @@ func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string)
 			continue
 		}
 		responseArr = append(responseArr, util.URLStructForBatchResponse{
-			CorrelationId: v.CorrelationId,
+			CorrelationID: v.CorrelationID,
 			ShortURL:      fmt.Sprintf("%s/%s", httpPrefix, shortcode),
 		})
 	}

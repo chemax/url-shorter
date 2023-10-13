@@ -27,11 +27,11 @@ type StorageInterface interface {
 	BatchSave(arr []*URLStructForBatch, httpPrefix string) (responseArr []URLStructForBatchResponse, err error)
 }
 type URLStructForBatch struct {
-	CorrelationId string `json:"correlation_id"`
+	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
 }
 type URLStructForBatchResponse struct {
-	CorrelationId string `json:"correlation_id"`
+	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
 }
 type ConfigInterface interface {
