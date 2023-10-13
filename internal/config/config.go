@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"os"
@@ -17,6 +18,7 @@ var (
 
 func Init() (*Config, error) {
 	cfg.initFlags()
+	flag.Parse()
 	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {

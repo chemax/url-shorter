@@ -101,7 +101,7 @@ func (c *Config) GetHTTPAddr() string {
 }
 
 func (c *Config) initFlags() {
-	if !c.flagInitialized {
+	if c.flagInitialized {
 		return
 	}
 	c.flagInitialized = true
@@ -109,5 +109,4 @@ func (c *Config) initFlags() {
 	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
 	flag.Var(cfg.SavePath, "f", "full path to file for save url's")
 	flag.Var(cfg.DBConfig, "d", "DB connect string like \"postgres://username:password@localhost:5432/database_name\"")
-	flag.Parse()
 }
