@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
 	mock_util "github.com/chemax/url-shorter/mocks/storage"
@@ -150,9 +152,9 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
+		bd, _ := db.Init(context.Background(), "")
 		t.Run(tt.name, func(t *testing.T) {
-			u, _ := storage.Init("", lg, nil)
+			u, _ := storage.Init("", lg, bd)
 
 			h := New(u, &cfgMock{}, lg)
 			if tt.args.target == "replaceme" {
@@ -256,9 +258,9 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
+		bd, _ := db.Init(context.Background(), "")
 		t.Run(tt.name, func(t *testing.T) {
-			u, _ := storage.Init("", lg, nil)
+			u, _ := storage.Init("", lg, bd)
 
 			h := New(u, &cfgMock{}, lg)
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)

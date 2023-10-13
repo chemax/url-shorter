@@ -5,6 +5,7 @@ In this file only type structs and its methods
 */
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -12,10 +13,11 @@ import (
 )
 
 type Config struct {
-	NetAddr  *NetAddr
-	HTTPAddr *HTTPAddr
-	SavePath *PathForSave
-	DBConfig *DBConfig
+	NetAddr         *NetAddr
+	HTTPAddr        *HTTPAddr
+	SavePath        *PathForSave
+	DBConfig        *DBConfig
+	flagInitialized bool
 }
 
 type DBConfig struct {
@@ -60,7 +62,7 @@ func (h *HTTPAddr) String() string {
 func (h *HTTPAddr) Set(s string) error {
 	_, err := url.ParseRequestURI(s)
 	if err != nil {
-		return err
+		return fmt.Errorf("parse base http addr error: %w", err)
 	}
 	s = strings.TrimSuffix(s, "/")
 	h.Addr = s
@@ -96,4 +98,16 @@ func (c *Config) GetNetAddr() string {
 }
 func (c *Config) GetHTTPAddr() string {
 	return c.HTTPAddr.String()
+}
+
+func (c *Config) initFlags() {
+	if !c.flagInitialized {
+		return
+	}
+	c.flagInitialized = true
+	flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
+	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
+	flag.Var(cfg.SavePath, "f", "full path to file for save url's")
+	flag.Var(cfg.DBConfig, "d", "DB connect string like \"postgres://username:password@localhost:5432/database_name\"")
+	flag.Parse()
 }

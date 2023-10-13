@@ -14,6 +14,7 @@ func TestConfig(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, config)
 	})
+
 }
 
 func TestNetAddr_Set(t *testing.T) {

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"os"
@@ -17,12 +16,7 @@ var (
 )
 
 func Init() (*Config, error) {
-	flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
-	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
-	flag.Var(cfg.SavePath, "f", "full path to file for save url's")
-	flag.Var(cfg.DBConfig, "d", "DB connect string like \"postgres://username:password@localhost:5432/database_name\"")
-	flag.Parse()
-
+	cfg.initFlags()
 	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {
