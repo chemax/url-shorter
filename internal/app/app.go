@@ -26,6 +26,9 @@ func Run() error {
 	//Кто кого и как инициализирует и использует...
 
 	dbObj, err := db.Init(ctx, cfg.DBConfig.String())
+	if err != nil {
+		return fmt.Errorf("db init error: %w", err)
+	}
 	st, err := storage.Init(cfg.SavePath.String(), log, dbObj)
 	if err != nil {
 		return fmt.Errorf("error storage init: %w", err)
