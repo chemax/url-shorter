@@ -10,6 +10,7 @@ func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
 
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {
+		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}

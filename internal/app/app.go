@@ -22,9 +22,12 @@ func Run() error {
 		return fmt.Errorf("error setup logger: %w", err)
 	}
 	defer log.Shutdown()
-	dbObj, err := db.Init(ctx, cfg.DBConfig.String())
-	if err != nil {
-		return fmt.Errorf("error setup database: %w", err)
+	var dbObj *db.DB
+	if cfg.DBConfig.String() != "" {
+		dbObj, err = db.Init(ctx, cfg.DBConfig.String())
+		if err != nil {
+			return fmt.Errorf("error setup database: %w", err)
+		}
 	}
 	st, err := storage.Init(cfg.SavePath.String(), log, dbObj)
 	if err != nil {

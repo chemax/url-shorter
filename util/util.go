@@ -8,6 +8,8 @@ import (
 
 type DBInterface interface {
 	Ping() error
+	SaveURL(code string, URL string) error
+	Get(code string) (string, error)
 }
 type LoggerInterface interface {
 	Middleware(next http.Handler) http.Handler

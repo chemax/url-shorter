@@ -36,6 +36,9 @@ func Init(savePath string, logger util.LoggerInterface, db util.DBInterface) (*U
 	return manager, nil
 }
 func (u *URLManager) restore() error {
+	if u.db != nil {
+		return nil
+	}
 	if u.SavePath == "" {
 		return nil
 	}
@@ -60,7 +63,17 @@ func (u *URLManager) restore() error {
 	return nil
 }
 
+func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
+	parsedURL, err = u.db.Get(code)
+	if err != nil {
+		return "", fmt.Errorf("get url from db error: %w", err)
+	}
+	return parsedURL, nil
+}
 func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
+	if u.db != nil {
+		return u.dbGetURL(code)
+	}
 	u.URLMx.RLock()
 	defer u.URLMx.RUnlock()
 	urlObj, ok := u.URLs[code]
@@ -95,7 +108,28 @@ func (u *URLManager) saveToFile(code string) {
 
 }
 
+func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
+	var loop int
+	for {
+		//TODO переделать на функции внутри postgresql?
+		code = util.RandStringRunes(util.CodeLength)
+		err := u.db.SaveURL(code, parsedURL)
+		if err != nil {
+			loop++
+			if loop > util.CodeGenerateAttempts {
+				code = ""
+				return code, fmt.Errorf("can not found free code for short url")
+			}
+			continue
+		}
+		return code, nil
+	}
+}
+
 func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
+	if u.db != nil {
+		return u.dbAddNewURL(parsedURL)
+	}
 	var ok = true
 	var loop int
 	u.URLMx.Lock()
@@ -115,6 +149,9 @@ func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
 }
 
 func (u *URLManager) Ping() bool {
+	if u.db == nil {
+		return false
+	}
 	err := u.db.Ping()
 	if err != nil {
 		u.logger.Error(fmt.Errorf("ping db error: %w", err))
