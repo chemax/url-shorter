@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"fmt"
 	"github.com/chemax/url-shorter/internal/db"
@@ -23,6 +24,21 @@ import (
 type cfgMock struct {
 }
 
+func gzipString(src string) ([]byte, error) {
+	var buf bytes.Buffer
+	zw := gzip.NewWriter(&buf)
+
+	_, err := zw.Write([]byte(src))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := zw.Close(); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
 func (c *cfgMock) GetHTTPAddr() string {
 	return "http://localhost:8080"
 }
@@ -290,7 +306,7 @@ func TestHandlers(t *testing.T) {
 	cfg := mock_util.NewMockConfigInterface(ctrl)
 	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
 	st := mock_util.NewMockStorageInterface(ctrl)
-	st.EXPECT().AddNewURL(gomock.Any()).Return("12345678", nil).Times(1)
+	st.EXPECT().AddNewURL(gomock.Any()).Return("12345678", nil).Times(2)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	//st.EXPECT().Ping().AnyTimes()
 	log, _ := logger.Init()
@@ -298,6 +314,25 @@ func TestHandlers(t *testing.T) {
 	assert.NotNil(t, handlers)
 	JSONURL := "{\"url\": \"http://ya.ru\"}"
 	JSONBadURL := "{\"url\": \".ru\"}"
+	t.Run("all ok gzip", func(t *testing.T) {
+		gzString, _ := gzipString(JSONURL)
+		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer(gzString))
+		request.Header.Set("Content-Type", "application/x-gzip")
+		w := httptest.NewRecorder()
+		handlers.Router.ServeHTTP(w, request)
+		res := w.Result()
+		defer res.Body.Close()
+		assert.Equal(t, http.StatusCreated, res.StatusCode)
+	})
+	t.Run("invalid header gzip", func(t *testing.T) {
+		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL)))
+		request.Header.Set("Content-Type", "application/x-gzip")
+		w := httptest.NewRecorder()
+		handlers.Router.ServeHTTP(w, request)
+		res := w.Result()
+		defer res.Body.Close()
+		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
+	})
 	t.Run("all ok", func(t *testing.T) {
 		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL)))
 		request.Header.Set("Content-Type", "application/json")

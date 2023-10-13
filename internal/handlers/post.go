@@ -80,7 +80,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	type ResultStruct struct {
 		Result string `json:"result"`
 	}
-	if !util.CheckHeaderJSONType(req.Header.Get("Content-Type")) {
+	if !util.CheckHeaderIsValidType(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
 	}

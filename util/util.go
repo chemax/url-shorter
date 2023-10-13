@@ -42,7 +42,7 @@ const (
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 
-func CheckHeaderJSONType(header string) bool {
+func CheckHeaderIsValidType(header string) bool {
 	return strings.Contains(header, "application/json") || strings.Contains(header, "application/x-gzip")
 }
 func CheckHeader(header string) bool {
