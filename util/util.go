@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-type AlreadyHaveThisUrlError struct {
+type AlreadyHaveThisURLError struct {
 }
 
-func (au *AlreadyHaveThisUrlError) Error() string {
+func (au *AlreadyHaveThisURLError) Error() string {
 	return "already have this url in db"
 }
 

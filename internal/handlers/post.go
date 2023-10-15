@@ -56,7 +56,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	code, err := h.store(parsedURL)
 	var statusCreated = http.StatusCreated
 	if err != nil {
-		if errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
+		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
 			statusCreated = http.StatusConflict
 		} else {
 			err = fmt.Errorf("store error: %w", err)
@@ -151,7 +151,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	code, err := h.store(parsedURL)
 	var statusCreated = http.StatusCreated
 	if err != nil {
-		if errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
+		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
 			statusCreated = http.StatusConflict
 		} else {
 			err = fmt.Errorf("store error: %w", err)

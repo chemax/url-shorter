@@ -128,7 +128,7 @@ func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
 		//TODO переделать на функции внутри postgresql?
 		code = util.RandStringRunes(util.CodeLength)
 		dupCode, err := u.db.SaveURL(code, parsedURL)
-		if err != nil && !errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
+		if err != nil && !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
 			loop++
 			if loop > util.CodeGenerateAttempts {
 				code = ""
@@ -136,7 +136,7 @@ func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
 			}
 			continue
 		}
-		if errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
+		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
 			return dupCode, err
 		}
 		return code, nil

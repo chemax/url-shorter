@@ -94,7 +94,7 @@ select shortcode from dup ;`
 		}
 		return "", err
 	}
-	return rowString, &util.AlreadyHaveThisUrlError{}
+	return rowString, &util.AlreadyHaveThisURLError{}
 
 }
 
