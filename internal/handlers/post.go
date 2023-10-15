@@ -3,6 +3,7 @@ package handlers
 import (
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"io"
@@ -53,12 +54,17 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	code, err := h.store(parsedURL)
+	var statusCreated = http.StatusCreated
 	if err != nil {
-		err = fmt.Errorf("store error: %w", err)
-		return
+		if errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
+			statusCreated = http.StatusConflict
+		} else {
+			err = fmt.Errorf("store error: %w", err)
+			return
+		}
 	}
 	res.Header().Set("content-type", "text/plain")
-	res.WriteHeader(http.StatusCreated)
+	res.WriteHeader(statusCreated)
 	_, err = res.Write([]byte(fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)))
 	if err != nil {
 		h.Log.Warn("response write error: ", err.Error())
@@ -143,9 +149,14 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	code, err := h.store(parsedURL)
+	var statusCreated = http.StatusCreated
 	if err != nil {
-		err = fmt.Errorf("store error: %w", err)
-		return
+		if errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
+			statusCreated = http.StatusConflict
+		} else {
+			err = fmt.Errorf("store error: %w", err)
+			return
+		}
 	}
 
 	result := ResultStruct{Result: fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)}
@@ -155,7 +166,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	res.Header().Set("content-type", "application/json")
-	res.WriteHeader(http.StatusCreated)
+	res.WriteHeader(statusCreated)
 	_, err = res.Write(resultData)
 	if err != nil {
 		h.Log.Warn("response write error: ", err.Error())
@@ -166,7 +177,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 func (h *Handlers) store(parsedURL *url.URL) (string, error) {
 	code, err := h.storage.AddNewURL(parsedURL.String())
 	if err != nil {
-		return "", err
+		return code, err
 	}
 	if code == "" {
 		return "", fmt.Errorf("cannot generate short url")

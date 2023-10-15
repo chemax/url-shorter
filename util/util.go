@@ -6,9 +6,16 @@ import (
 	"strings"
 )
 
+type AlreadyHaveThisUrlError struct {
+}
+
+func (au *AlreadyHaveThisUrlError) Error() string {
+	return "already have this url in db"
+}
+
 type DBInterface interface {
 	Ping() error
-	SaveURL(code string, URL string) error
+	SaveURL(code string, URL string) (string, error)
 	Get(code string) (string, error)
 	Use() bool
 }

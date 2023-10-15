@@ -3,7 +3,7 @@ POST http://localhost:8080/api/shorten
 Content-Type: application/json
 
 {
-  "url": "http://yandex.ru"
+  "url": "http://yandex8.ru"
 }
 
 ### Send POST request with json body

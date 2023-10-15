@@ -65,11 +65,11 @@ func (mr *MockDBInterfaceMockRecorder) Ping() *gomock.Call {
 }
 
 // SaveURL mocks base method.
-func (m *MockDBInterface) SaveURL(code, URL string) error {
+func (m *MockDBInterface) SaveURL(code string, URL string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveURL", code, URL)
 	ret0, _ := ret[0].(error)
-	return ret0
+	return "", ret0
 }
 
 // SaveURL indicates an expected call of SaveURL.

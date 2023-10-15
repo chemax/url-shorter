@@ -3,6 +3,7 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"os"
@@ -108,11 +109,7 @@ func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string)
 		})
 	}
 	if len(errorArr) > 0 {
-		var stringError string
-		for _, e := range errorArr {
-			stringError = fmt.Sprintf("%s\r\n%s", stringError, e.Error())
-		}
-		return responseArr, fmt.Errorf("add URLs list errors: %s", stringError)
+		return responseArr, fmt.Errorf("add URLs list errors: %w", errors.Join(errorArr...))
 	}
 	return responseArr, nil
 }
@@ -130,14 +127,17 @@ func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
 	for {
 		//TODO переделать на функции внутри postgresql?
 		code = util.RandStringRunes(util.CodeLength)
-		err := u.db.SaveURL(code, parsedURL)
-		if err != nil {
+		dupCode, err := u.db.SaveURL(code, parsedURL)
+		if err != nil && !errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
 			loop++
 			if loop > util.CodeGenerateAttempts {
 				code = ""
 				return code, fmt.Errorf("can not found free code for short url")
 			}
 			continue
+		}
+		if errors.Is(err, &util.AlreadyHaveThisUrlError{}) {
+			return dupCode, err
 		}
 		return code, nil
 	}

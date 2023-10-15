@@ -2,7 +2,9 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/util"
 	"github.com/jackc/pgx/v5"
 	"sync"
 	"time"
@@ -23,8 +25,8 @@ func (db *DB) createURLsTable() error {
 	// Снаружи я готов уже. Но задача пока такая.
 	_, err := db.conn.Exec(db.ctx, `create table if not exists URLs(
   id serial primary key,
-  shortCode varchar not null,
-  URL text not null
+  shortCode varchar unique not null,
+  URL text unique not null
 );`)
 	if err != nil {
 		return fmt.Errorf("create table 'URLs' error: %w", err)
@@ -43,13 +45,59 @@ func (db *DB) Get(shortcode string) (string, error) {
 
 	return URL, err
 }
-func (db *DB) SaveURL(shortcode string, URL string) error {
-	_, err := db.conn.Exec(db.ctx, `insert into urls(shortcode, url) values ($1, $2)`, shortcode, URL)
+func (db *DB) SaveURL(shortcode string, URL string) (string, error) {
+	// https://stackoverflow.com/questions/34708509/how-to-use-returning-with-on-conflict-in-postgresql
+	/*
+		with new(id,shortcode,url) as (
+		-- the rows you want to insert
+		values
+		(nextval('urls_id_seq'::regclass), '12345678', 'http://yandex2.ru')
+		---
+		), dup as (
+		-- the one that already exists (conflicting key)
+		select urls.* from urls
+		where (url)     in ( select url from new)
+		---
+		), ins as (
+		-- the ones to insert
+		insert into urls
+		select * from new
+		where (url) not in ( select url from dup)
+		returning *
+		---
+		)
+		--- finally the concatenation of inserted values and old value for skipped ones
+		select * from dup union all select * from ins
+		---
+		;
+	*/
+	sqlString := `with new(id,shortcode,url) as (
+values
+(nextval('urls_id_seq'::regclass), $1, $2) 
+), dup as (
+	select urls.* from urls
+	where (url) in ( select url from new)
+), ins as (
+	insert into urls
+	select * from new
+	where (url) not in ( select url from dup)
+	returning *
+) 
+select shortcode from dup ;`
+	row := db.conn.QueryRow(db.ctx, sqlString, shortcode, URL)
+	var rowString string
+	err := row.Scan(&rowString)
 	if err != nil {
-		return err
+		//Ошибка это хорошо, конкретно эта. Она означает отсутствие дюпа.
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", nil
+		}
+		return "", err
 	}
-	return nil
+	return rowString, &util.AlreadyHaveThisUrlError{}
+
 }
+
 func (db *DB) Ping() error {
 	// мьютекс нужен, потому что я использую пинг для реконнекта
 	// если мьютекса нет, возможны коллизии и ошибка conn busy
