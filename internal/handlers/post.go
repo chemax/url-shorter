@@ -56,12 +56,11 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	code, err := h.store(parsedURL)
 	var statusCreated = http.StatusCreated
 	if err != nil {
-		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
-			statusCreated = http.StatusConflict
-		} else {
+		if !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
 			err = fmt.Errorf("store error: %w", err)
 			return
 		}
+		statusCreated = http.StatusConflict
 	}
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(statusCreated)

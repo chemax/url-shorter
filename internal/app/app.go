@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"github.com/chemax/url-shorter/internal/config"
 	"github.com/chemax/url-shorter/internal/db"
@@ -12,7 +11,6 @@ import (
 )
 
 func Run() error {
-	ctx := context.Background()
 	cfg, err := config.Init()
 	if err != nil {
 		return fmt.Errorf("error init config: %w", err)
@@ -25,11 +23,12 @@ func Run() error {
 	//TODO возможно стоит использовать только интерфейс хранилища с конфигом внутри и там внутри уже разбираться
 	//Кто кого и как инициализирует и использует...
 
-	dbObj, err := db.Init(ctx, cfg.DBConfig.String())
+	dbObj, err := db.Init(cfg.DBConfig.String())
 	if err != nil {
 		return fmt.Errorf("db init error: %w", err)
 	}
-	st, err := storage.Init(cfg.SavePath.String(), log, dbObj)
+	//st, err := storage.Init(cfg.SavePath.String(), log, dbObj)
+	st, err := storage.Init(cfg, log, dbObj)
 	if err != nil {
 		return fmt.Errorf("error storage init: %w", err)
 	}

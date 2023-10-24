@@ -36,6 +36,10 @@ func (p *DBConfig) String() string {
 	return p.connectString
 }
 
+func (p *DBConfig) Use() bool {
+	return p.connectString != ""
+}
+
 type PathForSave struct {
 	path string
 }

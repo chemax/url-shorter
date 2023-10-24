@@ -13,7 +13,6 @@ import (
 type DB struct {
 	conn       *pgx.Conn
 	url        string
-	ctx        context.Context
 	pingSync   sync.Mutex
 	configured bool
 }
@@ -23,7 +22,7 @@ var database *DB
 func (db *DB) createURLsTable() error {
 	//это должно миграциями делаться, но как вкрутить миграции внутрь сервиса я пока не знаю. Обычно они снаружи.
 	// Снаружи я готов уже. Но задача пока такая.
-	_, err := db.conn.Exec(db.ctx, `create table if not exists URLs(
+	_, err := db.conn.Exec(context.Background(), `create table if not exists URLs(
   id serial primary key,
   shortCode varchar unique not null,
   URL text unique not null
@@ -38,7 +37,7 @@ func (db *DB) Use() bool {
 }
 func (db *DB) Get(shortcode string) (string, error) {
 	var URL string
-	err := db.conn.QueryRow(db.ctx, `SELECT url FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL)
+	err := db.conn.QueryRow(context.Background(), `SELECT url FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL)
 	if err != nil {
 		return "", fmt.Errorf("query shortcode error: %w", err)
 	}
@@ -84,7 +83,7 @@ values
 	returning *
 ) 
 select shortcode from dup ;`
-	row := db.conn.QueryRow(db.ctx, sqlString, shortcode, URL)
+	row := db.conn.QueryRow(context.Background(), sqlString, shortcode, URL)
 	var rowString string
 	err := row.Scan(&rowString)
 	if err != nil {
@@ -108,14 +107,14 @@ func (db *DB) Ping() error {
 	if db.conn == nil {
 		return fmt.Errorf("connection is nil")
 	}
-	return db.conn.Ping(db.ctx)
+	return db.conn.Ping(context.Background())
 }
 
 func (db *DB) pingAllTime() {
-	defer db.conn.Close(db.ctx)
+	defer db.conn.Close(context.Background())
 	for {
 		select {
-		case <-db.ctx.Done():
+		case <-context.Background().Done():
 			return
 		default:
 			var err error
@@ -138,7 +137,7 @@ func (db *DB) connect() error {
 	if db.url == "" {
 		return nil
 	}
-	conn, err := pgx.Connect(db.ctx, db.url)
+	conn, err := pgx.Connect(context.Background(), db.url)
 	if err != nil {
 		return fmt.Errorf("connect error: %w", err)
 	}
@@ -148,11 +147,10 @@ func (db *DB) connect() error {
 	return err
 }
 
-func Init(ctx context.Context, url string) (*DB, error) {
+func Init(url string) (*DB, error) {
 	if database == nil {
 		database = &DB{
 			url:        url,
-			ctx:        ctx,
 			configured: false,
 		}
 		if url != "" {
