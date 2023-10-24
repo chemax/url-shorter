@@ -70,6 +70,7 @@ func (db *DB) SaveURL(shortcode string, URL string) (string, error) {
 		---
 		;
 	*/
+	//TODO избавиться от * в запросе
 	sqlString := `with new(id,shortcode,url) as (
 values
 (nextval('urls_id_seq'::regclass), $1, $2) 
@@ -80,7 +81,7 @@ values
 	insert into urls
 	select * from new
 	where (url) not in ( select url from dup)
-	returning *
+	returning url, shortcode
 ) 
 select shortcode from dup ;`
 	row := db.conn.QueryRow(context.Background(), sqlString, shortcode, URL)

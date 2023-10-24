@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"github.com/chemax/url-shorter/internal/config"
 	"github.com/chemax/url-shorter/internal/db"
@@ -34,5 +35,8 @@ func Run() error {
 	}
 	handler := handlers.New(st, cfg, log)
 	err = http.ListenAndServe(cfg.GetNetAddr(), handler.Router)
+	if errors.Is(err, http.ErrServerClosed) {
+		return nil
+	}
 	return err
 }
