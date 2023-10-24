@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/internal/config"
 	"github.com/chemax/url-shorter/util"
 	"os"
 	"sync"
@@ -27,13 +26,13 @@ type URLManager struct {
 
 var manager = &URLManager{URLs: make(map[string]*URL)}
 
-func Init(cfg *config.Config, logger util.LoggerInterface, db util.DBInterface) (*URLManager, error) {
-	if cfg.DBConfig.Use() {
+func Init(cfg util.ConfigInterface, logger util.LoggerInterface, db util.DBInterface) (*URLManager, error) {
+	if cfg.GetDBUse() {
 		manager.db = db
 	} else {
 		manager.db = nil
 	}
-	manager.SavePath = cfg.SavePath.String()
+	manager.SavePath = cfg.GetSavePath()
 	manager.logger = logger
 	err := manager.restore()
 	if err != nil {

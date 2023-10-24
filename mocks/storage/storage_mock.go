@@ -65,11 +65,12 @@ func (mr *MockDBInterfaceMockRecorder) Ping() *gomock.Call {
 }
 
 // SaveURL mocks base method.
-func (m *MockDBInterface) SaveURL(code string, URL string) (string, error) {
+func (m *MockDBInterface) SaveURL(code, URL string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveURL", code, URL)
-	ret0, _ := ret[0].(error)
-	return "", ret0
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SaveURL indicates an expected call of SaveURL.
@@ -298,6 +299,20 @@ func (m *MockConfigInterface) EXPECT() *MockConfigInterfaceMockRecorder {
 	return m.recorder
 }
 
+// GetDBUse mocks base method.
+func (m *MockConfigInterface) GetDBUse() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDBUse")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// GetDBUse indicates an expected call of GetDBUse.
+func (mr *MockConfigInterfaceMockRecorder) GetDBUse() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDBUse", reflect.TypeOf((*MockConfigInterface)(nil).GetDBUse))
+}
+
 // GetHTTPAddr mocks base method.
 func (m *MockConfigInterface) GetHTTPAddr() string {
 	m.ctrl.T.Helper()
@@ -324,4 +339,18 @@ func (m *MockConfigInterface) GetNetAddr() string {
 func (mr *MockConfigInterfaceMockRecorder) GetNetAddr() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetAddr", reflect.TypeOf((*MockConfigInterface)(nil).GetNetAddr))
+}
+
+// GetSavePath mocks base method.
+func (m *MockConfigInterface) GetSavePath() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSavePath")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetSavePath indicates an expected call of GetSavePath.
+func (mr *MockConfigInterfaceMockRecorder) GetSavePath() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSavePath", reflect.TypeOf((*MockConfigInterface)(nil).GetSavePath))
 }

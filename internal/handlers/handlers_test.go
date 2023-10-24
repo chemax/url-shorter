@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"compress/gzip"
-	"context"
 	"fmt"
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/logger"
@@ -48,6 +47,13 @@ func (c *cfgMock) GetNetAddr() string {
 }
 
 func Test_urlManger_ServeHTTP(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	cfg := mock_util.NewMockConfigInterface(ctrl)
+	cfg.EXPECT().GetDBUse().Return(false).AnyTimes()
+	cfg.EXPECT().GetSavePath().Return("").AnyTimes()
+	cfg.EXPECT().GetHTTPAddr().Return("http://localhost:8080").AnyTimes()
+	cfg.EXPECT().GetNetAddr().Return("localhost:8080").AnyTimes()
 	lg, _ := logger.Init()
 	var tmpCode string
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
@@ -169,11 +175,11 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		bd, _ := db.Init(context.Background(), "")
+		bd, _ := db.Init("")
 		t.Run(tt.name, func(t *testing.T) {
-			u, _ := storage.Init("", lg, bd)
+			u, _ := storage.Init(cfg, lg, bd)
 
-			h := New(u, &cfgMock{}, lg)
+			h := New(u, cfg, lg)
 			if tt.args.target == "replaceme" {
 				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
 			}
@@ -203,6 +209,13 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 }
 
 func Test_urlManger_ApiServeCreate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	cfg := mock_util.NewMockConfigInterface(ctrl)
+	cfg.EXPECT().GetDBUse().Return(false).AnyTimes()
+	cfg.EXPECT().GetSavePath().Return("").AnyTimes()
+	cfg.EXPECT().GetHTTPAddr().Return("http://localhost:8080").AnyTimes()
+	cfg.EXPECT().GetNetAddr().Return("localhost:8080").AnyTimes()
 	lg, _ := logger.Init()
 	path := "/api/shorten"
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
@@ -275,11 +288,11 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		bd, _ := db.Init(context.Background(), "")
+		bd, _ := db.Init("")
 		t.Run(tt.name, func(t *testing.T) {
-			u, _ := storage.Init("", lg, bd)
+			u, _ := storage.Init(cfg, lg, bd)
 
-			h := New(u, &cfgMock{}, lg)
+			h := New(u, cfg, lg)
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
 
 			if tt.args.body != nil {

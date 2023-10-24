@@ -11,7 +11,7 @@ var (
 	cfg = &Config{
 		NetAddr:  &NetAddr{Host: "localhost", Port: 8080},
 		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
-		SavePath: &PathForSave{path: "/tmp/short-url-db.json"},
+		PathSave: &PathForSave{path: "/tmp/short-url-db.json"},
 		DBConfig: &DBConfig{connectString: ""},
 	}
 )
@@ -32,7 +32,7 @@ func Init() (*Config, error) {
 		}
 	}
 	if savePath, ok := os.LookupEnv(util.SavePath); ok && savePath != "" {
-		err := cfg.SavePath.Set(savePath)
+		err := cfg.PathSave.Set(savePath)
 		if err != nil {
 			return nil, fmt.Errorf("error setup save path: %w", err)
 		}

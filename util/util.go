@@ -44,6 +44,8 @@ type URLStructForBatchResponse struct {
 type ConfigInterface interface {
 	GetNetAddr() string
 	GetHTTPAddr() string
+	GetSavePath() string
+	GetDBUse() bool
 }
 
 const (

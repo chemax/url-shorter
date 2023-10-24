@@ -15,7 +15,7 @@ import (
 type Config struct {
 	NetAddr         *NetAddr
 	HTTPAddr        *HTTPAddr
-	SavePath        *PathForSave
+	PathSave        *PathForSave
 	DBConfig        *DBConfig
 	flagInitialized bool
 }
@@ -34,10 +34,6 @@ func (p *DBConfig) Set(s string) error {
 
 func (p *DBConfig) String() string {
 	return p.connectString
-}
-
-func (p *DBConfig) Use() bool {
-	return p.connectString != ""
 }
 
 type PathForSave struct {
@@ -96,7 +92,12 @@ func (a *NetAddr) Set(s string) error {
 	a.Port = port
 	return nil
 }
-
+func (c *Config) GetDBUse() bool {
+	return c.DBConfig.connectString != ""
+}
+func (c *Config) GetSavePath() string {
+	return c.PathSave.path
+}
 func (c *Config) GetNetAddr() string {
 	return c.NetAddr.String()
 }
@@ -111,6 +112,6 @@ func (c *Config) initFlags() {
 	c.flagInitialized = true
 	flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
 	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
-	flag.Var(cfg.SavePath, "f", "full path to file for save url's")
+	flag.Var(cfg.PathSave, "f", "full path to file for save url's")
 	flag.Var(cfg.DBConfig, "d", "DB connect string like \"postgres://username:password@localhost:5432/database_name\"")
 }

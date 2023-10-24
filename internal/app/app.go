@@ -27,7 +27,7 @@ func Run() error {
 	if err != nil {
 		return fmt.Errorf("db init error: %w", err)
 	}
-	//st, err := storage.Init(cfg.SavePath.String(), log, dbObj)
+	//st, err := storage.Init(cfg.PathSave.String(), log, dbObj)
 	st, err := storage.Init(cfg, log, dbObj)
 	if err != nil {
 		return fmt.Errorf("error storage init: %w", err)
