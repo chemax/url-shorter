@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/internal/compress"
-	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -11,10 +11,10 @@ import (
 )
 
 type Handlers struct {
-	storage util.StorageInterface
+	storage interfaces.StorageInterface
 	Router  *chi.Mux
-	Cfg     util.ConfigInterface
-	Log     util.LoggerInterface
+	Cfg     interfaces.ConfigInterface
+	Log     interfaces.LoggerInterface
 }
 
 func initRender() {
@@ -32,7 +32,7 @@ func initRender() {
 	}
 }
 
-func New(s util.StorageInterface, cfg util.ConfigInterface, log util.LoggerInterface) *Handlers {
+func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log interfaces.LoggerInterface) *Handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &Handlers{

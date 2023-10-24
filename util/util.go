@@ -2,7 +2,6 @@ package util
 
 import (
 	"math/rand"
-	"net/http"
 	"strings"
 )
 
@@ -13,26 +12,6 @@ func (au *AlreadyHaveThisURLError) Error() string {
 	return "already have this url in db"
 }
 
-type DBInterface interface {
-	Ping() error
-	SaveURL(code string, URL string) (string, error)
-	Get(code string) (string, error)
-	Use() bool
-}
-type LoggerInterface interface {
-	Middleware(next http.Handler) http.Handler
-	Debug(args ...interface{})
-	Info(args ...interface{})
-	Warn(args ...interface{})
-	Error(args ...interface{})
-}
-
-type StorageInterface interface {
-	GetURL(code string) (parsedURL string, err error)
-	AddNewURL(parsedURL string) (code string, err error)
-	Ping() bool
-	BatchSave(arr []*URLStructForBatch, httpPrefix string) (responseArr []URLStructForBatchResponse, err error)
-}
 type URLStructForBatch struct {
 	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
@@ -40,12 +19,6 @@ type URLStructForBatch struct {
 type URLStructForBatchResponse struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
-}
-type ConfigInterface interface {
-	GetNetAddr() string
-	GetHTTPAddr() string
-	GetSavePath() string
-	GetDBUse() bool
 }
 
 const (

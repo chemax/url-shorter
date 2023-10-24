@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"os"
 	"sync"
@@ -17,16 +18,16 @@ type URL struct {
 	Code string `json:"code"`
 }
 type URLManager struct {
-	db       util.DBInterface
+	db       interfaces.DBInterface
 	URLs     map[string]*URL
 	URLMx    sync.RWMutex
 	SavePath string
-	logger   util.LoggerInterface
+	logger   interfaces.LoggerInterface
 }
 
 var manager = &URLManager{URLs: make(map[string]*URL)}
 
-func Init(cfg util.ConfigInterface, logger util.LoggerInterface, db util.DBInterface) (*URLManager, error) {
+func Init(cfg interfaces.ConfigInterface, logger interfaces.LoggerInterface, db interfaces.DBInterface) (*URLManager, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {
