@@ -2,39 +2,37 @@ package util
 
 import (
 	"math/rand"
-	"net/http"
 	"strings"
 )
 
-type LoggerInterface interface {
-	Middleware(next http.Handler) http.Handler
-	Debug(args ...interface{})
-	Info(args ...interface{})
-	Warn(args ...interface{})
-	Error(args ...interface{})
+type AlreadyHaveThisURLError struct {
 }
 
-type StorageInterface interface {
-	GetURL(code string) (parsedURL string, err error)
-	AddNewURL(parsedURL string) (code string, err error)
+func (au *AlreadyHaveThisURLError) Error() string {
+	return "already have this url in db"
 }
 
-type ConfigInterface interface {
-	GetNetAddr() string
-	GetHTTPAddr() string
+type URLStructForBatch struct {
+	CorrelationID string `json:"correlation_id"`
+	OriginalURL   string `json:"original_url"`
+}
+type URLStructForBatchResponse struct {
+	CorrelationID string `json:"correlation_id"`
+	ShortURL      string `json:"short_url"`
 }
 
 const (
 	ServerAddressEnv     = "SERVER_ADDRESS"
 	BaseURLEnv           = "BASE_URL"
 	SavePath             = "FILE_STORAGE_PATH"
+	DBConnectString      = "DATABASE_DSN"
 	CodeLength           = 8
 	CodeGenerateAttempts = 20
 )
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 
-func CheckHeaderJSONType(header string) bool {
+func CheckHeaderIsValidType(header string) bool {
 	return strings.Contains(header, "application/json") || strings.Contains(header, "application/x-gzip")
 }
 func CheckHeader(header string) bool {

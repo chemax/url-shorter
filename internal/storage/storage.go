@@ -3,7 +3,9 @@ package storage
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"os"
 	"sync"
@@ -16,24 +18,33 @@ type URL struct {
 	Code string `json:"code"`
 }
 type URLManager struct {
+	db       interfaces.DBInterface
 	URLs     map[string]*URL
 	URLMx    sync.RWMutex
 	SavePath string
-	logger   util.LoggerInterface
+	logger   interfaces.LoggerInterface
 }
 
 var manager = &URLManager{URLs: make(map[string]*URL)}
 
-func Init(savePath string, logger util.LoggerInterface) (*URLManager, error) {
-	manager.SavePath = savePath
+func Init(cfg interfaces.ConfigInterface, logger interfaces.LoggerInterface, db interfaces.DBInterface) (*URLManager, error) {
+	if cfg.GetDBUse() {
+		manager.db = db
+	} else {
+		manager.db = nil
+	}
+	manager.SavePath = cfg.GetSavePath()
 	manager.logger = logger
 	err := manager.restore()
 	if err != nil {
-		return nil, fmt.Errorf("restore err: %w",err)
+		return nil, fmt.Errorf("restore err: %w", err)
 	}
 	return manager, nil
 }
 func (u *URLManager) restore() error {
+	if u.db != nil {
+		return nil
+	}
 	if u.SavePath == "" {
 		return nil
 	}
@@ -57,17 +68,6 @@ func (u *URLManager) restore() error {
 	}
 	return nil
 }
-
-func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
-	u.URLMx.RLock()
-	defer u.URLMx.RUnlock()
-	urlObj, ok := u.URLs[code]
-	if !ok {
-		return "", fmt.Errorf("requested url not found")
-	}
-	return urlObj.URL, nil
-}
-
 func (u *URLManager) saveToFile(code string) {
 	if u.SavePath == "" {
 		return
@@ -93,7 +93,73 @@ func (u *URLManager) saveToFile(code string) {
 
 }
 
+// Переиспользование во все поля. Нет четких критериев, что делать при сбое в середине процесса, я решил не прерывать,
+// а значит, я могу переиспользовать имеющийся функционал.
+func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error) {
+	var errorArr []error
+	for _, v := range arr {
+		shortcode, err := u.AddNewURL(v.OriginalURL)
+		if err != nil {
+			errorArr = append(errorArr, err)
+			continue
+		}
+		responseArr = append(responseArr, util.URLStructForBatchResponse{
+			CorrelationID: v.CorrelationID,
+			ShortURL:      fmt.Sprintf("%s/%s", httpPrefix, shortcode),
+		})
+	}
+	if len(errorArr) > 0 {
+		return responseArr, fmt.Errorf("add URLs list errors: %w", errors.Join(errorArr...))
+	}
+	return responseArr, nil
+}
+
+func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
+	parsedURL, err = u.db.Get(code)
+	if err != nil {
+		return "", fmt.Errorf("get url from db error: %w", err)
+	}
+	return parsedURL, nil
+}
+
+func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
+	var loop int
+	for {
+		//TODO переделать на функции внутри postgresql?
+		code = util.RandStringRunes(util.CodeLength)
+		dupCode, err := u.db.SaveURL(code, parsedURL)
+		if err != nil && !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+			loop++
+			if loop > util.CodeGenerateAttempts {
+				code = ""
+				return code, fmt.Errorf("can not found free code for short url")
+			}
+			continue
+		}
+		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+			return dupCode, err
+		}
+		return code, nil
+	}
+}
+
+func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
+	if u.db != nil {
+		return u.dbGetURL(code)
+	}
+	u.URLMx.RLock()
+	defer u.URLMx.RUnlock()
+	urlObj, ok := u.URLs[code]
+	if !ok {
+		return "", fmt.Errorf("requested url not found")
+	}
+	return urlObj.URL, nil
+}
+
 func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
+	if u.db != nil {
+		return u.dbAddNewURL(parsedURL)
+	}
 	var ok = true
 	var loop int
 	u.URLMx.Lock()
@@ -109,5 +175,17 @@ func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
 	}
 	u.URLs[code] = &URL{URL: parsedURL, Code: code}
 	u.saveToFile(code)
-	return code, err
+	return code, nil
+}
+
+func (u *URLManager) Ping() bool {
+	if u.db == nil {
+		return false
+	}
+	err := u.db.Ping()
+	if err != nil {
+		u.logger.Error(fmt.Errorf("ping db error: %w", err))
+		return false
+	}
+	return true
 }
