@@ -8,10 +8,18 @@ import (
 )
 
 func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) {
+	if r.Context().Value(util.UserID).(string) == "" {
+		res.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 	URLs, err := h.storage.GetUserURLs(r.Context().Value(util.UserID).(string))
 	if err != nil {
 		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if len(URLs) < 1 {
+		res.WriteHeader(http.StatusNoContent)
 		return
 	}
 	data, err := json.Marshal(URLs)
