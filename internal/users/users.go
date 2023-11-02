@@ -65,6 +65,10 @@ func (u *Users) Middleware(next http.Handler) http.Handler {
 				return []byte(u.SecretKey), nil
 			})
 		}
+		if err != nil && r.URL.String() == "/api/user/urls" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		if err != nil || (tkn != nil && !tkn.Valid) {
 			userID, err = u.createNewUser(w)
 			if err != nil {
