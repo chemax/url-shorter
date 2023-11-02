@@ -32,7 +32,7 @@ type databaseInterface interface {
 func (u *Users) createNewUser(w http.ResponseWriter) (userID string, err error) {
 	u.log.Debug("Create new user")
 	if !u.Use() {
-		uuid.New().String()
+		userID = uuid.New().String()
 	} else {
 		userID, err = u.CreateUser()
 	}
