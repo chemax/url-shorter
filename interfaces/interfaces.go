@@ -3,6 +3,7 @@ package interfaces
 import (
 	"github.com/chemax/url-shorter/util"
 	"net/http"
+	"time"
 )
 
 type DBInterface interface {
@@ -27,6 +28,8 @@ type StorageInterface interface {
 	BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error)
 }
 type ConfigInterface interface {
+	SecretKey() string
+	TokenExp() time.Duration
 	GetNetAddr() string
 	GetHTTPAddr() string
 	GetSavePath() string

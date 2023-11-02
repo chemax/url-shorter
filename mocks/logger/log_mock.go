@@ -7,6 +7,7 @@ package mock_interfaces
 import (
 	http "net/http"
 	reflect "reflect"
+	time "time"
 
 	util "github.com/chemax/url-shorter/util"
 	gomock "github.com/golang/mock/gomock"
@@ -383,6 +384,34 @@ func (m *MockConfigInterface) GetSavePath() string {
 func (mr *MockConfigInterfaceMockRecorder) GetSavePath() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSavePath", reflect.TypeOf((*MockConfigInterface)(nil).GetSavePath))
+}
+
+// SecretKey mocks base method.
+func (m *MockConfigInterface) SecretKey() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SecretKey")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// SecretKey indicates an expected call of SecretKey.
+func (mr *MockConfigInterfaceMockRecorder) SecretKey() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SecretKey", reflect.TypeOf((*MockConfigInterface)(nil).SecretKey))
+}
+
+// TokenExp mocks base method.
+func (m *MockConfigInterface) TokenExp() time.Duration {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TokenExp")
+	ret0, _ := ret[0].(time.Duration)
+	return ret0
+}
+
+// TokenExp indicates an expected call of TokenExp.
+func (mr *MockConfigInterfaceMockRecorder) TokenExp() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenExp", reflect.TypeOf((*MockConfigInterface)(nil).TokenExp))
 }
 
 // MockUsersInterface is a mock of UsersInterface interface.

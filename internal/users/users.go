@@ -3,8 +3,6 @@ package users
 import (
 	"context"
 	"github.com/chemax/url-shorter/interfaces"
-	"github.com/chemax/url-shorter/internal/config"
-	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"net/http"
@@ -95,9 +93,9 @@ func (u *Users) BuildJWTString(userID string) (string, error) {
 	return tokenString, nil
 }
 
-func Init(cfg *config.Config, log *logger.Logger, dbObj databaseInterface) (*Users, error) {
-	users.SecretKey = cfg.SecretKey
-	users.TokenExp = cfg.TokenExp
+func Init(cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, dbObj databaseInterface) (*Users, error) {
+	users.SecretKey = cfg.SecretKey()
+	users.TokenExp = cfg.TokenExp()
 	users.log = log
 	users.databaseInterface = dbObj
 	return users, nil

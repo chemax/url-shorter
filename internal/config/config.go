@@ -14,8 +14,8 @@ var (
 		HTTPAddr:  &HTTPAddr{Addr: "http://localhost:8080"},
 		PathSave:  &PathForSave{path: "/tmp/short-url-db.json"},
 		DBConfig:  &DBConfig{connectString: ""},
-		TokenExp:  time.Hour * 3,
-		SecretKey: "XXXXXX",
+		tokenExp:  time.Hour * 3,
+		secretKey: "XXXXXX",
 	}
 )
 
