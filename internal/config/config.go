@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"os"
+	"time"
 )
 
 var (
 	cfg = &Config{
-		NetAddr:  &NetAddr{Host: "localhost", Port: 8080},
-		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
-		PathSave: &PathForSave{path: "/tmp/short-url-db.json"},
-		DBConfig: &DBConfig{connectString: ""},
+		NetAddr:   &NetAddr{Host: "localhost", Port: 8080},
+		HTTPAddr:  &HTTPAddr{Addr: "http://localhost:8080"},
+		PathSave:  &PathForSave{path: "/tmp/short-url-db.json"},
+		DBConfig:  &DBConfig{connectString: ""},
+		TokenExp:  time.Hour * 3,
+		SecretKey: "XXXXXX",
 	}
 )
 

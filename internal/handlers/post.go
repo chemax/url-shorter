@@ -53,7 +53,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL)
+	code, err := h.store(parsedURL, req.Context().Value("userID").(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
 		if !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
@@ -113,6 +113,7 @@ func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Reque
 	}
 	//TODO как-то тут многовато общего кода с JSONPostHandler, DRY or not DRY?
 }
+
 func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
@@ -122,7 +123,8 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		}
 	}()
 	type URLStruct struct {
-		URL string `json:"url"`
+		URL    string `json:"url"`
+		UserID string `json:"userID"`
 	}
 	type ResultStruct struct {
 		Result string `json:"result"`
@@ -136,7 +138,8 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("get body error: %w", err)
 		return
 	}
-	URLObj := URLStruct{}
+	userID := req.Context().Value("userID").(string)
+	URLObj := URLStruct{UserID: userID}
 	err = json.Unmarshal(body, &URLObj)
 	if err != nil {
 		err = fmt.Errorf("JSON unmarshal error: %w", err)
@@ -147,7 +150,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL)
+	code, err := h.store(parsedURL, req.Context().Value("userID").(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
 		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
@@ -173,8 +176,8 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handlers) store(parsedURL *url.URL) (string, error) {
-	code, err := h.storage.AddNewURL(parsedURL.String())
+func (h *Handlers) store(parsedURL *url.URL, userID string) (string, error) {
+	code, err := h.storage.AddNewURL(parsedURL.String(), userID)
 	if err != nil {
 		return code, err
 	}

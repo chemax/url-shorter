@@ -1,11 +1,34 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
+func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) {
+	URLs, err := h.storage.GetUserURLs(r.Context().Value("userID").(string))
+	if err != nil {
+		h.Log.Error(err)
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	data, err := json.Marshal(URLs)
+	if err != nil {
+		h.Log.Error(err)
+		res.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	res.Header().Set("content-type", "application/json")
+	_, err = res.Write(data)
+	if err != nil {
+		h.Log.Warn("response write error: ", err.Error())
+		err = nil
+	}
+}
+
 func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
+	h.Log.Debug("userID", r.Context().Value("userID"))
 	id := chi.URLParam(r, "id")
 
 	parsedURL, err := h.storage.GetURL(id)

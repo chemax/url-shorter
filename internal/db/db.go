@@ -25,15 +25,30 @@ func (db *DB) createURLsTable() error {
 	_, err := db.conn.Exec(context.Background(), `create table if not exists URLs(
   id serial primary key,
   shortCode varchar unique not null,
-  URL text unique not null
+  URL text unique not null,
+  userID int
 );`)
 	if err != nil {
 		return fmt.Errorf("create table 'URLs' error: %w", err)
+	}
+	_, err = db.conn.Exec(context.Background(), `create table if not exists users(
+  id serial primary key
+);`)
+	if err != nil {
+		return fmt.Errorf("create table 'users' error: %w", err)
 	}
 	return nil
 }
 func (db *DB) Use() bool {
 	return db.configured
+}
+func (db *DB) GetAllURLs(userID string) (URLs []util.URLStructUser, err error) {
+
+	err = db.conn.QueryRow(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1`, userID).Scan(&URLs)
+	if err != nil {
+		return nil, fmt.Errorf("query shortcode error: %w", err)
+	}
+	return URLs, err
 }
 func (db *DB) Get(shortcode string) (string, error) {
 	var URL string
@@ -70,7 +85,7 @@ func (db *DB) SaveURL(shortcode string, URL string) (string, error) {
 		---
 		;
 	*/
-	//TODO избавиться от * в запросе
+	//TODO избавиться от * в запросе //вроде избавился (см returning)
 	sqlString := `with new(id,shortcode,url) as (
 values
 (nextval('urls_id_seq'::regclass), $1, $2) 
@@ -96,6 +111,16 @@ select shortcode from dup ;`
 	}
 	return rowString, &util.AlreadyHaveThisURLError{}
 
+}
+func (db *DB) CreateUser() (string, error) {
+	sqlString := `INSERT INTO users values(default) RETURNING id;`
+	row := db.conn.QueryRow(context.Background(), sqlString)
+	var id string
+	err := row.Scan(&id)
+	if err != nil {
+		return "", fmt.Errorf("error create new user: %w", err)
+	}
+	return id, nil
 }
 
 func (db *DB) Ping() error {

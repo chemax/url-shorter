@@ -14,8 +14,9 @@ import (
 var newLineBytes = []byte("\n")
 
 type URL struct {
-	URL  string `json:"url"`
-	Code string `json:"code"`
+	URL    string `json:"url"`
+	Code   string `json:"code"`
+	UserID string `json:"userID"`
 }
 type URLManager struct {
 	db       interfaces.DBInterface
@@ -98,7 +99,7 @@ func (u *URLManager) saveToFile(code string) {
 func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error) {
 	var errorArr []error
 	for _, v := range arr {
-		shortcode, err := u.AddNewURL(v.OriginalURL)
+		shortcode, err := u.AddNewURL(v.OriginalURL, "")
 		if err != nil {
 			errorArr = append(errorArr, err)
 			continue
@@ -143,6 +144,21 @@ func (u *URLManager) dbAddNewURL(parsedURL string) (code string, err error) {
 	}
 }
 
+func (u *URLManager) GetUserURLs(userID string) (URLs []util.URLStructUser, err error) {
+	if u.db != nil {
+		return u.db.GetAllURLs(userID)
+	}
+	u.URLMx.RLock()
+	defer u.URLMx.RUnlock()
+
+	for _, v := range u.URLs {
+		if v.UserID == userID {
+			URLs = append(URLs, util.URLStructUser{Shortcode: v.Code, URL: v.URL})
+		}
+	}
+	return URLs, err
+}
+
 func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
 	if u.db != nil {
 		return u.dbGetURL(code)
@@ -156,7 +172,7 @@ func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
 	return urlObj.URL, nil
 }
 
-func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
+func (u *URLManager) AddNewURL(parsedURL string, userID string) (code string, err error) {
 	if u.db != nil {
 		return u.dbAddNewURL(parsedURL)
 	}
@@ -173,7 +189,7 @@ func (u *URLManager) AddNewURL(parsedURL string) (code string, err error) {
 			return code, fmt.Errorf("can not found free code for short url")
 		}
 	}
-	u.URLs[code] = &URL{URL: parsedURL, Code: code}
+	u.URLs[code] = &URL{URL: parsedURL, Code: code, UserID: userID}
 	u.saveToFile(code)
 	return code, nil
 }

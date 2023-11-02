@@ -32,7 +32,7 @@ func initRender() {
 	}
 }
 
-func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log interfaces.LoggerInterface) *Handlers {
+func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, users interfaces.UsersInterface) *Handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &Handlers{
@@ -45,13 +45,15 @@ func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log inte
 		res.WriteHeader(http.StatusBadRequest)
 	})
 	r.Use(log.Middleware)
-	r.Use(compress.Middleware)
 	r.Use(middleware.Recoverer)
+	r.Use(users.Middleware)
+	r.Use(compress.Middleware)
 	r.Post("/api/shorten", h.JSONPostHandler)
 	r.Post("/api/shorten/batch", h.JSONBatchPostHandler)
 	r.Post("/", h.PostHandler)
 	r.Get("/ping", h.PingHandler)
 	r.Get("/{id}", h.GetHandler)
+	r.Get("/api/user/urls", h.GetUserURLsHandler)
 	return h
 }
 

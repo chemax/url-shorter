@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Config struct {
@@ -18,6 +19,8 @@ type Config struct {
 	PathSave        *PathForSave
 	DBConfig        *DBConfig
 	flagInitialized bool
+	SecretKey       string
+	TokenExp        time.Duration
 }
 
 type DBConfig struct {

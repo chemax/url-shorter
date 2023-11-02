@@ -12,6 +12,10 @@ func (au *AlreadyHaveThisURLError) Error() string {
 	return "already have this url in db"
 }
 
+type URLStructUser struct {
+	Shortcode string `json:"short_url"`
+	URL       string `json:"original_url"`
+}
 type URLStructForBatch struct {
 	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
