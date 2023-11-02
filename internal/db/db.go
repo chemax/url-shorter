@@ -26,7 +26,7 @@ func (db *DB) createURLsTable() error {
   id serial primary key,
   shortCode varchar unique not null,
   URL text unique not null,
-  userID int
+  userID varchar
 );`)
 	if err != nil {
 		return fmt.Errorf("create table 'URLs' error: %w", err)
@@ -42,12 +42,21 @@ func (db *DB) createURLsTable() error {
 func (db *DB) Use() bool {
 	return db.configured
 }
-func (db *DB) GetAllURLs(userID string) (URLs []util.URLStructUser, err error) {
-
-	err = db.conn.QueryRow(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1`, userID).Scan(&URLs)
+func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
+	var URLs []util.URLStructUser
+	rows, err := db.conn.Query(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1`, userID)
 	if err != nil {
-		return nil, fmt.Errorf("query shortcode error: %w", err)
+		return nil, fmt.Errorf("query URLs get error: %w", err)
 	}
+	for rows.Next() {
+		url := util.URLStructUser{}
+		err := rows.Scan(&url.URL, &url.Shortcode)
+		if err != nil {
+			return nil, fmt.Errorf("unable to scan row: %w", err)
+		}
+		URLs = append(URLs, url)
+	}
+
 	return URLs, err
 }
 func (db *DB) Get(shortcode string) (string, error) {
@@ -59,7 +68,7 @@ func (db *DB) Get(shortcode string) (string, error) {
 
 	return URL, err
 }
-func (db *DB) SaveURL(shortcode string, URL string) (string, error) {
+func (db *DB) SaveURL(shortcode string, URL string, userID string) (string, error) {
 	// https://stackoverflow.com/questions/34708509/how-to-use-returning-with-on-conflict-in-postgresql
 	/*
 		with new(id,shortcode,url) as (
@@ -86,9 +95,9 @@ func (db *DB) SaveURL(shortcode string, URL string) (string, error) {
 		;
 	*/
 	//TODO избавиться от * в запросе //вроде избавился (см returning)
-	sqlString := `with new(id,shortcode,url) as (
+	sqlString := `with new(id,shortcode,url,userid) as (
 values
-(nextval('urls_id_seq'::regclass), $1, $2) 
+(nextval('urls_id_seq'::regclass), $1, $2, $3) 
 ), dup as (
 	select urls.* from urls
 	where (url) in ( select url from new)
@@ -99,7 +108,7 @@ values
 	returning url, shortcode
 ) 
 select shortcode from dup ;`
-	row := db.conn.QueryRow(context.Background(), sqlString, shortcode, URL)
+	row := db.conn.QueryRow(context.Background(), sqlString, shortcode, URL, userID)
 	var rowString string
 	err := row.Scan(&rowString)
 	if err != nil {

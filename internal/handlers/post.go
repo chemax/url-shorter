@@ -62,7 +62,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 		}
 		statusCreated = http.StatusConflict
 	}
-	res.Header().Set("content-type", "text/plain")
+	res.Header().Set("Content-Type", "text/plain")
 	res.WriteHeader(statusCreated)
 	_, err = res.Write([]byte(fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)))
 	if err != nil {
@@ -104,7 +104,7 @@ func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Reque
 	if err != nil {
 		return
 	}
-	res.Header().Set("content-type", "application/json")
+	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(http.StatusCreated)
 	_, err = res.Write(resultData)
 	if err != nil {
@@ -167,7 +167,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res.Header().Set("content-type", "application/json")
+	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(statusCreated)
 	_, err = res.Write(resultData)
 	if err != nil {

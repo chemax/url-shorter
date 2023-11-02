@@ -8,7 +8,7 @@ import (
 
 type DBInterface interface {
 	Ping() error
-	SaveURL(code string, URL string) (string, error)
+	SaveURL(code string, URL string, userID string) (string, error)
 	Get(code string) (string, error)
 	GetAllURLs(userID string) ([]util.URLStructUser, error)
 	Use() bool

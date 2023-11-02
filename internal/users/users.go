@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"fmt"
 	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"github.com/golang-jwt/jwt/v4"
@@ -43,10 +44,12 @@ func (u *Users) createNewUser(w http.ResponseWriter) (userID string, err error) 
 	if err != nil {
 		return "", err
 	}
-	http.SetCookie(w, &http.Cookie{
-		Name:  "token",
+	myCookie := &http.Cookie{
+		Name:  util.TokenCookieName,
 		Value: token,
-	})
+	}
+	http.SetCookie(w, myCookie)
+	w.Header().Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	return userID, nil
 }
 
@@ -55,7 +58,7 @@ func (u *Users) Middleware(next http.Handler) http.Handler {
 		var tkn *jwt.Token
 		var userID string
 		claims := &Claims{}
-		c, err := r.Cookie("token")
+		c, err := r.Cookie(util.TokenCookieName)
 		if err == nil {
 			tknStr := c.Value
 			tkn, err = jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {

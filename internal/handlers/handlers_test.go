@@ -296,7 +296,7 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
 
 			if tt.args.body != nil {
-				request.Header.Set("content-type", "application/json")
+				request.Header.Set("Content-Type", "application/json")
 			}
 			w := httptest.NewRecorder()
 			h.Router.ServeHTTP(w, request)

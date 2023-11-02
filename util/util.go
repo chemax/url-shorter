@@ -27,6 +27,7 @@ type URLStructForBatchResponse struct {
 type UserIDStringType string
 
 const (
+	TokenCookieName      = "token"
 	UserID               = UserIDStringType("userID")
 	ServerAddressEnv     = "SERVER_ADDRESS"
 	BaseURLEnv           = "BASE_URL"

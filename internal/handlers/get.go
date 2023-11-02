@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
 func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) {
+	h.Log.Debug("userid: ", r.Context().Value(util.UserID).(string))
 	if r.Context().Value(util.UserID).(string) == "" {
 		res.WriteHeader(http.StatusUnauthorized)
 		return
@@ -22,13 +24,20 @@ func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 		res.WriteHeader(http.StatusNoContent)
 		return
 	}
-	data, err := json.Marshal(URLs)
+
+	var updatedURLs []util.URLStructUser
+	for _, v := range URLs {
+		v.Shortcode = fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), v.Shortcode)
+		updatedURLs = append(updatedURLs, v)
+	}
+	data, err := json.Marshal(updatedURLs)
 	if err != nil {
 		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	res.Header().Set("content-type", "application/json")
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
 	_, err = res.Write(data)
 	if err != nil {
 		h.Log.Warn("response write error: ", err.Error())
