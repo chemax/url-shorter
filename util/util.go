@@ -24,9 +24,10 @@ type URLStructForBatchResponse struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
 }
+type UserIDStringType string
 
 const (
-	UserID               = "userID"
+	UserID               = UserIDStringType("userID")
 	ServerAddressEnv     = "SERVER_ADDRESS"
 	BaseURLEnv           = "BASE_URL"
 	SavePath             = "FILE_STORAGE_PATH"
