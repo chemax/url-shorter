@@ -53,7 +53,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL, req.Context().Value("userID").(string))
+	code, err := h.store(parsedURL, req.Context().Value(util.UserID).(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
 		if !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
@@ -138,7 +138,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("get body error: %w", err)
 		return
 	}
-	userID := req.Context().Value("userID").(string)
+	userID := req.Context().Value(util.UserID).(string)
 	URLObj := URLStruct{UserID: userID}
 	err = json.Unmarshal(body, &URLObj)
 	if err != nil {
@@ -150,7 +150,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL, req.Context().Value("userID").(string))
+	code, err := h.store(parsedURL, req.Context().Value(util.UserID).(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
 		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {

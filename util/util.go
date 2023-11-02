@@ -26,6 +26,7 @@ type URLStructForBatchResponse struct {
 }
 
 const (
+	UserID               = "userID"
 	ServerAddressEnv     = "SERVER_ADDRESS"
 	BaseURLEnv           = "BASE_URL"
 	SavePath             = "FILE_STORAGE_PATH"

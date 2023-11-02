@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"github.com/chemax/url-shorter/interfaces"
+	"github.com/chemax/url-shorter/util"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"net/http"
@@ -70,7 +71,7 @@ func (u *Users) Middleware(next http.Handler) http.Handler {
 		} else {
 			userID = claims.UserID
 		}
-		ctx := context.WithValue(r.Context(), "userID", userID)
+		ctx := context.WithValue(r.Context(), util.UserID, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 
 	})
