@@ -46,7 +46,7 @@ func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {
 		h.Log.Error(fmt.Errorf("getURL error %w", err))
-		if errors.Is(err, util.MissingContentError) {
+		if errors.Is(err, util.ErrMissingContent) {
 			res.WriteHeader(http.StatusGone)
 			return
 		}

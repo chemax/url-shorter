@@ -118,7 +118,7 @@ func (db *DB) Get(shortcode string) (string, error) {
 		return "", fmt.Errorf("query shortcode error: %w", err)
 	}
 	if deleted {
-		return "", util.MissingContentError
+		return "", util.ErrMissingContent
 	}
 	return URL, err
 }

@@ -43,7 +43,7 @@ const (
 	CodeGenerateAttempts = 20
 )
 
-var MissingContentError = errors.New("content deleted")
+var ErrMissingContent = errors.New("content deleted")
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 
