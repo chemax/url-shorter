@@ -71,7 +71,6 @@ func (db *DB) BatchDelete(forDelete []string, userID string) {
 		Codes:  forDelete,
 		UserID: userID,
 	}
-	return
 }
 
 func (db *DB) Use() bool {
