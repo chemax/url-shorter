@@ -184,7 +184,6 @@ func (u *URLManager) DeleteListFor(forDelete []string, userID string) {
 			delete(u.URLs, v)
 		}
 	}
-	return
 }
 
 func (u *URLManager) AddNewURL(parsedURL string, userID string) (code string, err error) {
