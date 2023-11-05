@@ -43,14 +43,13 @@ func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 
 func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {
+		h.Log.Error(fmt.Errorf("getURL error %w", err))
 		if errors.Is(err, util.MissingContentError) {
 			res.WriteHeader(http.StatusGone)
 			return
 		}
-		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}

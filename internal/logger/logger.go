@@ -91,6 +91,7 @@ func (l *Logger) Middleware(next http.Handler) http.Handler {
 			"status", responseData.status,
 			"duration", duration,
 			"size", responseData.size,
+			//"userID", r.Context().Value(util.UserID).(string),
 		)
 	}
 
