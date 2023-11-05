@@ -54,6 +54,7 @@ func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log inte
 	r.Get("/ping", h.PingHandler)
 	r.Get("/{id}", h.GetHandler)
 	r.Get("/api/user/urls", h.GetUserURLsHandler)
+	r.Delete("/api/user/urls", h.DeleteUserURLsHandler)
 	return h
 }
 

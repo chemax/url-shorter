@@ -25,7 +25,7 @@ func Run() error {
 	//TODO возможно стоит использовать только интерфейс хранилища с конфигом внутри и там внутри уже разбираться
 	//Кто кого и как инициализирует и использует...
 
-	dbObj, err := db.Init(cfg.DBConfig.String())
+	dbObj, err := db.Init(cfg.DBConfig.String(), log)
 	if err != nil {
 		return fmt.Errorf("db init error: %w", err)
 	}

@@ -1,32 +1,37 @@
 package db
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"sync"
 	"time"
 )
 
 type DB struct {
-	conn       *pgx.Conn
+	conn       *pgxpool.Pool
 	url        string
 	pingSync   sync.Mutex
 	configured bool
+	delete     chan util.DeleteTask
+	log        interfaces.LoggerInterface
 }
 
 var database *DB
 
 func (db *DB) createURLsTable() error {
-	//это должно миграциями делаться, но как вкрутить миграции внутрь сервиса я пока не знаю. Обычно они снаружи.
-	// Снаружи я готов уже. Но задача пока такая.
+	//поздно переезжать на миграции
 	_, err := db.conn.Exec(context.Background(), `create table if not exists URLs(
   id serial primary key,
   shortCode varchar unique not null,
   URL text unique not null,
-  userID varchar
+  userID varchar,
+  deleted bool default false                             
 );`)
 	if err != nil {
 		return fmt.Errorf("create table 'URLs' error: %w", err)
@@ -39,12 +44,43 @@ func (db *DB) createURLsTable() error {
 	}
 	return nil
 }
+
+func (db *DB) backgroundDeleteHandler() {
+	for task := range db.delete {
+		db.log.Debugln("new task backgroundDeleteHandler", task)
+		buf := bytes.NewBufferString("UPDATE urls SET deleted = true  WHERE shortcode IN (")
+		for i, v := range task.Codes {
+			if i > 0 {
+				buf.WriteString(",")
+			}
+			buf.WriteString(fmt.Sprintf("'%s'", v))
+		}
+		buf.WriteString(") AND userid = $1;")
+		db.log.Debugln(buf.String())
+		_, err := db.conn.Query(context.Background(), buf.String(), task.UserID)
+		if err != nil {
+			db.log.Error("batch delete error %w", err)
+		}
+	}
+	db.log.Warnln("db.delete channel was closed")
+}
+
+func (db *DB) BatchDelete(forDelete []string, userID string) {
+	db.log.Debugln("new task BatchDelete", forDelete, userID)
+	db.delete <- util.DeleteTask{
+		Codes:  forDelete,
+		UserID: userID,
+	}
+	return
+}
+
 func (db *DB) Use() bool {
 	return db.configured
 }
+
 func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
 	var URLs []util.URLStructUser
-	rows, err := db.conn.Query(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1`, userID)
+	rows, err := db.conn.Query(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1 AND deleted = false`, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query URLs get error: %w", err)
 	}
@@ -61,11 +97,14 @@ func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
 }
 func (db *DB) Get(shortcode string) (string, error) {
 	var URL string
-	err := db.conn.QueryRow(context.Background(), `SELECT url FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL)
+	var deleted bool
+	err := db.conn.QueryRow(context.Background(), `SELECT url, deleted FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL, &deleted)
 	if err != nil {
 		return "", fmt.Errorf("query shortcode error: %w", err)
 	}
-
+	if deleted {
+		return "", util.MissingContentError
+	}
 	return URL, err
 }
 func (db *DB) SaveURL(shortcode string, URL string, userID string) (string, error) {
@@ -146,7 +185,7 @@ func (db *DB) Ping() error {
 }
 
 func (db *DB) pingAllTime() {
-	defer db.conn.Close(context.Background())
+	defer db.conn.Close()
 	for {
 		select {
 		case <-context.Background().Done():
@@ -172,7 +211,7 @@ func (db *DB) connect() error {
 	if db.url == "" {
 		return nil
 	}
-	conn, err := pgx.Connect(context.Background(), db.url)
+	conn, err := pgxpool.New(context.Background(), db.url) //pgx.Connect(context.Background(), db.url)
 	if err != nil {
 		return fmt.Errorf("connect error: %w", err)
 	}
@@ -182,10 +221,11 @@ func (db *DB) connect() error {
 	return err
 }
 
-func Init(url string) (*DB, error) {
+func Init(url string, log interfaces.LoggerInterface) (*DB, error) {
 	if database == nil {
 		database = &DB{
 			url:        url,
+			log:        log,
 			configured: false,
 		}
 		if url != "" {
@@ -194,6 +234,8 @@ func Init(url string) (*DB, error) {
 				return nil, fmt.Errorf("database init error: %w", err)
 			}
 			database.configured = true
+			database.delete = make(chan util.DeleteTask)
+			go database.backgroundDeleteHandler()
 		}
 	}
 

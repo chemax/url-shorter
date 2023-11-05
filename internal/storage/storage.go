@@ -65,7 +65,7 @@ func (u *URLManager) restore() error {
 			continue
 		}
 		u.URLs[parsedURL.Code] = parsedURL
-		u.logger.Debug("restored: ", scanner.Text())
+		u.logger.Debugln("restored: ", scanner.Text())
 	}
 	return nil
 }
@@ -170,6 +170,21 @@ func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
 		return "", fmt.Errorf("requested url not found")
 	}
 	return urlObj.URL, nil
+}
+
+func (u *URLManager) DeleteListFor(forDelete []string, userID string) {
+	if u.db != nil {
+		u.db.BatchDelete(forDelete, userID)
+		return
+	}
+	for _, v := range forDelete {
+		u.URLMx.Lock()
+		_, ok := u.URLs[v]
+		if ok && u.URLs[v].UserID == userID {
+			delete(u.URLs, v)
+		}
+	}
+	return
 }
 
 func (u *URLManager) AddNewURL(parsedURL string, userID string) (code string, err error) {

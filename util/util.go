@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"math/rand"
 	"strings"
 )
@@ -10,6 +11,11 @@ type AlreadyHaveThisURLError struct {
 
 func (au *AlreadyHaveThisURLError) Error() string {
 	return "already have this url in db"
+}
+
+type DeleteTask struct {
+	Codes  []string
+	UserID string
 }
 
 type URLStructUser struct {
@@ -36,6 +42,8 @@ const (
 	CodeLength           = 8
 	CodeGenerateAttempts = 20
 )
+
+var MissingContentError = errors.New("content deleted")
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
 

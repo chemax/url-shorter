@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
@@ -9,11 +10,6 @@ import (
 )
 
 func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) {
-	h.Log.Debug("userid: ", r.Context().Value(util.UserID).(string))
-	if r.Context().Value(util.UserID).(string) == "" {
-		res.WriteHeader(http.StatusUnauthorized)
-		return
-	}
 	URLs, err := h.storage.GetUserURLs(r.Context().Value(util.UserID).(string))
 	if err != nil {
 		h.Log.Error(err)
@@ -46,11 +42,14 @@ func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
-	h.Log.Debug(util.UserID, r.Context().Value(util.UserID))
 	id := chi.URLParam(r, "id")
 
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {
+		if errors.Is(err, util.MissingContentError) {
+			res.WriteHeader(http.StatusGone)
+			return
+		}
 		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
 		return

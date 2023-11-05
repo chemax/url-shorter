@@ -35,7 +35,7 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 }
 
 type Logger struct {
-	sugar *zap.SugaredLogger
+	*zap.SugaredLogger
 }
 
 func Init() (*Logger, error) {
@@ -44,27 +44,27 @@ func Init() (*Logger, error) {
 	cfgLogger.DisableStacktrace = true
 	lx, err := cfgLogger.Build()
 	if err != nil {
-		return nil, fmt.Errorf("build logger error: %w",err)
+		return nil, fmt.Errorf("build logger error: %w", err)
 	}
-	l.sugar = lx.Sugar()
+	l.SugaredLogger = lx.Sugar()
 	return l, nil
 }
 
 func (l *Logger) Shutdown() error {
-	return l.sugar.Sync()
+	return l.Sync()
 }
 
 func (l *Logger) Debug(args ...interface{}) {
-	l.sugar.Debugln(args)
+	l.Debugln(args)
 }
 func (l *Logger) Info(args ...interface{}) {
-	l.sugar.Infoln(args)
+	l.Infoln(args)
 }
 func (l *Logger) Warn(args ...interface{}) {
-	l.sugar.Warnln(args)
+	l.Warnln(args)
 }
 func (l *Logger) Error(args ...interface{}) {
-	l.sugar.Errorln(args)
+	l.Errorln(args)
 }
 func (l *Logger) Middleware(next http.Handler) http.Handler {
 
@@ -85,7 +85,7 @@ func (l *Logger) Middleware(next http.Handler) http.Handler {
 		method := r.Method
 		next.ServeHTTP(&lw, r)
 		duration := time.Since(start)
-		l.sugar.Infoln(
+		l.Infoln(
 			"uri", uri,
 			"method", method,
 			"status", responseData.status,
