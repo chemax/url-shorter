@@ -171,7 +171,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		bd, _ := db.Init("")
+		bd, _ := db.Init("", lg)
 		t.Run(tt.name, func(t *testing.T) {
 			usersManager, _ := users.Init(cfg, lg, bd)
 			storageObj, _ := storage.Init(cfg, lg, bd)
@@ -288,7 +288,7 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		bd, _ := db.Init("")
+		bd, _ := db.Init("", lg)
 		t.Run(tt.name, func(t *testing.T) {
 			u, _ := storage.Init(cfg, lg, bd)
 			usersManager, _ := users.Init(cfg, lg, bd)
@@ -324,7 +324,7 @@ func TestHandlers(t *testing.T) {
 	st := mock_util.NewMockStorageInterface(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	log, _ := logger.Init()
-	bd, _ := db.Init("")
+	bd, _ := db.Init("", log)
 	usersManager, _ := users.Init(cfg, log, bd)
 	handlers := New(st, cfg, log, usersManager)
 	assert.NotNil(t, handlers)
