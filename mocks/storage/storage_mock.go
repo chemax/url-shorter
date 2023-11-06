@@ -7,6 +7,7 @@ package mock_interfaces
 import (
 	http "net/http"
 	reflect "reflect"
+	time "time"
 
 	util "github.com/chemax/url-shorter/util"
 	gomock "github.com/golang/mock/gomock"
@@ -35,6 +36,18 @@ func (m *MockDBInterface) EXPECT() *MockDBInterfaceMockRecorder {
 	return m.recorder
 }
 
+// BatchDelete mocks base method.
+func (m *MockDBInterface) BatchDelete(arg0 []string, arg1 string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "BatchDelete", arg0, arg1)
+}
+
+// BatchDelete indicates an expected call of BatchDelete.
+func (mr *MockDBInterfaceMockRecorder) BatchDelete(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchDelete", reflect.TypeOf((*MockDBInterface)(nil).BatchDelete), arg0, arg1)
+}
+
 // Get mocks base method.
 func (m *MockDBInterface) Get(code string) (string, error) {
 	m.ctrl.T.Helper()
@@ -48,6 +61,21 @@ func (m *MockDBInterface) Get(code string) (string, error) {
 func (mr *MockDBInterfaceMockRecorder) Get(code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDBInterface)(nil).Get), code)
+}
+
+// GetAllURLs mocks base method.
+func (m *MockDBInterface) GetAllURLs(userID string) ([]util.URLStructUser, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllURLs", userID)
+	ret0, _ := ret[0].([]util.URLStructUser)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllURLs indicates an expected call of GetAllURLs.
+func (mr *MockDBInterfaceMockRecorder) GetAllURLs(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllURLs", reflect.TypeOf((*MockDBInterface)(nil).GetAllURLs), userID)
 }
 
 // Ping mocks base method.
@@ -65,18 +93,18 @@ func (mr *MockDBInterfaceMockRecorder) Ping() *gomock.Call {
 }
 
 // SaveURL mocks base method.
-func (m *MockDBInterface) SaveURL(code, URL string) (string, error) {
+func (m *MockDBInterface) SaveURL(code, URL, userID string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SaveURL", code, URL)
+	ret := m.ctrl.Call(m, "SaveURL", code, URL, userID)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SaveURL indicates an expected call of SaveURL.
-func (mr *MockDBInterfaceMockRecorder) SaveURL(code, URL interface{}) *gomock.Call {
+func (mr *MockDBInterfaceMockRecorder) SaveURL(code, URL, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveURL", reflect.TypeOf((*MockDBInterface)(nil).SaveURL), code, URL)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveURL", reflect.TypeOf((*MockDBInterface)(nil).SaveURL), code, URL, userID)
 }
 
 // Use mocks base method.
@@ -132,6 +160,22 @@ func (mr *MockLoggerInterfaceMockRecorder) Debug(args ...interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Debug", reflect.TypeOf((*MockLoggerInterface)(nil).Debug), args...)
 }
 
+// Debugln mocks base method.
+func (m *MockLoggerInterface) Debugln(args ...interface{}) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "Debugln", varargs...)
+}
+
+// Debugln indicates an expected call of Debugln.
+func (mr *MockLoggerInterfaceMockRecorder) Debugln(args ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Debugln", reflect.TypeOf((*MockLoggerInterface)(nil).Debugln), args...)
+}
+
 // Error mocks base method.
 func (m *MockLoggerInterface) Error(args ...interface{}) {
 	m.ctrl.T.Helper()
@@ -148,6 +192,22 @@ func (mr *MockLoggerInterfaceMockRecorder) Error(args ...interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Error", reflect.TypeOf((*MockLoggerInterface)(nil).Error), args...)
 }
 
+// Errorln mocks base method.
+func (m *MockLoggerInterface) Errorln(args ...interface{}) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "Errorln", varargs...)
+}
+
+// Errorln indicates an expected call of Errorln.
+func (mr *MockLoggerInterfaceMockRecorder) Errorln(args ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Errorln", reflect.TypeOf((*MockLoggerInterface)(nil).Errorln), args...)
+}
+
 // Info mocks base method.
 func (m *MockLoggerInterface) Info(args ...interface{}) {
 	m.ctrl.T.Helper()
@@ -162,6 +222,22 @@ func (m *MockLoggerInterface) Info(args ...interface{}) {
 func (mr *MockLoggerInterfaceMockRecorder) Info(args ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockLoggerInterface)(nil).Info), args...)
+}
+
+// Infoln mocks base method.
+func (m *MockLoggerInterface) Infoln(args ...interface{}) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "Infoln", varargs...)
+}
+
+// Infoln indicates an expected call of Infoln.
+func (mr *MockLoggerInterfaceMockRecorder) Infoln(args ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Infoln", reflect.TypeOf((*MockLoggerInterface)(nil).Infoln), args...)
 }
 
 // Middleware mocks base method.
@@ -194,6 +270,22 @@ func (mr *MockLoggerInterfaceMockRecorder) Warn(args ...interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Warn", reflect.TypeOf((*MockLoggerInterface)(nil).Warn), args...)
 }
 
+// Warnln mocks base method.
+func (m *MockLoggerInterface) Warnln(args ...interface{}) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "Warnln", varargs...)
+}
+
+// Warnln indicates an expected call of Warnln.
+func (mr *MockLoggerInterfaceMockRecorder) Warnln(args ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Warnln", reflect.TypeOf((*MockLoggerInterface)(nil).Warnln), args...)
+}
+
 // MockStorageInterface is a mock of StorageInterface interface.
 type MockStorageInterface struct {
 	ctrl     *gomock.Controller
@@ -218,18 +310,18 @@ func (m *MockStorageInterface) EXPECT() *MockStorageInterfaceMockRecorder {
 }
 
 // AddNewURL mocks base method.
-func (m *MockStorageInterface) AddNewURL(parsedURL string) (string, error) {
+func (m *MockStorageInterface) AddNewURL(parsedURL, userID string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddNewURL", parsedURL)
+	ret := m.ctrl.Call(m, "AddNewURL", parsedURL, userID)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // AddNewURL indicates an expected call of AddNewURL.
-func (mr *MockStorageInterfaceMockRecorder) AddNewURL(parsedURL interface{}) *gomock.Call {
+func (mr *MockStorageInterfaceMockRecorder) AddNewURL(parsedURL, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewURL", reflect.TypeOf((*MockStorageInterface)(nil).AddNewURL), parsedURL)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewURL", reflect.TypeOf((*MockStorageInterface)(nil).AddNewURL), parsedURL, userID)
 }
 
 // BatchSave mocks base method.
@@ -247,6 +339,18 @@ func (mr *MockStorageInterfaceMockRecorder) BatchSave(arr, httpPrefix interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchSave", reflect.TypeOf((*MockStorageInterface)(nil).BatchSave), arr, httpPrefix)
 }
 
+// DeleteListFor mocks base method.
+func (m *MockStorageInterface) DeleteListFor(forDelete []string, userID string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "DeleteListFor", forDelete, userID)
+}
+
+// DeleteListFor indicates an expected call of DeleteListFor.
+func (mr *MockStorageInterfaceMockRecorder) DeleteListFor(forDelete, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListFor", reflect.TypeOf((*MockStorageInterface)(nil).DeleteListFor), forDelete, userID)
+}
+
 // GetURL mocks base method.
 func (m *MockStorageInterface) GetURL(code string) (string, error) {
 	m.ctrl.T.Helper()
@@ -260,6 +364,21 @@ func (m *MockStorageInterface) GetURL(code string) (string, error) {
 func (mr *MockStorageInterfaceMockRecorder) GetURL(code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetURL", reflect.TypeOf((*MockStorageInterface)(nil).GetURL), code)
+}
+
+// GetUserURLs mocks base method.
+func (m *MockStorageInterface) GetUserURLs(userID string) ([]util.URLStructUser, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserURLs", userID)
+	ret0, _ := ret[0].([]util.URLStructUser)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserURLs indicates an expected call of GetUserURLs.
+func (mr *MockStorageInterfaceMockRecorder) GetUserURLs(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserURLs", reflect.TypeOf((*MockStorageInterface)(nil).GetUserURLs), userID)
 }
 
 // Ping mocks base method.
@@ -353,4 +472,69 @@ func (m *MockConfigInterface) GetSavePath() string {
 func (mr *MockConfigInterfaceMockRecorder) GetSavePath() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSavePath", reflect.TypeOf((*MockConfigInterface)(nil).GetSavePath))
+}
+
+// SecretKey mocks base method.
+func (m *MockConfigInterface) SecretKey() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SecretKey")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// SecretKey indicates an expected call of SecretKey.
+func (mr *MockConfigInterfaceMockRecorder) SecretKey() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SecretKey", reflect.TypeOf((*MockConfigInterface)(nil).SecretKey))
+}
+
+// TokenExp mocks base method.
+func (m *MockConfigInterface) TokenExp() time.Duration {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TokenExp")
+	ret0, _ := ret[0].(time.Duration)
+	return ret0
+}
+
+// TokenExp indicates an expected call of TokenExp.
+func (mr *MockConfigInterfaceMockRecorder) TokenExp() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TokenExp", reflect.TypeOf((*MockConfigInterface)(nil).TokenExp))
+}
+
+// MockUsersInterface is a mock of UsersInterface interface.
+type MockUsersInterface struct {
+	ctrl     *gomock.Controller
+	recorder *MockUsersInterfaceMockRecorder
+}
+
+// MockUsersInterfaceMockRecorder is the mock recorder for MockUsersInterface.
+type MockUsersInterfaceMockRecorder struct {
+	mock *MockUsersInterface
+}
+
+// NewMockUsersInterface creates a new mock instance.
+func NewMockUsersInterface(ctrl *gomock.Controller) *MockUsersInterface {
+	mock := &MockUsersInterface{ctrl: ctrl}
+	mock.recorder = &MockUsersInterfaceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUsersInterface) EXPECT() *MockUsersInterfaceMockRecorder {
+	return m.recorder
+}
+
+// Middleware mocks base method.
+func (m *MockUsersInterface) Middleware(next http.Handler) http.Handler {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Middleware", next)
+	ret0, _ := ret[0].(http.Handler)
+	return ret0
+}
+
+// Middleware indicates an expected call of Middleware.
+func (mr *MockUsersInterfaceMockRecorder) Middleware(next interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Middleware", reflect.TypeOf((*MockUsersInterface)(nil).Middleware), next)
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/chemax/url-shorter/internal/handlers"
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
+	"github.com/chemax/url-shorter/internal/users"
 	"net/http"
 )
 
@@ -24,16 +25,20 @@ func Run() error {
 	//TODO возможно стоит использовать только интерфейс хранилища с конфигом внутри и там внутри уже разбираться
 	//Кто кого и как инициализирует и использует...
 
-	dbObj, err := db.Init(cfg.DBConfig.String())
+	dbObj, err := db.Init(cfg.DBConfig.String(), log)
 	if err != nil {
 		return fmt.Errorf("db init error: %w", err)
 	}
-	//st, err := storage.Init(cfg.PathSave.String(), log, dbObj)
 	st, err := storage.Init(cfg, log, dbObj)
 	if err != nil {
 		return fmt.Errorf("error storage init: %w", err)
 	}
-	handler := handlers.New(st, cfg, log)
+	usersObj, err := users.Init(cfg, log, dbObj)
+	if err != nil {
+		return fmt.Errorf("error users init: %w", err)
+	}
+
+	handler := handlers.New(st, cfg, log, usersObj)
 	err = http.ListenAndServe(cfg.GetNetAddr(), handler.Router)
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil

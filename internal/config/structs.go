@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Config struct {
@@ -18,6 +19,8 @@ type Config struct {
 	PathSave        *PathForSave
 	DBConfig        *DBConfig
 	flagInitialized bool
+	secretKey       string
+	tokenExp        time.Duration
 }
 
 type DBConfig struct {
@@ -91,6 +94,12 @@ func (a *NetAddr) Set(s string) error {
 	a.Host = hp[0]
 	a.Port = port
 	return nil
+}
+func (c *Config) SecretKey() string {
+	return c.secretKey
+}
+func (c *Config) TokenExp() time.Duration {
+	return c.tokenExp
 }
 func (c *Config) GetDBUse() bool {
 	return c.DBConfig.connectString != ""
