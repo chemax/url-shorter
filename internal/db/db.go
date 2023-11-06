@@ -218,10 +218,6 @@ func (db *DB) pingAllTime() {
 	defer db.conn.Close()
 	tickTack := time.NewTicker(500 * time.Millisecond)
 	for range tickTack.C {
-		//Оно и так работало, а контекст был артефактом времен когда он хранился в БД глобальный.
-		//По идее тут надо что-то типа ловить сигнал os.Signal https://pkg.go.dev/os/signal#Notify типа такого
-		//Но я уже неделю как должен это всё сдать и в мыле, диплом горит, етц.
-
 		var err error
 		if db.conn != nil {
 			err = db.Ping()
@@ -229,9 +225,10 @@ func (db *DB) pingAllTime() {
 		if err != nil || db.conn == nil {
 			err := db.connect()
 			if err != nil {
-				db.log.Errorln(err)
+				continue
 			}
 		}
+	}
 	}
 
 }
