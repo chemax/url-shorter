@@ -216,20 +216,21 @@ func (db *DB) Ping() error {
 
 func (db *DB) pingAllTime() {
 	defer db.conn.Close()
+	tickTack := time.NewTicker(500 * time.Millisecond)
 	for {
+		//Оно и так работало, а контекст был артефактом времен когда он хранился в БД глобальный.
+		//По идее тут надо что-то типа ловить сигнал os.Signal https://pkg.go.dev/os/signal#Notify типа такого
+		//Но я уже неделю как должен это всё сдать и в мыле, диплом горит, етц.
 		select {
-		case <-context.Background().Done():
-			return
-		default:
+		case <-tickTack.C:
 			var err error
-			<-time.After(500 * time.Millisecond)
 			if db.conn != nil {
 				err = db.Ping()
 			}
 			if err != nil || db.conn == nil {
 				err := db.connect()
 				if err != nil {
-					continue
+					db.log.Errorln(err)
 				}
 			}
 		}
