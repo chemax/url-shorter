@@ -229,8 +229,6 @@ func (db *DB) pingAllTime() {
 			}
 		}
 	}
-	}
-
 }
 
 func (db *DB) connect() error {
