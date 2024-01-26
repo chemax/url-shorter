@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/chemax/url-shorter/internal/config"
@@ -9,10 +10,13 @@ import (
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/chemax/url-shorter/internal/users"
+	"github.com/chemax/url-shorter/pprof_server"
 	"net/http"
 )
 
 func Run() error {
+	// TODO прокинуть контекст везде где он нужен (бд, роутер) и использовать в будущем cancel(размьютить её)
+	ctx, _ := context.WithCancel(context.Background())
 	cfg, err := config.Init()
 	if err != nil {
 		return fmt.Errorf("error init config: %w", err)
@@ -22,6 +26,9 @@ func Run() error {
 		return fmt.Errorf("error setup logger: %w", err)
 	}
 	defer log.Shutdown()
+	//TODO спрятать под конфиг и инциализировать только по явному включению
+	pprof_server.Init(ctx, log)
+
 	//TODO возможно стоит использовать только интерфейс хранилища с конфигом внутри и там внутри уже разбираться
 	//Кто кого и как инициализирует и использует...
 
