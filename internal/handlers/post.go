@@ -13,7 +13,6 @@ import (
 )
 
 // IDK что тут можно оптимизировать
-var badLargeSliceForDumbTest []error
 
 func getBody(req *http.Request) ([]byte, error) {
 	var body []byte
@@ -38,7 +37,6 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
-			badLargeSliceForDumbTest = append(badLargeSliceForDumbTest, err)
 			h.Log.Warn(err.Error())
 			res.WriteHeader(http.StatusBadRequest)
 		}
