@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
-	"net/http"
 )
 
 func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) {

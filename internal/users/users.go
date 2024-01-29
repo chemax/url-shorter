@@ -3,12 +3,13 @@ package users
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
-	"net/http"
-	"time"
 )
 
 type Users struct {

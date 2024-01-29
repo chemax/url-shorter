@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/chemax/url-shorter/util"
 	"net/http"
+
+	"github.com/chemax/url-shorter/util"
 )
 
 func (h *Handlers) DeleteUserURLsHandler(res http.ResponseWriter, r *http.Request) {

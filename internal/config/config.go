@@ -3,9 +3,10 @@ package config
 import (
 	"flag"
 	"fmt"
-	"github.com/chemax/url-shorter/util"
 	"os"
 	"time"
+
+	"github.com/chemax/url-shorter/util"
 )
 
 var (

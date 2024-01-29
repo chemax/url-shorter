@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/chemax/url-shorter/internal/config"
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/handlers"
@@ -11,7 +13,6 @@ import (
 	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/chemax/url-shorter/internal/users"
 	"github.com/chemax/url-shorter/pprofserver"
-	"net/http"
 )
 
 func Run() error {

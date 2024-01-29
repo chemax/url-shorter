@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/internal/compress"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"net/http"
 )
 
 type Handlers struct {

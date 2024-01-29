@@ -5,12 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"sync"
-	"time"
 )
 
 type DB struct {

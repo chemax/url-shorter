@@ -4,6 +4,14 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
@@ -13,13 +21,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"strings"
-	"testing"
-	"time"
 )
 
 func gzipString(src string) ([]byte, error) {

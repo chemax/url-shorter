@@ -1,9 +1,10 @@
 package interfaces
 
 import (
-	"github.com/chemax/url-shorter/util"
 	"net/http"
 	"time"
+
+	"github.com/chemax/url-shorter/util"
 )
 
 type DBInterface interface {

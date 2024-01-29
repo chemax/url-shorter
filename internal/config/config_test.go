@@ -2,10 +2,11 @@ package config
 
 import (
 	"flag"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConfig(t *testing.T) {

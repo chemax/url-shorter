@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/util"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/chemax/url-shorter/util"
 )
 
 // IDK что тут можно оптимизировать

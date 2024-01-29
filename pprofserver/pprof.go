@@ -3,10 +3,11 @@ package pprofserver
 import (
 	"context"
 	"fmt"
-	"github.com/chemax/url-shorter/interfaces"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"net/http/pprof"
+
+	"github.com/chemax/url-shorter/interfaces"
+	"github.com/go-chi/chi/v5"
 )
 
 func Init(ctx context.Context, log interfaces.LoggerInterface) {
