@@ -1,11 +1,15 @@
 package handlers
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/users"
 	mock_util "github.com/chemax/url-shorter/mocks/storage"
 	"github.com/golang/mock/gomock"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -19,11 +23,25 @@ func BenchmarkHandlers_PostHandler(b *testing.B) {
 	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
 	st := mock_util.NewMockStorageInterface(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
+	st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).Return("12345678", nil).AnyTimes()
+
 	log, _ := logger.Init()
 	bd, _ := db.Init("", log)
 	usersManager, _ := users.Init(cfg, log, bd)
 	handlers := New(st, cfg, log, usersManager)
-	JSONURL := "{\"url\": \"http://ya.ru\"}"
-	JSONURLArray := "[{\"correlation_id\":\"1\",\"original_url\": \"http://ya.ru\"}, {\"correlation_id\":\"2\",\"original_url\": \"http://ya.ru\"}]"
-	JSONBadURL := "{\"url\": \".ru\"}"
+	JSONURLFmt := "{\"url\": \"http://%d.ya.ru\"}"
+	var cmps int
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		b.Run("all ok", func(b *testing.B) {
+			request := httptest.NewRequest(http.MethodPost, "/api/shorten",
+				bytes.NewBuffer([]byte(fmt.Sprint(JSONURLFmt, cmps))))
+			request.Header.Set("Content-Type", "application/json")
+			w := httptest.NewRecorder()
+			handlers.Router.ServeHTTP(w, request)
+			res := w.Result()
+			defer res.Body.Close()
+			cmps++
+		})
+	}
 }
