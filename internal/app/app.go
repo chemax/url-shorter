@@ -16,7 +16,8 @@ import (
 
 func Run() error {
 	// TODO прокинуть контекст везде где он нужен (бд, роутер) и использовать в будущем cancel(размьютить её)
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	cfg, err := config.Init()
 	if err != nil {
 		return fmt.Errorf("error init config: %w", err)
