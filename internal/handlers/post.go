@@ -12,6 +12,9 @@ import (
 	"strings"
 )
 
+// IDK что тут можно оптимизировать
+var badLargeSliceForDumbTest []error
+
 func getBody(req *http.Request) ([]byte, error) {
 	var body []byte
 	var err error
@@ -35,6 +38,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
+			badLargeSliceForDumbTest = append(badLargeSliceForDumbTest, err)
 			h.Log.Warn(err.Error())
 			res.WriteHeader(http.StatusBadRequest)
 		}
@@ -111,7 +115,6 @@ func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Reque
 		h.Log.Warn("response write error: ", err.Error())
 		err = nil
 	}
-	//TODO как-то тут многовато общего кода с JSONPostHandler, DRY or not DRY?
 }
 
 func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
