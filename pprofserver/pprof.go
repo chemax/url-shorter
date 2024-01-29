@@ -1,4 +1,4 @@
-package pprof_server
+package pprofserver
 
 import (
 	"context"

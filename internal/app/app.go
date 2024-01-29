@@ -10,7 +10,7 @@ import (
 	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/chemax/url-shorter/internal/users"
-	"github.com/chemax/url-shorter/pprof_server"
+	"github.com/chemax/url-shorter/pprofserver"
 	"net/http"
 )
 
@@ -28,7 +28,7 @@ func Run() error {
 	}
 	defer log.Shutdown()
 	//TODO спрятать под конфиг и инциализировать только по явному включению
-	pprof_server.Init(ctx, log)
+	pprofserver.Init(ctx, log)
 
 	//TODO возможно стоит использовать только интерфейс хранилища с конфигом внутри и там внутри уже разбираться
 	//Кто кого и как инициализирует и использует...
