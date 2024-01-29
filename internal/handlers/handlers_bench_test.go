@@ -34,8 +34,9 @@ func BenchmarkHandlers_PostHandler(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		b.Run("all ok", func(b *testing.B) {
+			jsString := fmt.Sprintf(JSONURLFmt, cmps)
 			request := httptest.NewRequest(http.MethodPost, "/api/shorten",
-				bytes.NewBuffer([]byte(fmt.Sprint(JSONURLFmt, cmps))))
+				bytes.NewBuffer([]byte(jsString)))
 			request.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 			handlers.Router.ServeHTTP(w, request)
