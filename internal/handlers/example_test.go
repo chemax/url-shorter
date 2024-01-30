@@ -3,16 +3,17 @@ package handlers
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/users"
 	"github.com/chemax/url-shorter/logger"
 	mock_util "github.com/chemax/url-shorter/mocks/storage"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func Example() {
