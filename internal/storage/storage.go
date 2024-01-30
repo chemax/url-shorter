@@ -14,22 +14,23 @@ import (
 
 var newLineBytes = []byte("\n")
 
-type URL struct {
+type singleURL struct {
 	URL    string `json:"url"`
 	Code   string `json:"code"`
 	UserID string `json:"userID"`
 }
-type URLManager struct {
+type managerURL struct {
 	db       interfaces.DBInterface
-	URLs     map[string]*URL
+	URLs     map[string]*singleURL
 	URLMx    sync.RWMutex
 	SavePath string
 	logger   interfaces.LoggerInterface
 }
 
-var manager = &URLManager{URLs: make(map[string]*URL)}
+var manager = &managerURL{URLs: make(map[string]*singleURL)}
 
-func Init(cfg interfaces.ConfigInterface, logger interfaces.LoggerInterface, db interfaces.DBInterface) (*URLManager, error) {
+// Init создает и возвращает структуру управления URL'ами
+func Init(cfg interfaces.ConfigInterface, logger interfaces.LoggerInterface, db interfaces.DBInterface) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {
@@ -43,7 +44,7 @@ func Init(cfg interfaces.ConfigInterface, logger interfaces.LoggerInterface, db 
 	}
 	return manager, nil
 }
-func (u *URLManager) restore() error {
+func (u *managerURL) restore() error {
 	if u.db != nil {
 		return nil
 	}
@@ -59,7 +60,7 @@ func (u *URLManager) restore() error {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		parsedURL := &URL{}
+		parsedURL := &singleURL{}
 		err := json.Unmarshal(scanner.Bytes(), parsedURL)
 		if err != nil {
 			u.logger.Error("restore error: ", err.Error())
@@ -70,7 +71,7 @@ func (u *URLManager) restore() error {
 	}
 	return nil
 }
-func (u *URLManager) saveToFile(code string) {
+func (u *managerURL) saveToFile(code string) {
 	if u.SavePath == "" {
 		return
 	}
@@ -95,9 +96,8 @@ func (u *URLManager) saveToFile(code string) {
 
 }
 
-// Переиспользование во все поля. Нет четких критериев, что делать при сбое в середине процесса, я решил не прерывать,
-// а значит, я могу переиспользовать имеющийся функционал.
-func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error) {
+// BatchSave пакетное сохранение
+func (u *managerURL) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error) {
 	var errorArr []error
 	for _, v := range arr {
 		shortcode, err := u.AddNewURL(v.OriginalURL, "")
@@ -116,7 +116,7 @@ func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string)
 	return responseArr, nil
 }
 
-func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
+func (u *managerURL) dbGetURL(code string) (parsedURL string, err error) {
 	parsedURL, err = u.db.Get(code)
 	if err != nil {
 		return "", fmt.Errorf("get url from db error: %w", err)
@@ -124,7 +124,7 @@ func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
 	return parsedURL, nil
 }
 
-func (u *URLManager) dbAddNewURL(parsedURL, userID string) (code string, err error) {
+func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err error) {
 	var loop int
 	for {
 		//TODO переделать на функции внутри postgresql?
@@ -145,7 +145,8 @@ func (u *URLManager) dbAddNewURL(parsedURL, userID string) (code string, err err
 	}
 }
 
-func (u *URLManager) GetUserURLs(userID string) (URLs []util.URLStructUser, err error) {
+// GetUserURLs вернуть все URL пользователя
+func (u *managerURL) GetUserURLs(userID string) (URLs []util.URLStructUser, err error) {
 	if u.db != nil {
 		return u.db.GetAllURLs(userID)
 	}
@@ -160,7 +161,8 @@ func (u *URLManager) GetUserURLs(userID string) (URLs []util.URLStructUser, err 
 	return URLs, err
 }
 
-func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
+// GetURL получить URL по коду
+func (u *managerURL) GetURL(code string) (parsedURL string, err error) {
 	if u.db != nil {
 		return u.dbGetURL(code)
 	}
@@ -173,7 +175,8 @@ func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
 	return urlObj.URL, nil
 }
 
-func (u *URLManager) DeleteListFor(forDelete []string, userID string) {
+// DeleteListFor пакетное удаление
+func (u *managerURL) DeleteListFor(forDelete []string, userID string) {
 	if u.db != nil {
 		u.db.BatchDelete(forDelete, userID)
 		return
@@ -187,7 +190,8 @@ func (u *URLManager) DeleteListFor(forDelete []string, userID string) {
 	}
 }
 
-func (u *URLManager) AddNewURL(parsedURL string, userID string) (code string, err error) {
+// AddNewURL сохранить URL
+func (u *managerURL) AddNewURL(parsedURL string, userID string) (code string, err error) {
 	if u.db != nil {
 		return u.dbAddNewURL(parsedURL, userID)
 	}
@@ -204,12 +208,13 @@ func (u *URLManager) AddNewURL(parsedURL string, userID string) (code string, er
 			return code, fmt.Errorf("can not found free code for short url")
 		}
 	}
-	u.URLs[code] = &URL{URL: parsedURL, Code: code, UserID: userID}
+	u.URLs[code] = &singleURL{URL: parsedURL, Code: code, UserID: userID}
 	u.saveToFile(code)
 	return code, nil
 }
 
-func (u *URLManager) Ping() bool {
+// Ping пинг бд
+func (u *managerURL) Ping() bool {
 	if u.db == nil {
 		return false
 	}

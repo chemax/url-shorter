@@ -391,7 +391,7 @@ func TestHandlers(t *testing.T) {
 		defer res.Body.Close()
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
-	t.Run("bad URL", func(t *testing.T) {
+	t.Run("bad singleURL", func(t *testing.T) {
 		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONBadURL)))
 		request.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
@@ -410,7 +410,7 @@ func TestHandlers(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
 
-	t.Run("store URL error", func(t *testing.T) {
+	t.Run("store singleURL error", func(t *testing.T) {
 		st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).Times(1).Return("", fmt.Errorf("test error"))
 		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL)))
 		request.Header.Set("Content-Type", "application/json")
