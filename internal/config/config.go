@@ -20,6 +20,7 @@ var (
 	}
 )
 
+// Init инициализация конфига
 func Init() (*Config, error) {
 	cfg.initFlags()
 	flag.Parse()

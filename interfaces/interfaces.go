@@ -7,6 +7,7 @@ import (
 	"github.com/chemax/url-shorter/util"
 )
 
+// DBInterface интерфейс для базы данных
 type DBInterface interface {
 	BatchDelete([]string, string)
 	Ping() error
@@ -15,6 +16,8 @@ type DBInterface interface {
 	GetAllURLs(userID string) ([]util.URLStructUser, error)
 	Use() bool
 }
+
+// LoggerInterface интерфейс логера
 type LoggerInterface interface {
 	Middleware(next http.Handler) http.Handler
 	Debug(args ...interface{})
@@ -26,6 +29,8 @@ type LoggerInterface interface {
 	Error(args ...interface{})
 	Errorln(args ...interface{})
 }
+
+// StorageInterface интерфейс хранилища
 type StorageInterface interface {
 	GetUserURLs(userID string) ([]util.URLStructUser, error)
 	GetURL(code string) (parsedURL string, err error)
@@ -34,6 +39,8 @@ type StorageInterface interface {
 	Ping() bool
 	BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error)
 }
+
+// ConfigInterface интерфейс конфиг-структуры
 type ConfigInterface interface {
 	SecretKey() string
 	TokenExp() time.Duration
@@ -43,6 +50,7 @@ type ConfigInterface interface {
 	GetDBUse() bool
 }
 
+// UsersInterface интерфейс юзер-менеджера
 type UsersInterface interface {
 	Middleware(next http.Handler) http.Handler
 }

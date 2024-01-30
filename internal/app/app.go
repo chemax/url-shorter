@@ -16,6 +16,7 @@ import (
 	"github.com/chemax/url-shorter/pprofserver"
 )
 
+// Run точка входа в приложение
 func Run() error {
 	// TODO прокинуть контекст везде где он нужен (бд, роутер) и использовать в будущем cancel(размьютить её)
 	ctx, cancel := context.WithCancel(context.Background())
