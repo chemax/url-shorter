@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-type Handlers struct {
+type handlers struct {
 	storage interfaces.StorageInterface
 	Router  *chi.Mux
 	Cfg     interfaces.ConfigInterface
@@ -33,10 +33,11 @@ func initRender() {
 	}
 }
 
-func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, users interfaces.UsersInterface) *Handlers {
+// New возвращает хендлер всех ручек
+func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, users interfaces.UsersInterface) *handlers {
 	initRender()
 	r := chi.NewRouter()
-	h := &Handlers{
+	h := &handlers{
 		storage: s,
 		Router:  r,
 		Cfg:     cfg,
@@ -49,12 +50,12 @@ func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log inte
 	r.Use(middleware.Recoverer)
 	r.Use(users.Middleware)
 	r.Use(compress.Middleware)
-	r.Post("/api/shorten", h.JSONPostHandler)
-	r.Post("/api/shorten/batch", h.JSONBatchPostHandler)
-	r.Post("/", h.PostHandler)
-	r.Get("/ping", h.PingHandler)
-	r.Get("/{id}", h.GetHandler)
-	r.Get("/api/user/urls", h.GetUserURLsHandler)
+	r.Post("/api/shorten", h.xJSONPostHandler)
+	r.Post("/api/shorten/batch", h.xJSONBatchPostHandler)
+	r.Post("/", h.postHandler)
+	r.Get("/ping", h.pingHandler)
+	r.Get("/{id}", h.getHandler)
+	r.Get("/api/user/urls", h.getUserURLsHandler)
 	r.Delete("/api/user/urls", h.DeleteUserURLsHandler)
 	return h
 }

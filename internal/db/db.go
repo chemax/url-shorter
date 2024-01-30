@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type DB struct {
+type structDB struct {
 	conn       *pgxpool.Pool
 	url        string
 	pingSync   sync.Mutex
@@ -23,9 +23,9 @@ type DB struct {
 	log        interfaces.LoggerInterface
 }
 
-var database *DB
+var database *structDB
 
-func (db *DB) createURLsTable() error {
+func (db *structDB) createURLsTable() error {
 	//поздно переезжать на миграции
 	_, err := db.conn.Exec(context.Background(), `create table if not exists URLs(
   id serial primary key,
@@ -46,7 +46,7 @@ func (db *DB) createURLsTable() error {
 	return nil
 }
 
-func (db *DB) backgroundDeleteHandler() {
+func (db *structDB) backgroundDeleteHandler() {
 	for task := range db.delete {
 		buf := bytes.NewBufferString("UPDATE urls SET deleted = true  WHERE shortcode IN (")
 		for i, v := range task.Codes {
@@ -58,7 +58,7 @@ func (db *DB) backgroundDeleteHandler() {
 		buf.WriteString(") AND userid = $1;")
 		conn, err := db.conn.Acquire(context.Background())
 		if err != nil {
-			db.log.Error("batch delete db.conn.Acquire error %w", err)
+			db.log.Error("batch delete structDB.conn.Acquire error %w", err)
 			continue
 		}
 
@@ -70,25 +70,28 @@ func (db *DB) backgroundDeleteHandler() {
 		}
 
 	}
-	db.log.Warnln("db.delete channel was closed")
+	db.log.Warnln("structDB.delete channel was closed")
 }
 
-func (db *DB) BatchDelete(forDelete []string, userID string) {
+// BatchDelete принимает пакет ид для пакетного удаления и юзерИД
+func (db *structDB) BatchDelete(forDelete []string, userID string) {
 	db.delete <- util.DeleteTask{
 		Codes:  forDelete,
 		UserID: userID,
 	}
 }
 
-func (db *DB) Use() bool {
+// Use используется ли БД постгре
+func (db *structDB) Use() bool {
 	return db.configured
 }
 
-func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
+// GetAllURLs возвращает все сокращенные URL пользователя
+func (db *structDB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
 	var URLs []util.URLStructUser
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("db.conn.Acquire error: %w", err)
+		return nil, fmt.Errorf("structDB.conn.Acquire error: %w", err)
 	}
 	defer conn.Release()
 	rows, err := conn.Query(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1 AND deleted = false`, userID)
@@ -106,12 +109,14 @@ func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
 
 	return URLs, err
 }
-func (db *DB) Get(shortcode string) (string, error) {
+
+// Get возвращает URL по коду
+func (db *structDB) Get(shortcode string) (string, error) {
 	var URL string
 	var deleted bool
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return "", fmt.Errorf("db.conn.Acquire error: %w", err)
+		return "", fmt.Errorf("structDB.conn.Acquire error: %w", err)
 	}
 	defer conn.Release()
 	err = conn.QueryRow(context.Background(), `SELECT url, deleted FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL, &deleted)
@@ -123,7 +128,9 @@ func (db *DB) Get(shortcode string) (string, error) {
 	}
 	return URL, err
 }
-func (db *DB) SaveURL(shortcode string, URL string, userID string) (string, error) {
+
+// SaveURL сохраняет сокращенный урл
+func (db *structDB) SaveURL(shortcode string, URL string, userID string) (string, error) {
 	// https://stackoverflow.com/questions/34708509/how-to-use-returning-with-on-conflict-in-postgresql
 	/*
 		with new(id,shortcode,url) as (
@@ -165,7 +172,7 @@ values
 select shortcode from dup ;`
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return "", fmt.Errorf("SaveURL db.conn.Acquire error %w", err)
+		return "", fmt.Errorf("SaveURL structDB.conn.Acquire error %w", err)
 	}
 	defer conn.Release()
 	row := conn.QueryRow(context.Background(), sqlString, shortcode, URL, userID)
@@ -181,11 +188,13 @@ select shortcode from dup ;`
 	return rowString, &util.AlreadyHaveThisURLError{}
 
 }
-func (db *DB) CreateUser() (string, error) {
+
+// CreateUser создает в бд нового пользователя
+func (db *structDB) CreateUser() (string, error) {
 	sqlString := `INSERT INTO users values(default) RETURNING id;`
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return "", fmt.Errorf("CreateUser db.conn.Acquire error %w", err)
+		return "", fmt.Errorf("CreateUser structDB.conn.Acquire error %w", err)
 	}
 	defer conn.Release()
 	row := conn.QueryRow(context.Background(), sqlString)
@@ -197,7 +206,8 @@ func (db *DB) CreateUser() (string, error) {
 	return id, nil
 }
 
-func (db *DB) Ping() error {
+// Ping базы данных
+func (db *structDB) Ping() error {
 	// мьютекс нужен, потому что я использую пинг для реконнекта
 	// если мьютекса нет, возможны коллизии и ошибка conn busy
 	// потом, возможно, эту проблему решит пул коннектов
@@ -209,13 +219,13 @@ func (db *DB) Ping() error {
 	}
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return fmt.Errorf("ping db.conn.Acquire error %w", err)
+		return fmt.Errorf("ping structDB.conn.Acquire error %w", err)
 	}
 	defer conn.Release()
 	return conn.Ping(context.Background())
 }
 
-func (db *DB) pingAllTime() {
+func (db *structDB) pingAllTime() {
 	defer db.conn.Close()
 	tickTack := time.NewTicker(500 * time.Millisecond)
 	for range tickTack.C {
@@ -232,7 +242,7 @@ func (db *DB) pingAllTime() {
 	}
 }
 
-func (db *DB) connect() error {
+func (db *structDB) connect() error {
 	if db.url == "" {
 		return nil
 	}
@@ -241,7 +251,7 @@ func (db *DB) connect() error {
 	if err != nil {
 		return fmt.Errorf("connect ParseConfig error: %w", err)
 	}
-	conn, err := pgxpool.NewWithConfig(context.Background(), config) //pgx.Connect(context.Background(), db.url)
+	conn, err := pgxpool.NewWithConfig(context.Background(), config) //pgx.Connect(context.Background(), structDB.url)
 	if err != nil {
 		return fmt.Errorf("connect error: %w", err)
 	}
@@ -251,9 +261,10 @@ func (db *DB) connect() error {
 	return err
 }
 
-func Init(url string, log interfaces.LoggerInterface) (*DB, error) {
+// Init Синглтон, возвращает ссылку на структуру для работы с постгре
+func Init(url string, log interfaces.LoggerInterface) (*structDB, error) {
 	if database == nil {
-		database = &DB{
+		database = &structDB{
 			url:        url,
 			log:        log,
 			configured: false,

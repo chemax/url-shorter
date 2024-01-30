@@ -34,7 +34,7 @@ func getBody(req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) postHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -74,7 +74,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) xJSONBatchPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -116,7 +116,7 @@ func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Reque
 	}
 }
 
-func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -178,7 +178,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handlers) store(parsedURL *url.URL, userID string) (string, error) {
+func (h *handlers) store(parsedURL *url.URL, userID string) (string, error) {
 	code, err := h.storage.AddNewURL(parsedURL.String(), userID)
 	if err != nil {
 		return code, err

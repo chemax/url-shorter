@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) {
+func (h *handlers) getUserURLsHandler(res http.ResponseWriter, r *http.Request) {
 	URLs, err := h.storage.GetUserURLs(r.Context().Value(util.UserID).(string))
 	if err != nil {
 		h.Log.Error(err)
@@ -42,7 +42,7 @@ func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
+func (h *handlers) getHandler(res http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {
@@ -58,7 +58,7 @@ func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
 	res.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func (h *Handlers) PingHandler(res http.ResponseWriter, r *http.Request) {
+func (h *handlers) pingHandler(res http.ResponseWriter, r *http.Request) {
 	if h.storage.Ping() {
 		res.WriteHeader(http.StatusOK)
 		return

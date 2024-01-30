@@ -7,7 +7,8 @@ import (
 	"github.com/chemax/url-shorter/util"
 )
 
-func (h *Handlers) DeleteUserURLsHandler(res http.ResponseWriter, r *http.Request) {
+// DeleteUserURLsHandler ручка для удаления пользовательских урл пачкой
+func (h *handlers) DeleteUserURLsHandler(res http.ResponseWriter, r *http.Request) {
 	body, err := getBody(r)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
