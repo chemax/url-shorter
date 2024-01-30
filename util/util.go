@@ -43,13 +43,21 @@ type URLStructForBatchResponse struct {
 type UserIDStringType string
 
 const (
-	TokenCookieName      = "token"
-	UserID               = UserIDStringType("userID")
-	ServerAddressEnv     = "SERVER_ADDRESS"
-	BaseURLEnv           = "BASE_URL"
-	SavePath             = "FILE_STORAGE_PATH"
-	DBConnectString      = "DATABASE_DSN"
-	CodeLength           = 8
+	// TokenCookieName Token Cookie Name
+	TokenCookieName = "token"
+	// UserID отдельный тип для приведения к нему из контекста
+	UserID = UserIDStringType("userID")
+	// ServerAddressEnv Server Address Env
+	ServerAddressEnv = "SERVER_ADDRESS"
+	// BaseURLEnv Base URL Env
+	BaseURLEnv = "BASE_URL"
+	// SavePath save path env
+	SavePath = "FILE_STORAGE_PATH"
+	// DBConnectString DB Connect String env
+	DBConnectString = "DATABASE_DSN"
+	//CodeLength длина сокращенного кода урл
+	CodeLength = 8
+	// CodeGenerateAttempts число попыток создать уникальный код
 	CodeGenerateAttempts = 20
 )
 
