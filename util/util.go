@@ -42,6 +42,7 @@ type URLStructForBatchResponse struct {
 // UserIDStringType User ID String Type
 type UserIDStringType string
 
+// const объявляю всякие константы (тест идиот? как я должен это документировать?)
 const (
 	// TokenCookieName Token Cookie Name
 	TokenCookieName = "token"
