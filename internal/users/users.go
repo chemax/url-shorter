@@ -12,26 +12,26 @@ import (
 	"github.com/google/uuid"
 )
 
-type Users struct {
+type usersStruct struct {
 	SecretKey string
 	TokenExp  time.Duration
 	log       interfaces.LoggerInterface
 	databaseInterface
 }
 
-type Claims struct {
+type claimsStruct struct {
 	jwt.RegisteredClaims
 	UserID string
 }
 
-var users = &Users{}
+var users = &usersStruct{}
 
 type databaseInterface interface {
 	CreateUser() (string, error)
 	Use() bool
 }
 
-func (u *Users) createNewUser(w http.ResponseWriter) (userID string, err error) {
+func (u *usersStruct) createNewUser(w http.ResponseWriter) (userID string, err error) {
 	u.log.Debugln("Create new user")
 	if !u.Use() {
 		userID = uuid.New().String()
@@ -54,11 +54,12 @@ func (u *Users) createNewUser(w http.ResponseWriter) (userID string, err error) 
 	return userID, nil
 }
 
-func (u *Users) Middleware(next http.Handler) http.Handler {
+// Middleware для аутентификации и авторизации
+func (u *usersStruct) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var tkn *jwt.Token
 		var userID string
-		claims := &Claims{}
+		claims := &claimsStruct{}
 		c, err := r.Cookie(util.TokenCookieName)
 		if err == nil {
 			tknStr := c.Value
@@ -86,8 +87,8 @@ func (u *Users) Middleware(next http.Handler) http.Handler {
 }
 
 // BuildJWTString создаёт токен и возвращает его в виде строки.
-func (u *Users) BuildJWTString(userID string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
+func (u *usersStruct) BuildJWTString(userID string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsStruct{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(u.TokenExp)),
 		},
@@ -102,7 +103,8 @@ func (u *Users) BuildJWTString(userID string) (string, error) {
 	return tokenString, nil
 }
 
-func Init(cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, dbObj databaseInterface) (*Users, error) {
+// Init возвращает юзер менеджера
+func Init(cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, dbObj databaseInterface) (*usersStruct, error) {
 	users.SecretKey = cfg.SecretKey()
 	users.TokenExp = cfg.TokenExp()
 	users.log = log

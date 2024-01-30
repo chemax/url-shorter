@@ -22,6 +22,7 @@ type (
 	}
 )
 
+// Write для мидлварь
 func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	// записываем ответ, используя оригинальный http.ResponseWriter
 	size, err := r.ResponseWriter.Write(b)
@@ -29,18 +30,20 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	return size, err
 }
 
+// WriteHeader логирует статус код
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	// записываем код статуса, используя оригинальный http.ResponseWriter
 	r.ResponseWriter.WriteHeader(statusCode)
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
-type Logger struct {
+type loggerStruct struct {
 	*zap.SugaredLogger
 }
 
-func Init() (*Logger, error) {
-	l := &Logger{}
+// Init делает новый логгер
+func Init() (*loggerStruct, error) {
+	l := &loggerStruct{}
 	cfgLogger := zap.NewDevelopmentConfig()
 	cfgLogger.DisableStacktrace = true
 	lx, err := cfgLogger.Build()
@@ -51,23 +54,33 @@ func Init() (*Logger, error) {
 	return l, nil
 }
 
-func (l *Logger) Shutdown() error {
+// Shutdown зачищает логгер
+func (l *loggerStruct) Shutdown() error {
 	return l.Sync()
 }
 
-func (l *Logger) Debug(args ...interface{}) {
+// Debug debug
+func (l *loggerStruct) Debug(args ...interface{}) {
 	l.Debugln(args)
 }
-func (l *Logger) Info(args ...interface{}) {
+
+// Info info log
+func (l *loggerStruct) Info(args ...interface{}) {
 	l.Infoln(args)
 }
-func (l *Logger) Warn(args ...interface{}) {
+
+// Warn warning log
+func (l *loggerStruct) Warn(args ...interface{}) {
 	l.Warnln(args)
 }
-func (l *Logger) Error(args ...interface{}) {
+
+// Error error log
+func (l *loggerStruct) Error(args ...interface{}) {
 	l.Errorln(args)
 }
-func (l *Logger) Middleware(next http.Handler) http.Handler {
+
+// Middleware для логирования хттп запросов
+func (l *loggerStruct) Middleware(next http.Handler) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Del("Content-Length")

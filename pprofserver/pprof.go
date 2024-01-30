@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Init включает в проекте pprof
 func Init(ctx context.Context, log interfaces.LoggerInterface) {
 	r := chi.NewRouter()
 	r.HandleFunc("/debug/pprof/", pprof.Index)
