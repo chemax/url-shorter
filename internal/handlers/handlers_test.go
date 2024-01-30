@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/chemax/url-shorter/logger"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/chemax/url-shorter/internal/db"
-	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/chemax/url-shorter/internal/users"
 	mock_util "github.com/chemax/url-shorter/mocks/storage"

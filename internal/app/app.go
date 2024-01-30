@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/logger"
 	"net/http"
 
 	"github.com/chemax/url-shorter/internal/config"
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/handlers"
-	"github.com/chemax/url-shorter/internal/logger"
 	"github.com/chemax/url-shorter/internal/storage"
 	"github.com/chemax/url-shorter/internal/users"
 	"github.com/chemax/url-shorter/pprofserver"
