@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/chemax/url-shorter/users"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/storage"
-	"github.com/chemax/url-shorter/internal/users"
 	mock_util "github.com/chemax/url-shorter/mocks/storage"
 	"github.com/chemax/url-shorter/util"
 	"github.com/golang/mock/gomock"

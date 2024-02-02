@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/users"
 	"net/http"
 
 	"github.com/chemax/url-shorter/logger"
@@ -12,13 +13,11 @@ import (
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/handlers"
 	"github.com/chemax/url-shorter/internal/storage"
-	"github.com/chemax/url-shorter/internal/users"
 	"github.com/chemax/url-shorter/pprofserver"
 )
 
 // Run точка входа в приложение
 func Run() error {
-	// TODO прокинуть контекст везде где он нужен (бд, роутер) и использовать в будущем cancel(размьютить её)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cfg, err := config.Init()
@@ -30,11 +29,7 @@ func Run() error {
 		return fmt.Errorf("error setup logger: %w", err)
 	}
 	defer log.Shutdown()
-	//TODO спрятать под конфиг и инциализировать только по явному включению
 	pprofserver.Init(ctx, log)
-
-	//TODO возможно стоит использовать только интерфейс хранилища с конфигом внутри и там внутри уже разбираться
-	//Кто кого и как инициализирует и использует...
 
 	dbObj, err := db.Init(cfg.DBConfig.String(), log)
 	if err != nil {

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/chemax/url-shorter/internal/compress"
+	"github.com/chemax/url-shorter/compress"
 	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

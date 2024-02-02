@@ -148,7 +148,6 @@ func (u *managerURL) dbGetURL(code string) (parsedURL string, err error) {
 func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err error) {
 	var loop int
 	for {
-		//TODO переделать на функции внутри postgresql?
 		code = util.RandStringRunes(util.CodeLength)
 		dupCode, err := u.db.SaveURL(code, parsedURL, userID)
 		if err != nil && !errors.Is(err, &util.AlreadyHaveThisURLError{}) {

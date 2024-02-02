@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"fmt"
+	"github.com/chemax/url-shorter/users"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +12,6 @@ import (
 	"github.com/chemax/url-shorter/logger"
 
 	"github.com/chemax/url-shorter/internal/db"
-	"github.com/chemax/url-shorter/internal/users"
 	mock_util "github.com/chemax/url-shorter/mocks/storage"
 	"github.com/golang/mock/gomock"
 )

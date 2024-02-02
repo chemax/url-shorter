@@ -28,7 +28,6 @@ func Init(ctx context.Context, log LoggerInterface) {
 	r.Handle("/debug/pprof/heap", pprof.Handler("heap"))
 	r.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
 
-	//todo конфигурировать это
 	s := &http.Server{
 		Addr:    "0.0.0.0:7777",
 		Handler: r,

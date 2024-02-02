@@ -161,7 +161,6 @@ func (db *managerDB) SaveURL(shortcode string, URL string, userID string) (strin
 		---
 		;
 	*/
-	//TODO избавиться от * в запросе //вроде избавился (см returning)
 	sqlString := `with new(id,shortcode,url,userid) as (
 values
 (nextval('urls_id_seq'::regclass), $1, $2, $3) 

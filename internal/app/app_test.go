@@ -22,5 +22,4 @@ func TestApp(t *testing.T) {
 		assert.Error(t, err)
 		os.Unsetenv(util.BaseURLEnv)
 	})
-	//TODO подумать над gomonkey чтобы тестировать реакцию на ошибки
 }
