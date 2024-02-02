@@ -6,12 +6,17 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/chemax/url-shorter/interfaces"
 	"github.com/go-chi/chi/v5"
 )
 
+// LoggerInterface интерфейс логера
+type LoggerInterface interface {
+	Infoln(args ...interface{})
+	Errorln(args ...interface{})
+}
+
 // Init включает в проекте pprof
-func Init(ctx context.Context, log interfaces.LoggerInterface) {
+func Init(ctx context.Context, log LoggerInterface) {
 	r := chi.NewRouter()
 	r.HandleFunc("/debug/pprof/", pprof.Index)
 	r.HandleFunc("/debug/pprof/*", pprof.Index)
@@ -36,10 +41,10 @@ func Init(ctx context.Context, log interfaces.LoggerInterface) {
 	go func(ctx context.Context, notErr chan error) {
 		select {
 		case err := <-notErr:
-			log.Error(fmt.Errorf("pprof server error: %w", err))
+			log.Errorln(fmt.Errorf("pprof server error: %w", err))
 		case <-ctx.Done():
 			s.Shutdown(ctx)
 		}
-		log.Info("pprof server stopped")
+		log.Infoln("pprof server stopped")
 	}(ctx, notifyErr)
 }

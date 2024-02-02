@@ -8,11 +8,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// LoggerInterface интерфейс логера
+type LoggerInterface interface {
+	Warnln(args ...interface{})
+	Error(args ...interface{})
+}
 
 type managerDB struct {
 	conn       *pgxpool.Pool
@@ -20,7 +25,7 @@ type managerDB struct {
 	pingSync   sync.Mutex
 	configured bool
 	delete     chan util.DeleteTask
-	log        interfaces.LoggerInterface
+	log        LoggerInterface
 }
 
 var database *managerDB
@@ -262,7 +267,7 @@ func (db *managerDB) connect() error {
 }
 
 // Init Синглтон, возвращает ссылку на структуру для работы с постгре
-func Init(url string, log interfaces.LoggerInterface) (*managerDB, error) {
+func Init(url string, log LoggerInterface) (*managerDB, error) {
 	if database == nil {
 		database = &managerDB{
 			url:        url,

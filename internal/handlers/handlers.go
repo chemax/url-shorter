@@ -2,20 +2,48 @@ package handlers
 
 import (
 	"fmt"
-	"net/http"
-
-	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/internal/compress"
+	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"net/http"
 )
 
+// ConfigInterface интерфейс конфиг-структуры
+type ConfigInterface interface {
+	GetHTTPAddr() string
+}
+
+// UsersInterface интерфейс юзер-менеджера
+type UsersInterface interface {
+	Middleware(next http.Handler) http.Handler
+}
+
+// LoggerInterface интерфейс логера
+type LoggerInterface interface {
+	Middleware(next http.Handler) http.Handler
+	Warn(args ...interface{})
+	Warnln(args ...interface{})
+	Error(args ...interface{})
+	Errorln(args ...interface{})
+}
+
+// StorageInterface интерфейс хранилища
+type StorageInterface interface {
+	GetUserURLs(userID string) ([]util.URLWithShort, error)
+	GetURL(code string) (parsedURL string, err error)
+	DeleteListFor(forDelete []string, userID string)
+	AddNewURL(parsedURL string, userID string) (code string, err error)
+	Ping() bool
+	BatchSave(arr []*util.URLForBatch, httpPrefix string) (responseArr []util.URLForBatchResponse, err error)
+}
+
 type handlers struct {
-	storage interfaces.StorageInterface
+	storage StorageInterface
 	Router  *chi.Mux
-	Cfg     interfaces.ConfigInterface
-	Log     interfaces.LoggerInterface
+	Cfg     ConfigInterface
+	Log     LoggerInterface
 }
 
 func initRender() {
@@ -34,7 +62,7 @@ func initRender() {
 }
 
 // New возвращает хендлер всех ручек
-func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, users interfaces.UsersInterface) *handlers {
+func New(s StorageInterface, cfg ConfigInterface, log LoggerInterface, users UsersInterface) *handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &handlers{

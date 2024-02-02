@@ -5,14 +5,34 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/util"
 	"os"
 	"sync"
-
-	"github.com/chemax/url-shorter/interfaces"
-	"github.com/chemax/url-shorter/util"
 )
 
 var newLineBytes = []byte("\n")
+
+// ConfigInterface интерфейс конфиг-структуры
+type ConfigInterface interface {
+	GetSavePath() string
+	GetDBUse() bool
+}
+
+// LoggerInterface интерфейс логера
+type LoggerInterface interface {
+	Debugln(args ...interface{})
+	Error(args ...interface{})
+}
+
+// DBInterface интерфейс для базы данных
+type DBInterface interface {
+	BatchDelete([]string, string)
+	Ping() error
+	SaveURL(code string, URL string, userID string) (string, error)
+	Get(code string) (string, error)
+	GetAllURLs(userID string) ([]util.URLWithShort, error)
+	Use() bool
+}
 
 type singleURL struct {
 	URL    string `json:"url"`
@@ -20,30 +40,31 @@ type singleURL struct {
 	UserID string `json:"userID"`
 }
 type managerURL struct {
-	db       interfaces.DBInterface
+	db       DBInterface
 	URLs     map[string]*singleURL
 	URLMx    sync.RWMutex
 	SavePath string
-	logger   interfaces.LoggerInterface
+	log      LoggerInterface
 }
 
 var manager = &managerURL{URLs: make(map[string]*singleURL)}
 
 // Init создает и возвращает структуру управления URL'ами
-func Init(cfg interfaces.ConfigInterface, logger interfaces.LoggerInterface, db interfaces.DBInterface) (*managerURL, error) {
+func Init(cfg ConfigInterface, logger LoggerInterface, db DBInterface) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {
 		manager.db = nil
 	}
 	manager.SavePath = cfg.GetSavePath()
-	manager.logger = logger
+	manager.log = logger
 	err := manager.restore()
 	if err != nil {
 		return nil, fmt.Errorf("restore err: %w", err)
 	}
 	return manager, nil
 }
+
 func (u *managerURL) restore() error {
 	if u.db != nil {
 		return nil
@@ -63,11 +84,11 @@ func (u *managerURL) restore() error {
 		parsedURL := &singleURL{}
 		err := json.Unmarshal(scanner.Bytes(), parsedURL)
 		if err != nil {
-			u.logger.Error("restore error: ", err.Error())
+			u.log.Error("restore error: ", err.Error())
 			continue
 		}
 		u.URLs[parsedURL.Code] = parsedURL
-		u.logger.Debugln("restored: ", scanner.Text())
+		u.log.Debugln("restored: ", scanner.Text())
 	}
 	return nil
 }
@@ -77,20 +98,20 @@ func (u *managerURL) saveToFile(code string) {
 	}
 	file, err := os.OpenFile(u.SavePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("error open file [%s], error: %s", u.SavePath, err.Error()))
+		u.log.Error(fmt.Sprintf("error open file [%s], error: %s", u.SavePath, err.Error()))
 		return
 	}
 	defer file.Close()
 	var data []byte
 	data, err = json.Marshal(u.URLs[code])
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("unmarshal error: %s", err.Error()))
+		u.log.Error(fmt.Sprintf("unmarshal error: %s", err.Error()))
 		return
 	}
 	data = append(data, newLineBytes...)
 	_, err = file.Write(data)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("error write to file [%s], error: %s", u.SavePath, err.Error()))
+		u.log.Error(fmt.Sprintf("error write to file [%s], error: %s", u.SavePath, err.Error()))
 		return
 	}
 
@@ -220,7 +241,7 @@ func (u *managerURL) Ping() bool {
 	}
 	err := u.db.Ping()
 	if err != nil {
-		u.logger.Error(fmt.Errorf("ping db error: %w", err))
+		u.log.Error(fmt.Errorf("ping db error: %w", err))
 		return false
 	}
 	return true

@@ -6,16 +6,27 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/chemax/url-shorter/interfaces"
 	"github.com/chemax/url-shorter/util"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
+// ConfigInterface интерфейс конфиг-структуры
+type ConfigInterface interface {
+	SecretKey() string
+	TokenExp() time.Duration
+}
+
+// LoggerInterface интерфейс логера
+type LoggerInterface interface {
+	Debugln(args ...interface{})
+	Error(args ...interface{})
+}
+
 type users struct {
 	SecretKey string
 	TokenExp  time.Duration
-	log       interfaces.LoggerInterface
+	log       LoggerInterface
 	databaseInterface
 }
 
@@ -104,7 +115,7 @@ func (u *users) BuildJWTString(userID string) (string, error) {
 }
 
 // Init возвращает юзер менеджера
-func Init(cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, dbObj databaseInterface) (*users, error) {
+func Init(cfg ConfigInterface, log LoggerInterface, dbObj databaseInterface) (*users, error) {
 	usersManager.SecretKey = cfg.SecretKey()
 	usersManager.TokenExp = cfg.TokenExp()
 	usersManager.log = log
