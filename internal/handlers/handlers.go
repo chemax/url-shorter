@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/chemax/url-shorter/compress"
 	"github.com/chemax/url-shorter/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"net/http"
 )
 
 // ConfigInterface интерфейс конфиг-структуры

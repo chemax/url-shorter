@@ -3,11 +3,12 @@ package handlers
 import (
 	"bytes"
 	"fmt"
-	"github.com/chemax/url-shorter/users"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/chemax/url-shorter/users"
 
 	"github.com/chemax/url-shorter/logger"
 

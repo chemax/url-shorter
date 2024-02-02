@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/util"
 	"os"
 	"sync"
+
+	"github.com/chemax/url-shorter/util"
 )
 
 var newLineBytes = []byte("\n")

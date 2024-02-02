@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/users"
 	"net/http"
+
+	"github.com/chemax/url-shorter/users"
 
 	"github.com/chemax/url-shorter/logger"
 
