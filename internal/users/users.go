@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type usersStruct struct {
+type users struct {
 	SecretKey string
 	TokenExp  time.Duration
 	log       interfaces.LoggerInterface
@@ -24,14 +24,14 @@ type claimsStruct struct {
 	UserID string
 }
 
-var users = &usersStruct{}
+var usersManager = &users{}
 
 type databaseInterface interface {
 	CreateUser() (string, error)
 	Use() bool
 }
 
-func (u *usersStruct) createNewUser(w http.ResponseWriter) (userID string, err error) {
+func (u *users) createNewUser(w http.ResponseWriter) (userID string, err error) {
 	u.log.Debugln("Create new user")
 	if !u.Use() {
 		userID = uuid.New().String()
@@ -41,7 +41,7 @@ func (u *usersStruct) createNewUser(w http.ResponseWriter) (userID string, err e
 	if err != nil {
 		return "", err
 	}
-	token, err := users.BuildJWTString(userID)
+	token, err := usersManager.BuildJWTString(userID)
 	if err != nil {
 		return "", err
 	}
@@ -55,7 +55,7 @@ func (u *usersStruct) createNewUser(w http.ResponseWriter) (userID string, err e
 }
 
 // Middleware для аутентификации и авторизации
-func (u *usersStruct) Middleware(next http.Handler) http.Handler {
+func (u *users) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var tkn *jwt.Token
 		var userID string
@@ -74,7 +74,7 @@ func (u *usersStruct) Middleware(next http.Handler) http.Handler {
 		if err != nil || (tkn != nil && !tkn.Valid) {
 			userID, err = u.createNewUser(w)
 			if err != nil {
-				users.log.Error(err)
+				usersManager.log.Error(err)
 				w.WriteHeader(http.StatusBadRequest)
 			}
 		} else {
@@ -87,7 +87,7 @@ func (u *usersStruct) Middleware(next http.Handler) http.Handler {
 }
 
 // BuildJWTString создаёт токен и возвращает его в виде строки.
-func (u *usersStruct) BuildJWTString(userID string) (string, error) {
+func (u *users) BuildJWTString(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsStruct{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(u.TokenExp)),
@@ -104,10 +104,10 @@ func (u *usersStruct) BuildJWTString(userID string) (string, error) {
 }
 
 // Init возвращает юзер менеджера
-func Init(cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, dbObj databaseInterface) (*usersStruct, error) {
-	users.SecretKey = cfg.SecretKey()
-	users.TokenExp = cfg.TokenExp()
-	users.log = log
-	users.databaseInterface = dbObj
-	return users, nil
+func Init(cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, dbObj databaseInterface) (*users, error) {
+	usersManager.SecretKey = cfg.SecretKey()
+	usersManager.TokenExp = cfg.TokenExp()
+	usersManager.log = log
+	usersManager.databaseInterface = dbObj
+	return usersManager, nil
 }

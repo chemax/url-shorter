@@ -22,7 +22,7 @@ func (h *handlers) getUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var updatedURLs []util.URLStructUser
+	var updatedURLs []util.URLWithShort
 	for _, v := range URLs {
 		v.Shortcode = fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), v.Shortcode)
 		updatedURLs = append(updatedURLs, v)

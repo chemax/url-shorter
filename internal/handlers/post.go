@@ -88,7 +88,7 @@ func (h *handlers) xJSONBatchPostHandler(res http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	var URLBatchArr []*util.URLStructForBatch
+	var URLBatchArr []*util.URLForBatch
 	body, err := getBody(req)
 	if err != nil {
 		err = fmt.Errorf("get body error: %w", err)

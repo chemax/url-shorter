@@ -421,7 +421,7 @@ func TestHandlers(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
 	t.Run("all ok BATCH", func(t *testing.T) {
-		st.EXPECT().BatchSave(gomock.Any(), gomock.Any()).Return([]util.URLStructForBatchResponse{{
+		st.EXPECT().BatchSave(gomock.Any(), gomock.Any()).Return([]util.URLForBatchResponse{{
 			CorrelationID: "1",
 			ShortURL:      "12345678",
 		}, {

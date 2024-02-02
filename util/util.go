@@ -21,20 +21,20 @@ type DeleteTask struct {
 	UserID string
 }
 
-// URLStructUser URL Struct
-type URLStructUser struct {
+// URLWithShort URL Struct
+type URLWithShort struct {
 	Shortcode string `json:"short_url"`
 	URL       string `json:"original_url"`
 }
 
-// URLStructForBatch URL Struct For Batch
-type URLStructForBatch struct {
+// URLForBatch URL Struct For Batch
+type URLForBatch struct {
 	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
 }
 
-// URLStructForBatchResponse URL Struct For Batch Response
-type URLStructForBatchResponse struct {
+// URLForBatchResponse URL Struct For Batch Response
+type URLForBatchResponse struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
 }

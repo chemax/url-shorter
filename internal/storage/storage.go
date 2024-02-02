@@ -97,7 +97,7 @@ func (u *managerURL) saveToFile(code string) {
 }
 
 // BatchSave пакетное сохранение
-func (u *managerURL) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error) {
+func (u *managerURL) BatchSave(arr []*util.URLForBatch, httpPrefix string) (responseArr []util.URLForBatchResponse, err error) {
 	var errorArr []error
 	for _, v := range arr {
 		shortcode, err := u.AddNewURL(v.OriginalURL, "")
@@ -105,7 +105,7 @@ func (u *managerURL) BatchSave(arr []*util.URLStructForBatch, httpPrefix string)
 			errorArr = append(errorArr, err)
 			continue
 		}
-		responseArr = append(responseArr, util.URLStructForBatchResponse{
+		responseArr = append(responseArr, util.URLForBatchResponse{
 			CorrelationID: v.CorrelationID,
 			ShortURL:      fmt.Sprintf("%s/%s", httpPrefix, shortcode),
 		})
@@ -146,7 +146,7 @@ func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err err
 }
 
 // GetUserURLs вернуть все URL пользователя
-func (u *managerURL) GetUserURLs(userID string) (URLs []util.URLStructUser, err error) {
+func (u *managerURL) GetUserURLs(userID string) (URLs []util.URLWithShort, err error) {
 	if u.db != nil {
 		return u.db.GetAllURLs(userID)
 	}
@@ -155,7 +155,7 @@ func (u *managerURL) GetUserURLs(userID string) (URLs []util.URLStructUser, err 
 
 	for _, v := range u.URLs {
 		if v.UserID == userID {
-			URLs = append(URLs, util.URLStructUser{Shortcode: v.Code, URL: v.URL})
+			URLs = append(URLs, util.URLWithShort{Shortcode: v.Code, URL: v.URL})
 		}
 	}
 	return URLs, err

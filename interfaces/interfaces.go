@@ -13,7 +13,7 @@ type DBInterface interface {
 	Ping() error
 	SaveURL(code string, URL string, userID string) (string, error)
 	Get(code string) (string, error)
-	GetAllURLs(userID string) ([]util.URLStructUser, error)
+	GetAllURLs(userID string) ([]util.URLWithShort, error)
 	Use() bool
 }
 
@@ -32,12 +32,12 @@ type LoggerInterface interface {
 
 // StorageInterface интерфейс хранилища
 type StorageInterface interface {
-	GetUserURLs(userID string) ([]util.URLStructUser, error)
+	GetUserURLs(userID string) ([]util.URLWithShort, error)
 	GetURL(code string) (parsedURL string, err error)
 	DeleteListFor(forDelete []string, userID string)
 	AddNewURL(parsedURL string, userID string) (code string, err error)
 	Ping() bool
-	BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error)
+	BatchSave(arr []*util.URLForBatch, httpPrefix string) (responseArr []util.URLForBatchResponse, err error)
 }
 
 // ConfigInterface интерфейс конфиг-структуры
