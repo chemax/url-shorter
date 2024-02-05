@@ -13,8 +13,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// LoggerInterface интерфейс логера
-type LoggerInterface interface {
+// Loggerer интерфейс логера
+type Loggerer interface {
 	Warnln(args ...interface{})
 	Error(args ...interface{})
 }
@@ -25,7 +25,7 @@ type managerDB struct {
 	pingSync   sync.Mutex
 	configured bool
 	delete     chan util.DeleteTask
-	log        LoggerInterface
+	log        Loggerer
 }
 
 var database *managerDB
@@ -266,7 +266,7 @@ func (db *managerDB) connect() error {
 }
 
 // Init Синглтон, возвращает ссылку на структуру для работы с постгре
-func Init(url string, log LoggerInterface) (*managerDB, error) {
+func Init(url string, log Loggerer) (*managerDB, error) {
 	if database == nil {
 		database = &managerDB{
 			url:        url,

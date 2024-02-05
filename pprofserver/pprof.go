@@ -9,14 +9,14 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// LoggerInterface интерфейс логера
-type LoggerInterface interface {
+// Loggerer интерфейс логера
+type Loggerer interface {
 	Infoln(args ...interface{})
 	Errorln(args ...interface{})
 }
 
 // Init включает в проекте pprof
-func Init(ctx context.Context, log LoggerInterface) {
+func Init(ctx context.Context, log Loggerer) {
 	r := chi.NewRouter()
 	r.HandleFunc("/debug/pprof/", pprof.Index)
 	r.HandleFunc("/debug/pprof/*", pprof.Index)
