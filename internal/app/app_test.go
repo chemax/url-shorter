@@ -5,21 +5,21 @@ import (
 	"os"
 	"testing"
 
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestApp(t *testing.T) {
 	t.Run("ServerAddressEnv", func(t *testing.T) {
-		os.Setenv(util.ServerAddressEnv, "fdsfffwefew")
+		os.Setenv(models.ServerAddressEnv, "fdsfffwefew")
 		err := Run()
 		assert.Error(t, fmt.Errorf("need address in a form Host:Port"), err)
-		os.Unsetenv(util.ServerAddressEnv)
+		os.Unsetenv(models.ServerAddressEnv)
 	})
 	t.Run("BaseURLEnv", func(t *testing.T) {
-		os.Setenv(util.BaseURLEnv, "http://www.example.com:xxxx//////path")
+		os.Setenv(models.BaseURLEnv, "http://www.example.com:xxxx//////path")
 		err := Run()
 		assert.Error(t, err)
-		os.Unsetenv(util.BaseURLEnv)
+		os.Unsetenv(models.BaseURLEnv)
 	})
 }

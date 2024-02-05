@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -57,7 +57,7 @@ func (u *users) createNewUser(w http.ResponseWriter) (userID string, err error) 
 		return "", err
 	}
 	myCookie := &http.Cookie{
-		Name:  util.TokenCookieName,
+		Name:  models.TokenCookieName,
 		Value: token,
 	}
 	http.SetCookie(w, myCookie)
@@ -71,7 +71,7 @@ func (u *users) Middleware(next http.Handler) http.Handler {
 		var tkn *jwt.Token
 		var userID string
 		claims := &claimsStruct{}
-		c, err := r.Cookie(util.TokenCookieName)
+		c, err := r.Cookie(models.TokenCookieName)
 		if err == nil {
 			tknStr := c.Value
 			tkn, err = jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (any, error) {
@@ -91,7 +91,7 @@ func (u *users) Middleware(next http.Handler) http.Handler {
 		} else {
 			userID = claims.UserID
 		}
-		ctx := context.WithValue(r.Context(), util.UserID, userID)
+		ctx := context.WithValue(r.Context(), models.UserID, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 
 	})

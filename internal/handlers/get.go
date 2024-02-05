@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 	"github.com/go-chi/chi/v5"
 )
 
 func (h *handlers) getUserURLsHandler(res http.ResponseWriter, r *http.Request) {
-	URLs, err := h.storage.GetUserURLs(r.Context().Value(util.UserID).(string))
+	URLs, err := h.storage.GetUserURLs(r.Context().Value(models.UserID).(string))
 	if err != nil {
 		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
@@ -22,7 +22,7 @@ func (h *handlers) getUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var updatedURLs []util.URLWithShort
+	var updatedURLs []models.URLWithShort
 	for _, v := range URLs {
 		v.Shortcode = fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), v.Shortcode)
 		updatedURLs = append(updatedURLs, v)
@@ -47,7 +47,7 @@ func (h *handlers) getHandler(res http.ResponseWriter, r *http.Request) {
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {
 		h.Log.Error(fmt.Errorf("getURL error %w", err))
-		if errors.Is(err, util.ErrMissingContent) {
+		if errors.Is(err, models.ErrMissingContent) {
 			res.WriteHeader(http.StatusGone)
 			return
 		}

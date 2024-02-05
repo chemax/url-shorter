@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	util "github.com/chemax/url-shorter/util"
+	util "github.com/chemax/url-shorter/models"
 	gomock "github.com/golang/mock/gomock"
 )
 

@@ -19,7 +19,7 @@ import (
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/storage"
 	mock_util "github.com/chemax/url-shorter/mocks/storage"
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -422,7 +422,7 @@ func TestHandlers(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
 	t.Run("all ok BATCH", func(t *testing.T) {
-		st.EXPECT().BatchSave(gomock.Any(), gomock.Any()).Return([]util.URLForBatchResponse{{
+		st.EXPECT().BatchSave(gomock.Any(), gomock.Any()).Return([]models.URLForBatchResponse{{
 			CorrelationID: "1",
 			ShortURL:      "12345678",
 		}, {

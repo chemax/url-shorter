@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 )
 
 // DeleteUserURLsHandler ручка для удаления пользовательских урл пачкой
@@ -33,5 +33,5 @@ func (h *handlers) DeleteUserURLsHandler(res http.ResponseWriter, r *http.Reques
 	if err != nil {
 		h.Log.Error(err)
 	}
-	h.storage.DeleteListFor(forDelete, r.Context().Value(util.UserID).(string))
+	h.storage.DeleteListFor(forDelete, r.Context().Value(models.UserID).(string))
 }

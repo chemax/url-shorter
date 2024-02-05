@@ -3,9 +3,10 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/chemax/url-shorter/compress"
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -32,12 +33,12 @@ type loggerer interface {
 
 // storager интерфейс хранилища
 type storager interface {
-	GetUserURLs(userID string) ([]util.URLWithShort, error)
+	GetUserURLs(userID string) ([]models.URLWithShort, error)
 	GetURL(code string) (parsedURL string, err error)
 	DeleteListFor(forDelete []string, userID string)
 	AddNewURL(parsedURL string, userID string) (code string, err error)
 	Ping() bool
-	BatchSave(arr []*util.URLForBatch, httpPrefix string) (responseArr []util.URLForBatchResponse, err error)
+	BatchSave(arr []*models.URLForBatch, httpPrefix string) (responseArr []models.URLForBatchResponse, err error)
 }
 
 type handlers struct {
@@ -45,6 +46,14 @@ type handlers struct {
 	Router  *chi.Mux
 	Cfg     configer
 	Log     loggerer
+}
+
+func checkHeaderIsValidType(header string) bool {
+	return strings.Contains(header, "application/json") || strings.Contains(header, "application/x-gzip")
+}
+
+func checkHeader(header string) bool {
+	return strings.Contains(header, "text/plain") || strings.Contains(header, "application/x-gzip")
 }
 
 func initRender() {

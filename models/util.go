@@ -1,9 +1,7 @@
-package util
+package models
 
 import (
 	"errors"
-	"math/rand"
-	"strings"
 )
 
 // AlreadyHaveThisURLError если урл уже существует
@@ -64,24 +62,3 @@ const (
 
 // ErrMissingContent контент помечен как удаленный
 var ErrMissingContent = errors.New("content deleted")
-
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
-
-// CheckHeaderIsValidType проверка на валидность хидера
-func CheckHeaderIsValidType(header string) bool {
-	return strings.Contains(header, "application/json") || strings.Contains(header, "application/x-gzip")
-}
-
-// CheckHeader проверка на валидность хидера
-func CheckHeader(header string) bool {
-	return strings.Contains(header, "text/plain") || strings.Contains(header, "application/x-gzip")
-}
-
-// RandStringRunes генерация псевдослучайной строки заданной длинны
-func RandStringRunes(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(b)
-}

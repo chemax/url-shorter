@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"sync"
 
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 )
 
 var newLineBytes = []byte("\n")
@@ -31,7 +32,7 @@ type dataBaser interface {
 	Ping() error
 	SaveURL(code string, URL string, userID string) (string, error)
 	Get(code string) (string, error)
-	GetAllURLs(userID string) ([]util.URLWithShort, error)
+	GetAllURLs(userID string) ([]models.URLWithShort, error)
 	Use() bool
 }
 
@@ -49,6 +50,16 @@ type managerURL struct {
 }
 
 var manager = &managerURL{URLs: make(map[string]*singleURL)}
+
+// randStringRunes генерация псевдослучайной строки заданной длинны
+func randStringRunes(n int) string {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
 
 // NewStorage создает и возвращает структуру управления URL'ами
 func NewStorage(cfg configer, logger loggerer, db dataBaser) (*managerURL, error) {
@@ -119,7 +130,7 @@ func (u *managerURL) saveToFile(code string) {
 }
 
 // BatchSave пакетное сохранение
-func (u *managerURL) BatchSave(arr []*util.URLForBatch, httpPrefix string) (responseArr []util.URLForBatchResponse, err error) {
+func (u *managerURL) BatchSave(arr []*models.URLForBatch, httpPrefix string) (responseArr []models.URLForBatchResponse, err error) {
 	var errorArr []error
 	for _, v := range arr {
 		shortcode, err := u.AddNewURL(v.OriginalURL, "")
@@ -127,7 +138,7 @@ func (u *managerURL) BatchSave(arr []*util.URLForBatch, httpPrefix string) (resp
 			errorArr = append(errorArr, err)
 			continue
 		}
-		responseArr = append(responseArr, util.URLForBatchResponse{
+		responseArr = append(responseArr, models.URLForBatchResponse{
 			CorrelationID: v.CorrelationID,
 			ShortURL:      fmt.Sprintf("%s/%s", httpPrefix, shortcode),
 		})
@@ -149,17 +160,17 @@ func (u *managerURL) dbGetURL(code string) (parsedURL string, err error) {
 func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err error) {
 	var loop int
 	for {
-		code = util.RandStringRunes(util.CodeLength)
+		code = randStringRunes(models.CodeLength)
 		dupCode, err := u.db.SaveURL(code, parsedURL, userID)
-		if err != nil && !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if err != nil && !errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			loop++
-			if loop > util.CodeGenerateAttempts {
+			if loop > models.CodeGenerateAttempts {
 				code = ""
 				return code, fmt.Errorf("can not found free code for short url")
 			}
 			continue
 		}
-		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			return dupCode, err
 		}
 		return code, nil
@@ -167,7 +178,7 @@ func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err err
 }
 
 // GetUserURLs вернуть все URL пользователя
-func (u *managerURL) GetUserURLs(userID string) (URLs []util.URLWithShort, err error) {
+func (u *managerURL) GetUserURLs(userID string) (URLs []models.URLWithShort, err error) {
 	if u.db != nil {
 		return u.db.GetAllURLs(userID)
 	}
@@ -176,7 +187,7 @@ func (u *managerURL) GetUserURLs(userID string) (URLs []util.URLWithShort, err e
 
 	for _, v := range u.URLs {
 		if v.UserID == userID {
-			URLs = append(URLs, util.URLWithShort{Shortcode: v.Code, URL: v.URL})
+			URLs = append(URLs, models.URLWithShort{Shortcode: v.Code, URL: v.URL})
 		}
 	}
 	return URLs, err
@@ -221,10 +232,10 @@ func (u *managerURL) AddNewURL(parsedURL string, userID string) (code string, er
 	u.URLMx.Lock()
 	defer u.URLMx.Unlock()
 	for ok {
-		code = util.RandStringRunes(util.CodeLength)
+		code = randStringRunes(models.CodeLength)
 		_, ok = u.URLs[code]
 		loop++
-		if loop > util.CodeGenerateAttempts {
+		if loop > models.CodeGenerateAttempts {
 			code = ""
 			return code, fmt.Errorf("can not found free code for short url")
 		}

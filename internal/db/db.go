@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -24,7 +24,7 @@ type managerDB struct {
 	url        string
 	pingSync   sync.Mutex
 	configured bool
-	delete     chan util.DeleteTask
+	delete     chan models.DeleteTask
 	log        Loggerer
 }
 
@@ -80,7 +80,7 @@ func (db *managerDB) backgroundDeleteHandler() {
 
 // BatchDelete принимает пакет ид для пакетного удаления и юзерИД
 func (db *managerDB) BatchDelete(forDelete []string, userID string) {
-	db.delete <- util.DeleteTask{
+	db.delete <- models.DeleteTask{
 		Codes:  forDelete,
 		UserID: userID,
 	}
@@ -92,8 +92,8 @@ func (db *managerDB) Use() bool {
 }
 
 // GetAllURLs возвращает все сокращенные URL пользователя
-func (db *managerDB) GetAllURLs(userID string) ([]util.URLWithShort, error) {
-	var URLs []util.URLWithShort
+func (db *managerDB) GetAllURLs(userID string) ([]models.URLWithShort, error) {
+	var URLs []models.URLWithShort
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("managerDB.conn.Acquire error: %w", err)
@@ -104,7 +104,7 @@ func (db *managerDB) GetAllURLs(userID string) ([]util.URLWithShort, error) {
 		return nil, fmt.Errorf("query URLs get error: %w", err)
 	}
 	for rows.Next() {
-		url := util.URLWithShort{}
+		url := models.URLWithShort{}
 		err := rows.Scan(&url.URL, &url.Shortcode)
 		if err != nil {
 			return nil, fmt.Errorf("unable to scan row: %w", err)
@@ -129,7 +129,7 @@ func (db *managerDB) Get(shortcode string) (string, error) {
 		return "", fmt.Errorf("query shortcode error: %w", err)
 	}
 	if deleted {
-		return "", util.ErrMissingContent
+		return "", models.ErrMissingContent
 	}
 	return URL, err
 }
@@ -189,7 +189,7 @@ select shortcode from dup ;`
 		}
 		return "", err
 	}
-	return rowString, &util.AlreadyHaveThisURLError{}
+	return rowString, &models.AlreadyHaveThisURLError{}
 
 }
 
@@ -279,7 +279,7 @@ func NewDB(url string, log Loggerer) (*managerDB, error) {
 				return nil, fmt.Errorf("database init error: %w", err)
 			}
 			database.configured = true
-			database.delete = make(chan util.DeleteTask)
+			database.delete = make(chan models.DeleteTask)
 			go database.backgroundDeleteHandler()
 		}
 	}

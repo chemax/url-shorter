@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/chemax/url-shorter/util"
+	"github.com/chemax/url-shorter/models"
 )
 
 // IDK что тут можно оптимизировать
@@ -42,7 +42,7 @@ func (h *handlers) postHandler(res http.ResponseWriter, req *http.Request) {
 			res.WriteHeader(http.StatusBadRequest)
 		}
 	}()
-	if !util.CheckHeader(req.Header.Get("Content-Type")) {
+	if !checkHeader(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not plain text: %s", req.Header.Get("Content-Type"))
 		return
 	}
@@ -56,10 +56,10 @@ func (h *handlers) postHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL, req.Context().Value(util.UserID).(string))
+	code, err := h.store(parsedURL, req.Context().Value(models.UserID).(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
-		if !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if !errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			err = fmt.Errorf("store error: %w", err)
 			return
 		}
@@ -83,12 +83,12 @@ func (h *handlers) xJSONBatchPostHandler(res http.ResponseWriter, req *http.Requ
 		}
 	}()
 
-	if !util.CheckHeaderIsValidType(req.Header.Get("Content-Type")) {
+	if !checkHeaderIsValidType(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
 	}
 
-	var URLBatchArr []*util.URLForBatch
+	var URLBatchArr []*models.URLForBatch
 	body, err := getBody(req)
 	if err != nil {
 		err = fmt.Errorf("get body error: %w", err)
@@ -131,7 +131,7 @@ func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) 
 	type ResultStruct struct {
 		Result string `json:"result"`
 	}
-	if !util.CheckHeaderIsValidType(req.Header.Get("Content-Type")) {
+	if !checkHeaderIsValidType(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
 	}
@@ -140,7 +140,7 @@ func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) 
 		err = fmt.Errorf("get body error: %w", err)
 		return
 	}
-	userID := req.Context().Value(util.UserID).(string)
+	userID := req.Context().Value(models.UserID).(string)
 	URLObj := URLStruct{UserID: userID}
 	err = json.Unmarshal(body, &URLObj)
 	if err != nil {
@@ -152,10 +152,10 @@ func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) 
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL, req.Context().Value(util.UserID).(string))
+	code, err := h.store(parsedURL, req.Context().Value(models.UserID).(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
-		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			statusCreated = http.StatusConflict
 		} else {
 			err = fmt.Errorf("store error: %w", err)
