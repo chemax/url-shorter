@@ -15,8 +15,8 @@ type Loggerer interface {
 	Errorln(args ...interface{})
 }
 
-// Init включает в проекте pprof
-func Init(ctx context.Context, log Loggerer) {
+// NewPprof включает в проекте pprof
+func NewPprof(ctx context.Context, log Loggerer) {
 	r := chi.NewRouter()
 	r.HandleFunc("/debug/pprof/", pprof.Index)
 	r.HandleFunc("/debug/pprof/*", pprof.Index)

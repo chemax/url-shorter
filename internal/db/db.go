@@ -265,8 +265,8 @@ func (db *managerDB) connect() error {
 	return err
 }
 
-// Init Синглтон, возвращает ссылку на структуру для работы с постгре
-func Init(url string, log Loggerer) (*managerDB, error) {
+// NewDB Синглтон, возвращает ссылку на структуру для работы с постгре
+func NewDB(url string, log Loggerer) (*managerDB, error) {
 	if database == nil {
 		database = &managerDB{
 			url:        url,

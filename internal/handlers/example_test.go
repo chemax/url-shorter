@@ -28,10 +28,10 @@ func Example() {
 	st := mock_util.NewMockStorageInterface(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).AnyTimes().Return("123445", nil)
-	log, _ := logger.Init()
-	bd, _ := db.Init("", log)
-	usersManager, _ := users.Init(cfg, log, bd)
-	handlers := New(st, cfg, log, usersManager)
+	log, _ := logger.NewLogger()
+	bd, _ := db.NewDB("", log)
+	usersManager, _ := users.NewUser(cfg, log, bd)
+	handlers := NewHandlers(st, cfg, log, usersManager)
 	assert.NotNil(t, handlers)
 	JSONURL := "{\"url\": \"http://ya.ru\"}"
 

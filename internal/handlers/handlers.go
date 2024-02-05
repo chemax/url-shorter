@@ -62,8 +62,8 @@ func initRender() {
 	}
 }
 
-// New возвращает хендлер всех ручек
-func New(s storager, cfg configer, log loggerer, users userser) *handlers {
+// NewHandlers возвращает хендлер всех ручек
+func NewHandlers(s storager, cfg configer, log loggerer, users userser) *handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &handlers{

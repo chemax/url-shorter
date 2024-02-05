@@ -50,8 +50,8 @@ type managerURL struct {
 
 var manager = &managerURL{URLs: make(map[string]*singleURL)}
 
-// Init создает и возвращает структуру управления URL'ами
-func Init(cfg configer, logger loggerer, db dataBaser) (*managerURL, error) {
+// NewStorage создает и возвращает структуру управления URL'ами
+func NewStorage(cfg configer, logger loggerer, db dataBaser) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {

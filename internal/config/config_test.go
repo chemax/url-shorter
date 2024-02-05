@@ -11,7 +11,7 @@ import (
 
 func TestConfig(t *testing.T) {
 	t.Run("err is nil", func(t *testing.T) {
-		config, err := Init()
+		config, err := NewConfig()
 		assert.Nil(t, err)
 		assert.NotNil(t, config)
 	})

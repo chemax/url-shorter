@@ -20,8 +20,8 @@ var (
 	}
 )
 
-// Init инициализация конфига
-func Init() (*Config, error) {
+// NewConfig инициализация конфига
+func NewConfig() (*Config, error) {
 	cfg.initFlags()
 	flag.Parse()
 	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {

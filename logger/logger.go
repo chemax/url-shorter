@@ -41,8 +41,8 @@ type log struct {
 	*zap.SugaredLogger
 }
 
-// Init делает новый логгер
-func Init() (*log, error) {
+// NewLogger делает новый логгер
+func NewLogger() (*log, error) {
 	l := &log{}
 	cfgLogger := zap.NewDevelopmentConfig()
 	cfgLogger.DisableStacktrace = true

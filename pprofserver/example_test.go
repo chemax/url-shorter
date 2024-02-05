@@ -9,9 +9,9 @@ import (
 func ExampleInit() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	lg, err := logger.Init()
+	lg, err := logger.NewLogger()
 	if err != nil {
 		return
 	}
-	Init(ctx, lg)
+	NewPprof(ctx, lg)
 }

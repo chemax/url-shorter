@@ -114,8 +114,8 @@ func (u *users) BuildJWTString(userID string) (string, error) {
 	return tokenString, nil
 }
 
-// Init возвращает юзер менеджера
-func Init(cfg configer, log loggerer, dbObj dataBaser) (*users, error) {
+// NewUser возвращает юзер менеджера
+func NewUser(cfg configer, log loggerer, dbObj dataBaser) (*users, error) {
 	usersManager.SecretKey = cfg.SecretKey()
 	usersManager.TokenExp = cfg.TokenExp()
 	usersManager.log = log

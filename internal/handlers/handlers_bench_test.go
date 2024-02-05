@@ -28,10 +28,10 @@ func BenchmarkHandlers_PostHandler(b *testing.B) {
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).Return("12345678", nil).AnyTimes()
 
-	log, _ := logger.Init()
-	bd, _ := db.Init("", log)
-	usersManager, _ := users.Init(cfg, log, bd)
-	handlers := New(st, cfg, log, usersManager)
+	log, _ := logger.NewLogger()
+	bd, _ := db.NewDB("", log)
+	usersManager, _ := users.NewUser(cfg, log, bd)
+	handlers := NewHandlers(st, cfg, log, usersManager)
 	JSONURLFmt := "{\"url\": \"http://%d.ya.ru\"}"
 	var cmps int
 	b.ResetTimer()
