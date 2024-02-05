@@ -11,14 +11,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// Configer интерфейс конфиг-структуры
-type Configer interface {
+// configer интерфейс конфиг-структуры
+type configer interface {
 	SecretKey() string
 	TokenExp() time.Duration
 }
 
-// Loggerer интерфейс логера
-type Loggerer interface {
+// loggerer интерфейс логера
+type loggerer interface {
 	Debugln(args ...interface{})
 	Error(args ...interface{})
 }
@@ -26,8 +26,8 @@ type Loggerer interface {
 type users struct {
 	SecretKey string
 	TokenExp  time.Duration
-	log       Loggerer
-	DataBaser
+	log       loggerer
+	dataBaser
 }
 
 type claimsStruct struct {
@@ -37,7 +37,7 @@ type claimsStruct struct {
 
 var usersManager = &users{}
 
-type DataBaser interface {
+type dataBaser interface {
 	CreateUser() (string, error)
 	Use() bool
 }
@@ -115,10 +115,10 @@ func (u *users) BuildJWTString(userID string) (string, error) {
 }
 
 // Init возвращает юзер менеджера
-func Init(cfg Configer, log Loggerer, dbObj DataBaser) (*users, error) {
+func Init(cfg configer, log loggerer, dbObj dataBaser) (*users, error) {
 	usersManager.SecretKey = cfg.SecretKey()
 	usersManager.TokenExp = cfg.TokenExp()
 	usersManager.log = log
-	usersManager.DataBaser = dbObj
+	usersManager.dataBaser = dbObj
 	return usersManager, nil
 }

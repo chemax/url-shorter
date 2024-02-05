@@ -13,20 +13,20 @@ import (
 
 var newLineBytes = []byte("\n")
 
-// Configer интерфейс конфиг-структуры
-type Configer interface {
+// configer интерфейс конфиг-структуры
+type configer interface {
 	GetSavePath() string
 	GetDBUse() bool
 }
 
-// Loggerer интерфейс логера
-type Loggerer interface {
+// loggerer интерфейс логера
+type loggerer interface {
 	Debugln(args ...interface{})
 	Error(args ...interface{})
 }
 
-// DataBaser интерфейс для базы данных
-type DataBaser interface {
+// dataBaser интерфейс для базы данных
+type dataBaser interface {
 	BatchDelete([]string, string)
 	Ping() error
 	SaveURL(code string, URL string, userID string) (string, error)
@@ -41,17 +41,17 @@ type singleURL struct {
 	UserID string `json:"userID"`
 }
 type managerURL struct {
-	db       DataBaser
+	db       dataBaser
 	URLs     map[string]*singleURL
 	URLMx    sync.RWMutex
 	SavePath string
-	log      Loggerer
+	log      loggerer
 }
 
 var manager = &managerURL{URLs: make(map[string]*singleURL)}
 
 // Init создает и возвращает структуру управления URL'ами
-func Init(cfg Configer, logger Loggerer, db DataBaser) (*managerURL, error) {
+func Init(cfg configer, logger loggerer, db dataBaser) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {
