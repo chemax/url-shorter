@@ -4,15 +4,6 @@ import (
 	"errors"
 )
 
-// AlreadyHaveThisURLError если урл уже существует
-type AlreadyHaveThisURLError struct {
-}
-
-// Error для реализации интерфейса ошибки
-func (au *AlreadyHaveThisURLError) Error() string {
-	return "already have this url in db"
-}
-
 // DeleteTask задача на удаление
 type DeleteTask struct {
 	Codes  []string
@@ -60,5 +51,14 @@ const (
 	CodeGenerateAttempts = 20
 )
 
+// AlreadyHaveThisURLError если урл уже существует
+type AlreadyHaveThisURLError struct {
+}
+
 // ErrMissingContent контент помечен как удаленный
 var ErrMissingContent = errors.New("content deleted")
+
+// Error для реализации интерфейса ошибки
+func (au *AlreadyHaveThisURLError) Error() string {
+	return "already have this url in db"
+}

@@ -13,6 +13,15 @@ import (
 	"github.com/chemax/url-shorter/models"
 )
 
+type URLByUser struct {
+	URL    string `json:"url"`
+	UserID string `json:"userID"`
+}
+
+type ResultStruct struct {
+	Result string `json:"result"`
+}
+
 // IDK что тут можно оптимизировать
 
 func getBody(req *http.Request) ([]byte, error) {
@@ -116,6 +125,7 @@ func (h *handlers) xJSONBatchPostHandler(res http.ResponseWriter, req *http.Requ
 	}
 }
 
+// todo переименовать нормально
 func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
@@ -124,13 +134,7 @@ func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) 
 			res.WriteHeader(http.StatusBadRequest)
 		}
 	}()
-	type URLStruct struct {
-		URL    string `json:"url"`
-		UserID string `json:"userID"`
-	}
-	type ResultStruct struct {
-		Result string `json:"result"`
-	}
+
 	if !checkHeaderIsValidType(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
@@ -141,7 +145,7 @@ func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) 
 		return
 	}
 	userID := req.Context().Value(models.UserID).(string)
-	URLObj := URLStruct{UserID: userID}
+	URLObj := URLByUser{UserID: userID}
 	err = json.Unmarshal(body, &URLObj)
 	if err != nil {
 		err = fmt.Errorf("JSON unmarshal error: %w", err)
