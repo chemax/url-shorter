@@ -30,7 +30,7 @@ type managerDB struct {
 	url        string
 	pingSync   sync.Mutex
 	configured bool
-	delete     chan models.DeleteTask
+	delete     chan DeleteTask
 	log        Loggerer
 }
 
@@ -86,7 +86,7 @@ func (db *managerDB) backgroundDeleteHandler() {
 
 // BatchDelete принимает пакет ид для пакетного удаления и юзерИД
 func (db *managerDB) BatchDelete(forDelete []string, userID string) {
-	db.delete <- models.DeleteTask{
+	db.delete <- DeleteTask{
 		Codes:  forDelete,
 		UserID: userID,
 	}
@@ -285,7 +285,7 @@ func NewDB(url string, log Loggerer) (*managerDB, error) {
 				return nil, fmt.Errorf("database init error: %w", err)
 			}
 			database.configured = true
-			database.delete = make(chan models.DeleteTask)
+			database.delete = make(chan DeleteTask)
 			go database.backgroundDeleteHandler()
 		}
 	}
