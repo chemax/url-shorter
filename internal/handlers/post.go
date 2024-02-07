@@ -13,12 +13,14 @@ import (
 	"github.com/chemax/url-shorter/models"
 )
 
+// URLByUser содежрит url и userID
 type URLByUser struct {
 	URL    string `json:"url"`
 	UserID string `json:"userID"`
 }
 
-type ResultStruct struct {
+// Result нужен исключительно для удобного маршалинга ответа
+type Result struct {
 	Result string `json:"result"`
 }
 
@@ -167,7 +169,7 @@ func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) 
 		}
 	}
 
-	result := ResultStruct{Result: fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)}
+	result := Result{Result: fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)}
 	resultData, err := json.Marshal(result)
 	if err != nil {
 		return
