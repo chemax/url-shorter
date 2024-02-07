@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/config"
 	"net/http"
 
 	"github.com/chemax/url-shorter/users"
 
 	"github.com/chemax/url-shorter/logger"
 
-	"github.com/chemax/url-shorter/internal/config"
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/handlers"
 	"github.com/chemax/url-shorter/internal/storage"

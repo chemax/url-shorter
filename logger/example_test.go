@@ -1,12 +1,14 @@
 package logger
 
+import "fmt"
+
 func Example() {
-	l, e := NewLogger()
-	if e != nil {
-
+	l, err := NewLogger()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
-	defer l.Shutdown()
-	l.Debugln("111")
-	l.Warnln("111")
-
+	l.Debugln("debug")
+	l.Warnln("warn")
+	l.Infoln("Info")
 }
