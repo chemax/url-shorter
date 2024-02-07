@@ -1,14 +1,9 @@
+// содержит общие модели используемые в разных пакетах
 package models
 
 import (
 	"errors"
 )
-
-// DeleteTask задача на удаление
-type DeleteTask struct {
-	Codes  []string
-	UserID string
-}
 
 // URLWithShort URL Struct
 type URLWithShort struct {

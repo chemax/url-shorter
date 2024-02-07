@@ -19,6 +19,12 @@ type Loggerer interface {
 	Error(args ...interface{})
 }
 
+// DeleteTask задача на удаление
+type DeleteTask struct {
+	Codes  []string
+	UserID string
+}
+
 type managerDB struct {
 	conn       *pgxpool.Pool
 	url        string

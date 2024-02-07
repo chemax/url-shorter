@@ -1,3 +1,4 @@
+// сделано именно так сознательно, модуль конфигурируется отдельно от основного веб-сервера приложения, отдельный порт, отдельный IP.
 package pprofserver
 
 import (
@@ -9,14 +10,14 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Loggerer интерфейс логера
-type Loggerer interface {
+// loggerer интерфейс логера
+type loggerer interface {
 	Infoln(args ...interface{})
 	Errorln(args ...interface{})
 }
 
 // NewPprof включает в проекте pprof
-func NewPprof(ctx context.Context, log Loggerer) {
+func NewPprof(ctx context.Context, log loggerer) {
 	r := chi.NewRouter()
 	r.HandleFunc("/debug/pprof/", pprof.Index)
 	r.HandleFunc("/debug/pprof/*", pprof.Index)
