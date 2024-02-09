@@ -5,26 +5,38 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/interfaces"
-	"github.com/chemax/url-shorter/util"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"sync"
 	"time"
+
+	"github.com/chemax/url-shorter/models"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type DB struct {
+// Loggerer интерфейс логера
+type Loggerer interface {
+	Warnln(args ...interface{})
+	Error(args ...interface{})
+}
+
+// DeleteTask задача на удаление
+type DeleteTask struct {
+	Codes  []string
+	UserID string
+}
+
+type managerDB struct {
 	conn       *pgxpool.Pool
 	url        string
 	pingSync   sync.Mutex
 	configured bool
-	delete     chan util.DeleteTask
-	log        interfaces.LoggerInterface
+	delete     chan DeleteTask
+	log        Loggerer
 }
 
-var database *DB
+var database *managerDB
 
-func (db *DB) createURLsTable() error {
+func (db *managerDB) createURLsTable() error {
 	//поздно переезжать на миграции
 	_, err := db.conn.Exec(context.Background(), `create table if not exists URLs(
   id serial primary key,
@@ -45,7 +57,7 @@ func (db *DB) createURLsTable() error {
 	return nil
 }
 
-func (db *DB) backgroundDeleteHandler() {
+func (db *managerDB) backgroundDeleteHandler() {
 	for task := range db.delete {
 		buf := bytes.NewBufferString("UPDATE urls SET deleted = true  WHERE shortcode IN (")
 		for i, v := range task.Codes {
@@ -57,7 +69,7 @@ func (db *DB) backgroundDeleteHandler() {
 		buf.WriteString(") AND userid = $1;")
 		conn, err := db.conn.Acquire(context.Background())
 		if err != nil {
-			db.log.Error("batch delete db.conn.Acquire error %w", err)
+			db.log.Error("batch delete managerDB.conn.Acquire error %w", err)
 			continue
 		}
 
@@ -69,25 +81,28 @@ func (db *DB) backgroundDeleteHandler() {
 		}
 
 	}
-	db.log.Warnln("db.delete channel was closed")
+	db.log.Warnln("managerDB.delete channel was closed")
 }
 
-func (db *DB) BatchDelete(forDelete []string, userID string) {
-	db.delete <- util.DeleteTask{
+// BatchDelete принимает пакет ид для пакетного удаления и юзерИД
+func (db *managerDB) BatchDelete(forDelete []string, userID string) {
+	db.delete <- DeleteTask{
 		Codes:  forDelete,
 		UserID: userID,
 	}
 }
 
-func (db *DB) Use() bool {
+// Use используется ли БД постгре
+func (db *managerDB) Use() bool {
 	return db.configured
 }
 
-func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
-	var URLs []util.URLStructUser
+// GetAllURLs возвращает все сокращенные URL пользователя
+func (db *managerDB) GetAllURLs(userID string) ([]models.URLWithShort, error) {
+	var URLs []models.URLWithShort
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("db.conn.Acquire error: %w", err)
+		return nil, fmt.Errorf("managerDB.conn.Acquire error: %w", err)
 	}
 	defer conn.Release()
 	rows, err := conn.Query(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1 AND deleted = false`, userID)
@@ -95,7 +110,7 @@ func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
 		return nil, fmt.Errorf("query URLs get error: %w", err)
 	}
 	for rows.Next() {
-		url := util.URLStructUser{}
+		url := models.URLWithShort{}
 		err := rows.Scan(&url.URL, &url.Shortcode)
 		if err != nil {
 			return nil, fmt.Errorf("unable to scan row: %w", err)
@@ -105,12 +120,14 @@ func (db *DB) GetAllURLs(userID string) ([]util.URLStructUser, error) {
 
 	return URLs, err
 }
-func (db *DB) Get(shortcode string) (string, error) {
+
+// Get возвращает URL по коду
+func (db *managerDB) Get(shortcode string) (string, error) {
 	var URL string
 	var deleted bool
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return "", fmt.Errorf("db.conn.Acquire error: %w", err)
+		return "", fmt.Errorf("managerDB.conn.Acquire error: %w", err)
 	}
 	defer conn.Release()
 	err = conn.QueryRow(context.Background(), `SELECT url, deleted FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL, &deleted)
@@ -118,11 +135,13 @@ func (db *DB) Get(shortcode string) (string, error) {
 		return "", fmt.Errorf("query shortcode error: %w", err)
 	}
 	if deleted {
-		return "", util.ErrMissingContent
+		return "", models.ErrMissingContent
 	}
 	return URL, err
 }
-func (db *DB) SaveURL(shortcode string, URL string, userID string) (string, error) {
+
+// SaveURL сохраняет сокращенный урл
+func (db *managerDB) SaveURL(shortcode string, URL string, userID string) (string, error) {
 	// https://stackoverflow.com/questions/34708509/how-to-use-returning-with-on-conflict-in-postgresql
 	/*
 		with new(id,shortcode,url) as (
@@ -148,7 +167,6 @@ func (db *DB) SaveURL(shortcode string, URL string, userID string) (string, erro
 		---
 		;
 	*/
-	//TODO избавиться от * в запросе //вроде избавился (см returning)
 	sqlString := `with new(id,shortcode,url,userid) as (
 values
 (nextval('urls_id_seq'::regclass), $1, $2, $3) 
@@ -164,7 +182,7 @@ values
 select shortcode from dup ;`
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return "", fmt.Errorf("SaveURL db.conn.Acquire error %w", err)
+		return "", fmt.Errorf("SaveURL managerDB.conn.Acquire error %w", err)
 	}
 	defer conn.Release()
 	row := conn.QueryRow(context.Background(), sqlString, shortcode, URL, userID)
@@ -177,14 +195,16 @@ select shortcode from dup ;`
 		}
 		return "", err
 	}
-	return rowString, &util.AlreadyHaveThisURLError{}
+	return rowString, &models.AlreadyHaveThisURLError{}
 
 }
-func (db *DB) CreateUser() (string, error) {
+
+// CreateUser создает в бд нового пользователя
+func (db *managerDB) CreateUser() (string, error) {
 	sqlString := `INSERT INTO users values(default) RETURNING id;`
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return "", fmt.Errorf("CreateUser db.conn.Acquire error %w", err)
+		return "", fmt.Errorf("CreateUser managerDB.conn.Acquire error %w", err)
 	}
 	defer conn.Release()
 	row := conn.QueryRow(context.Background(), sqlString)
@@ -196,7 +216,8 @@ func (db *DB) CreateUser() (string, error) {
 	return id, nil
 }
 
-func (db *DB) Ping() error {
+// Ping базы данных
+func (db *managerDB) Ping() error {
 	// мьютекс нужен, потому что я использую пинг для реконнекта
 	// если мьютекса нет, возможны коллизии и ошибка conn busy
 	// потом, возможно, эту проблему решит пул коннектов
@@ -208,13 +229,13 @@ func (db *DB) Ping() error {
 	}
 	conn, err := db.conn.Acquire(context.Background())
 	if err != nil {
-		return fmt.Errorf("ping db.conn.Acquire error %w", err)
+		return fmt.Errorf("ping managerDB.conn.Acquire error %w", err)
 	}
 	defer conn.Release()
 	return conn.Ping(context.Background())
 }
 
-func (db *DB) pingAllTime() {
+func (db *managerDB) pingAllTime() {
 	defer db.conn.Close()
 	tickTack := time.NewTicker(500 * time.Millisecond)
 	for range tickTack.C {
@@ -231,7 +252,7 @@ func (db *DB) pingAllTime() {
 	}
 }
 
-func (db *DB) connect() error {
+func (db *managerDB) connect() error {
 	if db.url == "" {
 		return nil
 	}
@@ -240,7 +261,7 @@ func (db *DB) connect() error {
 	if err != nil {
 		return fmt.Errorf("connect ParseConfig error: %w", err)
 	}
-	conn, err := pgxpool.NewWithConfig(context.Background(), config) //pgx.Connect(context.Background(), db.url)
+	conn, err := pgxpool.NewWithConfig(context.Background(), config) //pgx.Connect(context.Background(), managerDB.url)
 	if err != nil {
 		return fmt.Errorf("connect error: %w", err)
 	}
@@ -250,9 +271,10 @@ func (db *DB) connect() error {
 	return err
 }
 
-func Init(url string, log interfaces.LoggerInterface) (*DB, error) {
+// NewDB Синглтон, возвращает ссылку на структуру для работы с постгре
+func NewDB(url string, log Loggerer) (*managerDB, error) {
 	if database == nil {
-		database = &DB{
+		database = &managerDB{
 			url:        url,
 			log:        log,
 			configured: false,
@@ -263,7 +285,7 @@ func Init(url string, log interfaces.LoggerInterface) (*DB, error) {
 				return nil, fmt.Errorf("database init error: %w", err)
 			}
 			database.configured = true
-			database.delete = make(chan util.DeleteTask)
+			database.delete = make(chan DeleteTask)
 			go database.backgroundDeleteHandler()
 		}
 	}

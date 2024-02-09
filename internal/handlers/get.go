@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/util"
-	"github.com/go-chi/chi/v5"
 	"net/http"
+
+	"github.com/chemax/url-shorter/models"
+	"github.com/go-chi/chi/v5"
 )
 
-func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) {
-	URLs, err := h.storage.GetUserURLs(r.Context().Value(util.UserID).(string))
+func (h *handlers) getUserURLsHandler(res http.ResponseWriter, r *http.Request) {
+	URLs, err := h.storage.GetUserURLs(r.Context().Value(models.UserID).(string))
 	if err != nil {
 		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
@@ -21,7 +22,7 @@ func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var updatedURLs []util.URLStructUser
+	var updatedURLs []models.URLWithShort
 	for _, v := range URLs {
 		v.Shortcode = fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), v.Shortcode)
 		updatedURLs = append(updatedURLs, v)
@@ -41,12 +42,12 @@ func (h *Handlers) GetUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
+func (h *handlers) getHandler(res http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {
 		h.Log.Error(fmt.Errorf("getURL error %w", err))
-		if errors.Is(err, util.ErrMissingContent) {
+		if errors.Is(err, models.ErrMissingContent) {
 			res.WriteHeader(http.StatusGone)
 			return
 		}
@@ -57,7 +58,7 @@ func (h *Handlers) GetHandler(res http.ResponseWriter, r *http.Request) {
 	res.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func (h *Handlers) PingHandler(res http.ResponseWriter, r *http.Request) {
+func (h *handlers) pingHandler(res http.ResponseWriter, r *http.Request) {
 	if h.storage.Ping() {
 		res.WriteHeader(http.StatusOK)
 		return

@@ -4,15 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"github.com/chemax/url-shorter/internal/db"
-	"github.com/chemax/url-shorter/internal/logger"
-	"github.com/chemax/url-shorter/internal/storage"
-	"github.com/chemax/url-shorter/internal/users"
-	mock_util "github.com/chemax/url-shorter/mocks/storage"
-	"github.com/chemax/url-shorter/util"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -20,6 +11,18 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/chemax/url-shorter/users"
+
+	"github.com/chemax/url-shorter/logger"
+
+	"github.com/chemax/url-shorter/internal/db"
+	"github.com/chemax/url-shorter/internal/storage"
+	mock_util "github.com/chemax/url-shorter/mocks/storage"
+	"github.com/chemax/url-shorter/models"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func gzipString(src string) ([]byte, error) {
@@ -49,7 +52,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 	cfg.EXPECT().GetHTTPAddr().Return("http://localhost:8080").AnyTimes()
 	cfg.EXPECT().GetNetAddr().Return("localhost:8080").AnyTimes()
 
-	lg, _ := logger.Init()
+	lg, _ := logger.NewLogger()
 
 	var tmpCode string
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
@@ -171,12 +174,12 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		bd, _ := db.Init("", lg)
+		bd, _ := db.NewDB("", lg)
 		t.Run(tt.name, func(t *testing.T) {
-			usersManager, _ := users.Init(cfg, lg, bd)
-			storageObj, _ := storage.Init(cfg, lg, bd)
+			usersManager, _ := users.NewUser(cfg, lg, bd)
+			storageObj, _ := storage.NewStorage(cfg, lg, bd)
 
-			h := New(storageObj, cfg, lg, usersManager)
+			h := NewHandlers(storageObj, cfg, lg, usersManager)
 			if tt.args.target == "replaceme" {
 				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
 			}
@@ -215,7 +218,7 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
 	cfg.EXPECT().GetHTTPAddr().Return("http://localhost:8080").AnyTimes()
 	cfg.EXPECT().GetNetAddr().Return("localhost:8080").AnyTimes()
-	lg, _ := logger.Init()
+	lg, _ := logger.NewLogger()
 
 	path := "/api/shorten"
 	const urlURL = "http://q7mtomi69.yandex/ahqas693eln9/sl3q8kiiwh4/mdcwekmdbq"
@@ -288,11 +291,11 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		bd, _ := db.Init("", lg)
+		bd, _ := db.NewDB("", lg)
 		t.Run(tt.name, func(t *testing.T) {
-			u, _ := storage.Init(cfg, lg, bd)
-			usersManager, _ := users.Init(cfg, lg, bd)
-			h := New(u, cfg, lg, usersManager)
+			u, _ := storage.NewStorage(cfg, lg, bd)
+			usersManager, _ := users.NewUser(cfg, lg, bd)
+			h := NewHandlers(u, cfg, lg, usersManager)
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
 
 			if tt.args.body != nil {
@@ -323,10 +326,10 @@ func TestHandlers(t *testing.T) {
 	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
 	st := mock_util.NewMockStorageInterface(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
-	log, _ := logger.Init()
-	bd, _ := db.Init("", log)
-	usersManager, _ := users.Init(cfg, log, bd)
-	handlers := New(st, cfg, log, usersManager)
+	log, _ := logger.NewLogger()
+	bd, _ := db.NewDB("", log)
+	usersManager, _ := users.NewUser(cfg, log, bd)
+	handlers := NewHandlers(st, cfg, log, usersManager)
 	assert.NotNil(t, handlers)
 	JSONURL := "{\"url\": \"http://ya.ru\"}"
 	JSONURLArray := "[{\"correlation_id\":\"1\",\"original_url\": \"http://ya.ru\"}, {\"correlation_id\":\"2\",\"original_url\": \"http://ya.ru\"}]"
@@ -389,7 +392,7 @@ func TestHandlers(t *testing.T) {
 		defer res.Body.Close()
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
-	t.Run("bad URL", func(t *testing.T) {
+	t.Run("bad singleURL", func(t *testing.T) {
 		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONBadURL)))
 		request.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
@@ -408,7 +411,7 @@ func TestHandlers(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
 
-	t.Run("store URL error", func(t *testing.T) {
+	t.Run("store singleURL error", func(t *testing.T) {
 		st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).Times(1).Return("", fmt.Errorf("test error"))
 		request := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL)))
 		request.Header.Set("Content-Type", "application/json")
@@ -419,7 +422,7 @@ func TestHandlers(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 	})
 	t.Run("all ok BATCH", func(t *testing.T) {
-		st.EXPECT().BatchSave(gomock.Any(), gomock.Any()).Return([]util.URLStructForBatchResponse{{
+		st.EXPECT().BatchSave(gomock.Any(), gomock.Any()).Return([]models.URLForBatchResponse{{
 			CorrelationID: "1",
 			ShortURL:      "12345678",
 		}, {

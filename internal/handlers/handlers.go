@@ -2,19 +2,58 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/chemax/url-shorter/interfaces"
-	"github.com/chemax/url-shorter/internal/compress"
+	"net/http"
+	"strings"
+
+	"github.com/chemax/url-shorter/compress"
+	"github.com/chemax/url-shorter/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"net/http"
 )
 
-type Handlers struct {
-	storage interfaces.StorageInterface
+// configer интерфейс конфиг-структуры
+type configer interface {
+	GetHTTPAddr() string
+}
+
+// userser интерфейс юзер-менеджера
+type userser interface {
+	Middleware(next http.Handler) http.Handler
+}
+
+// loggerer интерфейс логера
+type loggerer interface {
+	Middleware(next http.Handler) http.Handler
+	Warn(args ...interface{})
+	Warnln(args ...interface{})
+	Error(args ...interface{})
+	Errorln(args ...interface{})
+}
+
+// storager интерфейс хранилища
+type storager interface {
+	GetUserURLs(userID string) ([]models.URLWithShort, error)
+	GetURL(code string) (parsedURL string, err error)
+	DeleteListFor(forDelete []string, userID string)
+	AddNewURL(parsedURL string, userID string) (code string, err error)
+	Ping() bool
+	BatchSave(arr []*models.URLForBatch, httpPrefix string) (responseArr []models.URLForBatchResponse, err error)
+}
+
+type handlers struct {
+	storage storager
 	Router  *chi.Mux
-	Cfg     interfaces.ConfigInterface
-	Log     interfaces.LoggerInterface
+	Cfg     configer
+	Log     loggerer
+}
+
+func checkHeaderIsValidType(header string) bool {
+	return strings.Contains(header, "application/json") || strings.Contains(header, "application/x-gzip")
+}
+
+func checkHeader(header string) bool {
+	return strings.Contains(header, "text/plain") || strings.Contains(header, "application/x-gzip")
 }
 
 func initRender() {
@@ -32,10 +71,11 @@ func initRender() {
 	}
 }
 
-func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log interfaces.LoggerInterface, users interfaces.UsersInterface) *Handlers {
+// NewHandlers возвращает хендлер всех ручек
+func NewHandlers(s storager, cfg configer, log loggerer, users userser) *handlers {
 	initRender()
 	r := chi.NewRouter()
-	h := &Handlers{
+	h := &handlers{
 		storage: s,
 		Router:  r,
 		Cfg:     cfg,
@@ -48,12 +88,12 @@ func New(s interfaces.StorageInterface, cfg interfaces.ConfigInterface, log inte
 	r.Use(middleware.Recoverer)
 	r.Use(users.Middleware)
 	r.Use(compress.Middleware)
-	r.Post("/api/shorten", h.JSONPostHandler)
-	r.Post("/api/shorten/batch", h.JSONBatchPostHandler)
-	r.Post("/", h.PostHandler)
-	r.Get("/ping", h.PingHandler)
-	r.Get("/{id}", h.GetHandler)
-	r.Get("/api/user/urls", h.GetUserURLsHandler)
+	r.Post("/api/shorten", h.xJSONPostHandler)
+	r.Post("/api/shorten/batch", h.xJSONBatchPostHandler)
+	r.Post("/", h.postHandler)
+	r.Get("/ping", h.pingHandler)
+	r.Get("/{id}", h.getHandler)
+	r.Get("/api/user/urls", h.getUserURLsHandler)
 	r.Delete("/api/user/urls", h.DeleteUserURLsHandler)
 	return h
 }

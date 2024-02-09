@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	util "github.com/chemax/url-shorter/util"
+	util "github.com/chemax/url-shorter/models"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -64,10 +64,10 @@ func (mr *MockDBInterfaceMockRecorder) Get(code interface{}) *gomock.Call {
 }
 
 // GetAllURLs mocks base method.
-func (m *MockDBInterface) GetAllURLs(userID string) ([]util.URLStructUser, error) {
+func (m *MockDBInterface) GetAllURLs(userID string) ([]util.URLWithShort, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllURLs", userID)
-	ret0, _ := ret[0].([]util.URLStructUser)
+	ret0, _ := ret[0].([]util.URLWithShort)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -325,10 +325,10 @@ func (mr *MockStorageInterfaceMockRecorder) AddNewURL(parsedURL, userID interfac
 }
 
 // BatchSave mocks base method.
-func (m *MockStorageInterface) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) ([]util.URLStructForBatchResponse, error) {
+func (m *MockStorageInterface) BatchSave(arr []*util.URLForBatch, httpPrefix string) ([]util.URLForBatchResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BatchSave", arr, httpPrefix)
-	ret0, _ := ret[0].([]util.URLStructForBatchResponse)
+	ret0, _ := ret[0].([]util.URLForBatchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -367,10 +367,10 @@ func (mr *MockStorageInterfaceMockRecorder) GetURL(code interface{}) *gomock.Cal
 }
 
 // GetUserURLs mocks base method.
-func (m *MockStorageInterface) GetUserURLs(userID string) ([]util.URLStructUser, error) {
+func (m *MockStorageInterface) GetUserURLs(userID string) ([]util.URLWithShort, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserURLs", userID)
-	ret0, _ := ret[0].([]util.URLStructUser)
+	ret0, _ := ret[0].([]util.URLWithShort)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

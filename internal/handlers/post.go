@@ -5,12 +5,26 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/util"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/chemax/url-shorter/models"
 )
+
+// URLByUser содежрит url и userID
+type URLByUser struct {
+	URL    string `json:"url"`
+	UserID string `json:"userID"`
+}
+
+// Result нужен исключительно для удобного маршалинга ответа
+type Result struct {
+	Result string `json:"result"`
+}
+
+// IDK что тут можно оптимизировать
 
 func getBody(req *http.Request) ([]byte, error) {
 	var body []byte
@@ -31,7 +45,7 @@ func getBody(req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) postHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -39,7 +53,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 			res.WriteHeader(http.StatusBadRequest)
 		}
 	}()
-	if !util.CheckHeader(req.Header.Get("Content-Type")) {
+	if !checkHeader(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not plain text: %s", req.Header.Get("Content-Type"))
 		return
 	}
@@ -53,10 +67,10 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL, req.Context().Value(util.UserID).(string))
+	code, err := h.store(parsedURL, req.Context().Value(models.UserID).(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
-		if !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if !errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			err = fmt.Errorf("store error: %w", err)
 			return
 		}
@@ -71,7 +85,7 @@ func (h *Handlers) PostHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) xJSONBatchPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -80,12 +94,12 @@ func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Reque
 		}
 	}()
 
-	if !util.CheckHeaderIsValidType(req.Header.Get("Content-Type")) {
+	if !checkHeaderIsValidType(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
 	}
 
-	var URLBatchArr []*util.URLStructForBatch
+	var URLBatchArr []*models.URLForBatch
 	body, err := getBody(req)
 	if err != nil {
 		err = fmt.Errorf("get body error: %w", err)
@@ -111,10 +125,10 @@ func (h *Handlers) JSONBatchPostHandler(res http.ResponseWriter, req *http.Reque
 		h.Log.Warn("response write error: ", err.Error())
 		err = nil
 	}
-	//TODO как-то тут многовато общего кода с JSONPostHandler, DRY or not DRY?
 }
 
-func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
+// todo переименовать нормально
+func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -122,14 +136,8 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 			res.WriteHeader(http.StatusBadRequest)
 		}
 	}()
-	type URLStruct struct {
-		URL    string `json:"url"`
-		UserID string `json:"userID"`
-	}
-	type ResultStruct struct {
-		Result string `json:"result"`
-	}
-	if !util.CheckHeaderIsValidType(req.Header.Get("Content-Type")) {
+
+	if !checkHeaderIsValidType(req.Header.Get("Content-Type")) {
 		err = fmt.Errorf("not application/json: %s", req.Header.Get("Content-Type"))
 		return
 	}
@@ -138,8 +146,8 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("get body error: %w", err)
 		return
 	}
-	userID := req.Context().Value(util.UserID).(string)
-	URLObj := URLStruct{UserID: userID}
+	userID := req.Context().Value(models.UserID).(string)
+	URLObj := URLByUser{UserID: userID}
 	err = json.Unmarshal(body, &URLObj)
 	if err != nil {
 		err = fmt.Errorf("JSON unmarshal error: %w", err)
@@ -150,10 +158,10 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("parse URL error: %w", err)
 		return
 	}
-	code, err := h.store(parsedURL, req.Context().Value(util.UserID).(string))
+	code, err := h.store(parsedURL, req.Context().Value(models.UserID).(string))
 	var statusCreated = http.StatusCreated
 	if err != nil {
-		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			statusCreated = http.StatusConflict
 		} else {
 			err = fmt.Errorf("store error: %w", err)
@@ -161,7 +169,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	result := ResultStruct{Result: fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)}
+	result := Result{Result: fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)}
 	resultData, err := json.Marshal(result)
 	if err != nil {
 		return
@@ -176,7 +184,7 @@ func (h *Handlers) JSONPostHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *Handlers) store(parsedURL *url.URL, userID string) (string, error) {
+func (h *handlers) store(parsedURL *url.URL, userID string) (string, error) {
 	code, err := h.storage.AddNewURL(parsedURL.String(), userID)
 	if err != nil {
 		return code, err

@@ -13,6 +13,7 @@ type gzipWriter struct {
 	compress bool
 }
 
+// WriteHeader записывает нужный хидер
 func (w *gzipWriter) WriteHeader(statusCode int) {
 	if strings.Contains(w.Header().Get("Content-Type"), "application/json") ||
 		strings.Contains(w.Header().Get("Content-Type"), "text/html") {
@@ -26,6 +27,7 @@ func (w *gzipWriter) WriteHeader(statusCode int) {
 
 }
 
+// Write обертка над gzip.Writer чтобы определять нужно ли сжимать
 func (w *gzipWriter) Write(b []byte) (int, error) {
 	if w.compress {
 		gz, err := gzip.NewWriterLevel(w.ResponseWriter, gzip.BestSpeed)
@@ -39,6 +41,7 @@ func (w *gzipWriter) Write(b []byte) (int, error) {
 	}
 }
 
+// Middleware для работы со сжатым контентом
 func Middleware(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

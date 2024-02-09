@@ -1,11 +1,14 @@
+// пакет служит хранилищем конфигурации приложения, получает данные из окружения, из аргументов и имеет дефолтные значения для некоторых параметров.
+// реализует паттерн singleton.
 package config
 
 import (
 	"flag"
 	"fmt"
-	"github.com/chemax/url-shorter/util"
 	"os"
 	"time"
+
+	"github.com/chemax/url-shorter/models"
 )
 
 var (
@@ -19,28 +22,29 @@ var (
 	}
 )
 
-func Init() (*Config, error) {
+// NewConfig инициализация конфига
+func NewConfig() (*Config, error) {
 	cfg.initFlags()
 	flag.Parse()
-	if srvAddr, ok := os.LookupEnv(util.ServerAddressEnv); ok && srvAddr != "" {
+	if srvAddr, ok := os.LookupEnv(models.ServerAddressEnv); ok && srvAddr != "" {
 		err := cfg.NetAddr.Set(srvAddr)
 		if err != nil {
 			return nil, fmt.Errorf("error setup server address: %w", err)
 		}
 	}
-	if baseURL, ok := os.LookupEnv(util.BaseURLEnv); ok && baseURL != "" {
+	if baseURL, ok := os.LookupEnv(models.BaseURLEnv); ok && baseURL != "" {
 		err := cfg.HTTPAddr.Set(baseURL)
 		if err != nil {
 			return nil, fmt.Errorf("error setup base url: %w", err)
 		}
 	}
-	if savePath, ok := os.LookupEnv(util.SavePath); ok && savePath != "" {
+	if savePath, ok := os.LookupEnv(models.SavePath); ok && savePath != "" {
 		err := cfg.PathSave.Set(savePath)
 		if err != nil {
 			return nil, fmt.Errorf("error setup save path: %w", err)
 		}
 	}
-	if connectString, ok := os.LookupEnv(util.DBConnectString); ok {
+	if connectString, ok := os.LookupEnv(models.DBConnectString); ok {
 		err := cfg.DBConfig.Set(connectString)
 		if err != nil {
 			return nil, fmt.Errorf("error setup save path: %w", err)

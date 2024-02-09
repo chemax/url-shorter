@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/chemax/url-shorter/internal/app"
 	"log"
+
+	"github.com/chemax/url-shorter/internal/app"
 )
 
 func main() {

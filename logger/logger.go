@@ -1,10 +1,12 @@
+// пакет-обёртка над логгером zap
 package logger
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type (
@@ -21,6 +23,7 @@ type (
 	}
 )
 
+// Write для мидлварь
 func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	// записываем ответ, используя оригинальный http.ResponseWriter
 	size, err := r.ResponseWriter.Write(b)
@@ -28,18 +31,20 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	return size, err
 }
 
+// WriteHeader логирует статус код
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	// записываем код статуса, используя оригинальный http.ResponseWriter
 	r.ResponseWriter.WriteHeader(statusCode)
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
-type Logger struct {
+type log struct {
 	*zap.SugaredLogger
 }
 
-func Init() (*Logger, error) {
-	l := &Logger{}
+// NewLogger делает новый логгер
+func NewLogger() (*log, error) {
+	l := &log{}
 	cfgLogger := zap.NewDevelopmentConfig()
 	cfgLogger.DisableStacktrace = true
 	lx, err := cfgLogger.Build()
@@ -50,23 +55,33 @@ func Init() (*Logger, error) {
 	return l, nil
 }
 
-func (l *Logger) Shutdown() error {
+// Shutdown зачищает логгер
+func (l *log) Shutdown() error {
 	return l.Sync()
 }
 
-func (l *Logger) Debug(args ...interface{}) {
+// Debug debug
+func (l *log) Debug(args ...interface{}) {
 	l.Debugln(args)
 }
-func (l *Logger) Info(args ...interface{}) {
+
+// Info info log
+func (l *log) Info(args ...interface{}) {
 	l.Infoln(args)
 }
-func (l *Logger) Warn(args ...interface{}) {
+
+// Warn warning log
+func (l *log) Warn(args ...interface{}) {
 	l.Warnln(args)
 }
-func (l *Logger) Error(args ...interface{}) {
+
+// Error error log
+func (l *log) Error(args ...interface{}) {
 	l.Errorln(args)
 }
-func (l *Logger) Middleware(next http.Handler) http.Handler {
+
+// Middleware для логирования хттп запросов
+func (l *log) Middleware(next http.Handler) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Del("Content-Length")

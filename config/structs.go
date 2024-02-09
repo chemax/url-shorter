@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// Config содержит в себе весь конфиг включая подструктуры
 type Config struct {
 	NetAddr         *NetAddr
 	HTTPAddr        *HTTPAddr
@@ -23,22 +24,23 @@ type Config struct {
 	tokenExp        time.Duration
 }
 
+// DBConfig конфиг базы данных
 type DBConfig struct {
 	connectString string
 }
 
-// Set implements pkg "flag" interface.
-// Also in the future, we can make some logic or parse for connect string for some reason. Validation, for example.
-
+// Set сеттер коннект стринга базы данных
 func (p *DBConfig) Set(s string) error {
 	p.connectString = s
 	return nil
 }
 
+// String стрингует коннект стринг базы данных (для реализации интерфейса стрингера)
 func (p *DBConfig) String() string {
 	return p.connectString
 }
 
+// PathForSave путь сохранения "текстовой" базы сокращений
 type PathForSave struct {
 	path string
 }
@@ -49,14 +51,17 @@ func (p *PathForSave) Set(s string) error {
 	return nil
 }
 
+// String стрингует коннект стринг файлового хранилища (для реализации интерфейса стрингера)
 func (p *PathForSave) String() string {
 	return p.path
 }
 
+// HTTPAddr хранит http адрес приложения, никак формально не связан с сетевым адресом, используется для генерации сокращенных ссылок.
 type HTTPAddr struct {
 	Addr string `json:"addr"`
 }
 
+// String для реализации интерфейса стрингера
 func (h *HTTPAddr) String() string {
 	return h.Addr
 }
@@ -72,11 +77,13 @@ func (h *HTTPAddr) Set(s string) error {
 	return nil
 }
 
+// NetAddr хранит хост и порт которые биндит приложение для http сервера
 type NetAddr struct {
 	Host string `json:"host"`
 	Port int    `json:"port"`
 }
 
+// String возвращает хост:порт для бинда http-сервером
 func (a *NetAddr) String() string {
 	return fmt.Sprintf("%s:%d", a.Host, a.Port)
 }
@@ -95,21 +102,33 @@ func (a *NetAddr) Set(s string) error {
 	a.Port = port
 	return nil
 }
+
+// SecretKey возвращает секретный ключ
 func (c *Config) SecretKey() string {
 	return c.secretKey
 }
+
+// TokenExp возвращает срок жизни токена
 func (c *Config) TokenExp() time.Duration {
 	return c.tokenExp
 }
+
+// GetDBUse используется ли внешняя база данных или текстовая
 func (c *Config) GetDBUse() bool {
 	return c.DBConfig.connectString != ""
 }
+
+// GetSavePath путь к текстовой базе данных
 func (c *Config) GetSavePath() string {
 	return c.PathSave.path
 }
+
+// GetNetAddr получить сетевой адрес
 func (c *Config) GetNetAddr() string {
 	return c.NetAddr.String()
 }
+
+// GetHTTPAddr возвращает http адрес сервиса (для генерации сокращенных ссылок)
 func (c *Config) GetHTTPAddr() string {
 	return c.HTTPAddr.String()
 }

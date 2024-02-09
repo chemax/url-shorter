@@ -5,44 +5,79 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/interfaces"
-	"github.com/chemax/url-shorter/util"
+	"math/rand"
 	"os"
 	"sync"
+
+	"github.com/chemax/url-shorter/models"
 )
 
 var newLineBytes = []byte("\n")
 
-type URL struct {
+// configer интерфейс конфиг-структуры
+type configer interface {
+	GetSavePath() string
+	GetDBUse() bool
+}
+
+// loggerer интерфейс логера
+type loggerer interface {
+	Debugln(args ...interface{})
+	Error(args ...interface{})
+}
+
+// dataBaser интерфейс для базы данных
+type dataBaser interface {
+	BatchDelete([]string, string)
+	Ping() error
+	SaveURL(code string, URL string, userID string) (string, error)
+	Get(code string) (string, error)
+	GetAllURLs(userID string) ([]models.URLWithShort, error)
+	Use() bool
+}
+
+type singleURL struct {
 	URL    string `json:"url"`
 	Code   string `json:"code"`
 	UserID string `json:"userID"`
 }
-type URLManager struct {
-	db       interfaces.DBInterface
-	URLs     map[string]*URL
+type managerURL struct {
+	db       dataBaser
+	URLs     map[string]*singleURL
 	URLMx    sync.RWMutex
 	SavePath string
-	logger   interfaces.LoggerInterface
+	log      loggerer
 }
 
-var manager = &URLManager{URLs: make(map[string]*URL)}
+var manager = &managerURL{URLs: make(map[string]*singleURL)}
 
-func Init(cfg interfaces.ConfigInterface, logger interfaces.LoggerInterface, db interfaces.DBInterface) (*URLManager, error) {
+// randStringRunes генерация псевдослучайной строки заданной длинны
+func randStringRunes(n int) string {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
+
+// NewStorage создает и возвращает структуру управления URL'ами
+func NewStorage(cfg configer, logger loggerer, db dataBaser) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {
 		manager.db = nil
 	}
 	manager.SavePath = cfg.GetSavePath()
-	manager.logger = logger
+	manager.log = logger
 	err := manager.restore()
 	if err != nil {
 		return nil, fmt.Errorf("restore err: %w", err)
 	}
 	return manager, nil
 }
-func (u *URLManager) restore() error {
+
+func (u *managerURL) restore() error {
 	if u.db != nil {
 		return nil
 	}
@@ -58,45 +93,44 @@ func (u *URLManager) restore() error {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		parsedURL := &URL{}
+		parsedURL := &singleURL{}
 		err := json.Unmarshal(scanner.Bytes(), parsedURL)
 		if err != nil {
-			u.logger.Error("restore error: ", err.Error())
+			u.log.Error("restore error: ", err.Error())
 			continue
 		}
 		u.URLs[parsedURL.Code] = parsedURL
-		u.logger.Debugln("restored: ", scanner.Text())
+		u.log.Debugln("restored: ", scanner.Text())
 	}
 	return nil
 }
-func (u *URLManager) saveToFile(code string) {
+func (u *managerURL) saveToFile(code string) {
 	if u.SavePath == "" {
 		return
 	}
 	file, err := os.OpenFile(u.SavePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("error open file [%s], error: %s", u.SavePath, err.Error()))
+		u.log.Error(fmt.Sprintf("error open file [%s], error: %s", u.SavePath, err.Error()))
 		return
 	}
 	defer file.Close()
 	var data []byte
 	data, err = json.Marshal(u.URLs[code])
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("unmarshal error: %s", err.Error()))
+		u.log.Error(fmt.Sprintf("unmarshal error: %s", err.Error()))
 		return
 	}
 	data = append(data, newLineBytes...)
 	_, err = file.Write(data)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("error write to file [%s], error: %s", u.SavePath, err.Error()))
+		u.log.Error(fmt.Sprintf("error write to file [%s], error: %s", u.SavePath, err.Error()))
 		return
 	}
 
 }
 
-// Переиспользование во все поля. Нет четких критериев, что делать при сбое в середине процесса, я решил не прерывать,
-// а значит, я могу переиспользовать имеющийся функционал.
-func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string) (responseArr []util.URLStructForBatchResponse, err error) {
+// BatchSave пакетное сохранение
+func (u *managerURL) BatchSave(arr []*models.URLForBatch, httpPrefix string) (responseArr []models.URLForBatchResponse, err error) {
 	var errorArr []error
 	for _, v := range arr {
 		shortcode, err := u.AddNewURL(v.OriginalURL, "")
@@ -104,7 +138,7 @@ func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string)
 			errorArr = append(errorArr, err)
 			continue
 		}
-		responseArr = append(responseArr, util.URLStructForBatchResponse{
+		responseArr = append(responseArr, models.URLForBatchResponse{
 			CorrelationID: v.CorrelationID,
 			ShortURL:      fmt.Sprintf("%s/%s", httpPrefix, shortcode),
 		})
@@ -115,7 +149,7 @@ func (u *URLManager) BatchSave(arr []*util.URLStructForBatch, httpPrefix string)
 	return responseArr, nil
 }
 
-func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
+func (u *managerURL) dbGetURL(code string) (parsedURL string, err error) {
 	parsedURL, err = u.db.Get(code)
 	if err != nil {
 		return "", fmt.Errorf("get url from db error: %w", err)
@@ -123,28 +157,28 @@ func (u *URLManager) dbGetURL(code string) (parsedURL string, err error) {
 	return parsedURL, nil
 }
 
-func (u *URLManager) dbAddNewURL(parsedURL, userID string) (code string, err error) {
+func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err error) {
 	var loop int
 	for {
-		//TODO переделать на функции внутри postgresql?
-		code = util.RandStringRunes(util.CodeLength)
+		code = randStringRunes(models.CodeLength)
 		dupCode, err := u.db.SaveURL(code, parsedURL, userID)
-		if err != nil && !errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if err != nil && !errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			loop++
-			if loop > util.CodeGenerateAttempts {
+			if loop > models.CodeGenerateAttempts {
 				code = ""
 				return code, fmt.Errorf("can not found free code for short url")
 			}
 			continue
 		}
-		if errors.Is(err, &util.AlreadyHaveThisURLError{}) {
+		if errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			return dupCode, err
 		}
 		return code, nil
 	}
 }
 
-func (u *URLManager) GetUserURLs(userID string) (URLs []util.URLStructUser, err error) {
+// GetUserURLs вернуть все URL пользователя
+func (u *managerURL) GetUserURLs(userID string) (URLs []models.URLWithShort, err error) {
 	if u.db != nil {
 		return u.db.GetAllURLs(userID)
 	}
@@ -153,13 +187,14 @@ func (u *URLManager) GetUserURLs(userID string) (URLs []util.URLStructUser, err 
 
 	for _, v := range u.URLs {
 		if v.UserID == userID {
-			URLs = append(URLs, util.URLStructUser{Shortcode: v.Code, URL: v.URL})
+			URLs = append(URLs, models.URLWithShort{Shortcode: v.Code, URL: v.URL})
 		}
 	}
 	return URLs, err
 }
 
-func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
+// GetURL получить URL по коду
+func (u *managerURL) GetURL(code string) (parsedURL string, err error) {
 	if u.db != nil {
 		return u.dbGetURL(code)
 	}
@@ -172,7 +207,8 @@ func (u *URLManager) GetURL(code string) (parsedURL string, err error) {
 	return urlObj.URL, nil
 }
 
-func (u *URLManager) DeleteListFor(forDelete []string, userID string) {
+// DeleteListFor пакетное удаление
+func (u *managerURL) DeleteListFor(forDelete []string, userID string) {
 	if u.db != nil {
 		u.db.BatchDelete(forDelete, userID)
 		return
@@ -186,7 +222,8 @@ func (u *URLManager) DeleteListFor(forDelete []string, userID string) {
 	}
 }
 
-func (u *URLManager) AddNewURL(parsedURL string, userID string) (code string, err error) {
+// AddNewURL сохранить URL
+func (u *managerURL) AddNewURL(parsedURL string, userID string) (code string, err error) {
 	if u.db != nil {
 		return u.dbAddNewURL(parsedURL, userID)
 	}
@@ -195,26 +232,27 @@ func (u *URLManager) AddNewURL(parsedURL string, userID string) (code string, er
 	u.URLMx.Lock()
 	defer u.URLMx.Unlock()
 	for ok {
-		code = util.RandStringRunes(util.CodeLength)
+		code = randStringRunes(models.CodeLength)
 		_, ok = u.URLs[code]
 		loop++
-		if loop > util.CodeGenerateAttempts {
+		if loop > models.CodeGenerateAttempts {
 			code = ""
 			return code, fmt.Errorf("can not found free code for short url")
 		}
 	}
-	u.URLs[code] = &URL{URL: parsedURL, Code: code, UserID: userID}
+	u.URLs[code] = &singleURL{URL: parsedURL, Code: code, UserID: userID}
 	u.saveToFile(code)
 	return code, nil
 }
 
-func (u *URLManager) Ping() bool {
+// Ping пинг бд
+func (u *managerURL) Ping() bool {
 	if u.db == nil {
 		return false
 	}
 	err := u.db.Ping()
 	if err != nil {
-		u.logger.Error(fmt.Errorf("ping db error: %w", err))
+		u.log.Error(fmt.Errorf("ping db error: %w", err))
 		return false
 	}
 	return true
