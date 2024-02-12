@@ -1,4 +1,4 @@
-// менеджер пользователей
+// Package users менеджер пользователей
 package users
 
 import (

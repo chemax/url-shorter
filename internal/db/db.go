@@ -1,3 +1,4 @@
+// Package db синглтон для общения с БД.
 package db
 
 import (
