@@ -13,7 +13,6 @@ import (
 
 func main() {
 	var analyzers []*analysis.Analyzer
-	//TODO как получить ВСЕ анализаторы из x/analysis??????
 	//analyzers = append(analyzers, linter.ErrCheckAnalyzer)
 	analyzers = append(analyzers, linter.ExitInMainAnalyzer)
 	//Simple linter to check that your code does not contain non-ASCII identifiers
@@ -27,7 +26,5 @@ func main() {
 	for _, fix := range quickfix.Analyzers {
 		analyzers = append(analyzers, fix.Analyzer)
 	}
-	//TODO внешние анализаторы
-
 	multichecker.Main(analyzers...)
 }
