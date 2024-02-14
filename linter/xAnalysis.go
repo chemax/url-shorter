@@ -48,6 +48,7 @@ import (
 	"honnef.co/go/tools/analysis/facts/nilness"
 )
 
+// X список стандартных анализаторов из пакета x/analysis, не знаю, как их импортировать все разом
 var X = []*analysis.Analyzer{
 	asmdecl.Analyzer,
 	assign.Analyzer,

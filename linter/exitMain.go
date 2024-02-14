@@ -1,3 +1,4 @@
+// Package linter функционал линтера.
 package linter
 
 import (
@@ -7,6 +8,7 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+// ExitInMainAnalyzer check for direct os.Exit calls in main function
 var ExitInMainAnalyzer = &analysis.Analyzer{
 	Name: "exitinmain",
 	Doc:  "check for direct os.Exit calls in main function",

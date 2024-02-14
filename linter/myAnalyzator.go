@@ -8,12 +8,14 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
+// ErrCheckAnalyzer проверяет непроверенные ошибки (пример из урока, не используется)
 var ErrCheckAnalyzer = &analysis.Analyzer{
 	Name: "errcheck",
 	Doc:  "check for unchecked errors",
 	Run:  run,
 }
 
+// Pass pass
 type Pass struct {
 	// отобразим здесь только важные поля
 	Fset         *token.FileSet // информация о позиции токенов

@@ -1,3 +1,4 @@
+// Package main запускать go run cmd/linter/linter.go ./...
 package main
 
 import (
