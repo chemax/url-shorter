@@ -19,11 +19,15 @@ require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
+	github.com/gostaticanalysis/comment v1.4.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/tdakkota/asciicheck v0.2.0 // indirect
+	github.com/timakin/bodyclose v0.0.0-20240125160201-f835fa56326a // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20221208152030-732eee02a75a // indirect
