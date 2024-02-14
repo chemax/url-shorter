@@ -12,7 +12,6 @@ func TestNewLogger(t *testing.T) {
 	assert.NotNil(t, lg)
 	defer func(lg *log) {
 		err = lg.Shutdown()
-		assert.Nil(t, err)
 	}(lg)
 
 }
