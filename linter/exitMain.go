@@ -2,8 +2,9 @@ package linter
 
 import (
 	"go/ast"
-	"golang.org/x/tools/go/analysis"
 	"strings"
+
+	"golang.org/x/tools/go/analysis"
 )
 
 var ExitInMainAnalyzer = &analysis.Analyzer{
