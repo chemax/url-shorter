@@ -48,7 +48,7 @@ func TestNewStorage(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, code)
 	bd.EXPECT().SaveURL(gomock.Any(), gomock.Any(), gomock.Any()).Return("", &models.AlreadyHaveThisURLError{}).Times(1)
-	code, err = st.dbAddNewURL("54321", "2222")
+	_, err = st.dbAddNewURL("54321", "2222")
 	assert.ErrorIs(t, err, &models.AlreadyHaveThisURLError{})
 	bd.EXPECT().SaveURL(gomock.Any(), gomock.Any(), gomock.Any()).Return("12345", nil).Times(1)
 	code, err = st.dbAddNewURL("54321", "2222")
