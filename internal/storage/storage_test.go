@@ -2,13 +2,14 @@ package storage
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/logger"
 	mock_storage "github.com/chemax/url-shorter/mocks/newstorage"
 	"github.com/chemax/url-shorter/models"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 // Конечно, тут стоило бы работать с реальным хранилищем. Но долго, а я в цейтноте.
