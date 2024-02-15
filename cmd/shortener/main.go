@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/chemax/url-shorter/internal/app"
+	"log"
 )
 
 var (

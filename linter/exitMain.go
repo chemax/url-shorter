@@ -1,4 +1,7 @@
 // Package linter функционал линтера.
+
+// asciicheck Simple linter to check that your code does not contain non-ASCII identifiers
+// bodyclose is a static analysis tool which checks whether res.Body is correctly closed.
 package linter
 
 import (
