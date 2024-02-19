@@ -1,3 +1,4 @@
+// Package app главная и единственная точка входа в программу
 package app
 
 import (

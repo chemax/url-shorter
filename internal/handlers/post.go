@@ -78,7 +78,11 @@ func (h *handlers) postHandler(res http.ResponseWriter, req *http.Request) {
 	}
 	res.Header().Set("Content-Type", "text/plain")
 	res.WriteHeader(statusCreated)
-	_, err = res.Write([]byte(fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)))
+	_, err = fmt.Fprintf(res, "%s/%s", h.Cfg.GetHTTPAddr(), code)
+	if err != nil {
+		return
+	}
+	//_, err = res.Write([]byte(fmt.Sprintf("%s/%s", h.Cfg.GetHTTPAddr(), code)))
 	if err != nil {
 		h.Log.Warn("response write error: ", err.Error())
 		err = nil

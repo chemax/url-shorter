@@ -1,3 +1,4 @@
+// Package db синглтон для общения с БД.
 package db
 
 import (
@@ -64,7 +65,7 @@ func (db *managerDB) backgroundDeleteHandler() {
 			if i > 0 {
 				buf.WriteString(",")
 			}
-			buf.WriteString(fmt.Sprintf("'%s'", v))
+			fmt.Fprintf(buf, "'%s'", v)
 		}
 		buf.WriteString(") AND userid = $1;")
 		conn, err := db.conn.Acquire(context.Background())
@@ -111,7 +112,7 @@ func (db *managerDB) GetAllURLs(userID string) ([]models.URLWithShort, error) {
 	}
 	for rows.Next() {
 		url := models.URLWithShort{}
-		err := rows.Scan(&url.URL, &url.Shortcode)
+		err = rows.Scan(&url.URL, &url.Shortcode)
 		if err != nil {
 			return nil, fmt.Errorf("unable to scan row: %w", err)
 		}

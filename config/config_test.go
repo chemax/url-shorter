@@ -56,11 +56,11 @@ func TestHTTPAddr_Set(t *testing.T) {
 }
 
 func TestConfig_GetNetAddr(t *testing.T) {
-	cfg := &Config{
+	cfgForTest := &Config{
 		NetAddr: &NetAddr{Host: "localhost", Port: 8080},
 	}
 
-	result := cfg.GetNetAddr()
+	result := cfgForTest.GetNetAddr()
 	expected := "localhost:8080"
 
 	if result != expected {
@@ -69,11 +69,11 @@ func TestConfig_GetNetAddr(t *testing.T) {
 }
 
 func TestConfig_GetHTTPAddr(t *testing.T) {
-	cfg := &Config{
+	cfgForTest := &Config{
 		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
 	}
 
-	result := cfg.GetHTTPAddr()
+	result := cfgForTest.GetHTTPAddr()
 	expected := "http://localhost:8080"
 
 	if result != expected {

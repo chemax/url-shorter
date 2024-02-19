@@ -12,7 +12,7 @@ func (h *handlers) DeleteUserURLsHandler(res http.ResponseWriter, r *http.Reques
 	body, err := getBody(r)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
-		_, err := res.Write(nil)
+		_, err = res.Write(nil)
 		if err != nil {
 			h.Log.Error(err)
 		}
@@ -22,7 +22,7 @@ func (h *handlers) DeleteUserURLsHandler(res http.ResponseWriter, r *http.Reques
 	err = json.Unmarshal(body, &forDelete)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
-		_, err := res.Write(nil)
+		_, err = res.Write(nil)
 		if err != nil {
 			h.Log.Error(err)
 		}

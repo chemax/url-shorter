@@ -1,3 +1,4 @@
+// Package compress пакет создан для реализации middleware определяющей, сжатый контент или нет.
 package compress
 
 import (

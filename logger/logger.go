@@ -1,4 +1,4 @@
-// пакет-обёртка над логгером zap
+// Package logger пакет-обёртка над логгером zap
 package logger
 
 import (

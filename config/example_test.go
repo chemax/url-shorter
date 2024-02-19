@@ -3,13 +3,13 @@ package config
 import "fmt"
 
 func Example() {
-	cfg, err := NewConfig()
+	exampleCfg, err := NewConfig()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(cfg.GetDBUse())
-	fmt.Println(cfg.GetHTTPAddr())
-	fmt.Println(cfg.GetNetAddr())
+	fmt.Println(exampleCfg.GetDBUse())
+	fmt.Println(exampleCfg.GetHTTPAddr())
+	fmt.Println(exampleCfg.GetNetAddr())
 
 	// Output:
 	// false
