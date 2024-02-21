@@ -6,8 +6,9 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/certgen"
 	"net/http"
+
+	"github.com/chemax/url-shorter/certgen"
 
 	"github.com/chemax/url-shorter/config"
 
@@ -22,7 +23,7 @@ import (
 )
 
 // Run точка входа в приложение
-func Run() error {
+func Run() (err error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cfg, err := config.NewConfig()
@@ -57,7 +58,8 @@ func Run() error {
 		// девопсы, let's encrypt или ещё кто
 		// да и я бы предпочел, для вебсервера тупого, прикрыть его nginx'ом. нежели поднимать на нём хттпс. просто удобней.
 		c1, c2 := certgen.NewCert()
-		pair, err := tls.X509KeyPair(c1.Bytes(), c2.Bytes())
+		var pair tls.Certificate
+		pair, err = tls.X509KeyPair(c1.Bytes(), c2.Bytes())
 		if err != nil {
 			return err
 		}
