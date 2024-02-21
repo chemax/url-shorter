@@ -20,6 +20,7 @@ type Config struct {
 	PathSave        *PathForSave
 	DBConfig        *DBConfig
 	flagInitialized bool
+	HTTPSEnabled    bool
 	secretKey       string
 	tokenExp        time.Duration
 }
@@ -138,6 +139,7 @@ func (c *Config) initFlags() {
 		return
 	}
 	c.flagInitialized = true
+	flag.BoolVar(&cfg.HTTPSEnabled, "s", false, "enable https")
 	flag.Var(cfg.NetAddr, "a", "Net address Host:Port")
 	flag.Var(cfg.HTTPAddr, "b", "http(s) address http://host:port")
 	flag.Var(cfg.PathSave, "f", "full path to file for save url's")

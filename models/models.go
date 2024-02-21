@@ -44,6 +44,8 @@ const (
 	CodeLength = 8
 	// CodeGenerateAttempts число попыток создать уникальный код
 	CodeGenerateAttempts = 20
+	// HTTPSEnabled https flag env
+	HTTPSEnabled = "ENABLE_HTTPS"
 )
 
 // AlreadyHaveThisURLError если урл уже существует

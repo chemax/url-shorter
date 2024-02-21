@@ -50,5 +50,8 @@ func NewConfig() (*Config, error) {
 			return nil, fmt.Errorf("error setup save path: %w", err)
 		}
 	}
+	if _, ok := os.LookupEnv(models.HTTPSEnabled); ok {
+		cfg.HTTPSEnabled = true
+	}
 	return cfg, nil
 }
