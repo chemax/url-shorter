@@ -1,9 +1,8 @@
 package config
 
 import (
-	"flag"
+	"fmt"
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,46 +17,9 @@ func TestConfig(t *testing.T) {
 
 }
 
-func TestNetAddr_Set(t *testing.T) {
-	flag.Parse()
-	addr := &NetAddr{}
-
-	err := addr.Set("localhost:8080")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if addr.Host != "localhost" || addr.Port != 8080 {
-		t.Errorf("unexpected result: %s:%d", addr.Host, addr.Port)
-	}
-
-	err = addr.Set("invalid_address")
-	if err == nil {
-		t.Error("expected an error")
-	}
-}
-
-func TestHTTPAddr_Set(t *testing.T) {
-	httpAddr := &HTTPAddr{}
-
-	err := httpAddr.Set("http://localhost:8080")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
-	if httpAddr.Addr != "http://localhost:8080" {
-		t.Errorf("unexpected result: %s", httpAddr.Addr)
-	}
-
-	err = httpAddr.Set("invalid_address")
-	if err == nil {
-		t.Error("expected an error")
-	}
-}
-
 func TestConfig_GetNetAddr(t *testing.T) {
 	cfgForTest := &Config{
-		NetAddr: &NetAddr{Host: "localhost", Port: 8080},
+		NetAddr: "localhost:8080",
 	}
 
 	result := cfgForTest.GetNetAddr()
@@ -70,7 +32,7 @@ func TestConfig_GetNetAddr(t *testing.T) {
 
 func TestConfig_GetHTTPAddr(t *testing.T) {
 	cfgForTest := &Config{
-		HTTPAddr: &HTTPAddr{Addr: "http://localhost:8080"},
+		HTTPAddr: "http://localhost:8080",
 	}
 
 	result := cfgForTest.GetHTTPAddr()
@@ -82,23 +44,47 @@ func TestConfig_GetHTTPAddr(t *testing.T) {
 }
 
 func TestInit(t *testing.T) {
-	os.Setenv("SERVER_ADDRESS", "localhost:8080")
+	//проверяем правильность приоритетов конфигурации (какая же дурацкая задача)
+	tFile, err := os.CreateTemp("", "config.json")
+	assert.Nil(t, err)
+	// Вызов ответственен за очистку
+	defer func(name string) {
+		err := tFile.Close()
+		if err != nil {
+			fmt.Println("error close tmp file", err.Error())
+		}
+		err = os.Remove(name)
+		if err != nil {
+			fmt.Println("error delete tmp file", err.Error())
+		}
+	}(tFile.Name())
+	testJSONData := []byte(`{
+	   "server_address": "localhost:9999",
+	   "base_url": "http://localhost:54321",
+	   "file_storage_path": "/some.db",
+	   "database_dsn": "",
+	   "enable_https": true
+	}`)
+
+	_, err = tFile.Write(testJSONData)
+	assert.Nil(t, err)
+
+	os.Setenv("SERVER_ADDRESS", "localhost:4444")
 	os.Setenv("BASE_URL", "http://localhost:8080")
+	os.Setenv("CONFIG", tFile.Name())
+
+	//Если при наличии энв переменной полезет в несуществующий файл - чет не так.
+	os.Args = []string{"somebinaryfile", "-c", "./config_test.json"}
 
 	defer func() {
 		os.Unsetenv("SERVER_ADDRESS")
 		os.Unsetenv("BASE_URL")
+		os.Unsetenv("CONFIG")
 	}()
 
-	//init()
-
-	expectedNetAddr := &NetAddr{Host: "localhost", Port: 8080}
-	if !reflect.DeepEqual(cfg.NetAddr, expectedNetAddr) {
-		t.Errorf("unexpected NetAddr: %+v", cfg.NetAddr)
-	}
-
-	expectedHTTPAddr := &HTTPAddr{Addr: "http://localhost:8080"}
-	if !reflect.DeepEqual(cfg.HTTPAddr, expectedHTTPAddr) {
-		t.Errorf("unexpected HTTPAddr: %+v", cfg.HTTPAddr)
-	}
+	cfgFirst, err := NewConfig()
+	assert.Nil(t, err)
+	assert.NotNil(t, cfgFirst)
+	assert.Equal(t, "localhost:4444", cfgFirst.GetNetAddr())
+	assert.Equal(t, "/some.db", cfgFirst.GetSavePath())
 }
