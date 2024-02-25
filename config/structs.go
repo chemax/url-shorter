@@ -82,6 +82,8 @@ func (c *Config) initFlags(tmpCfg *tmpConfig) {
 	flaggy.Parse()
 }
 
+// SetFromTmpConfig вносит в конфиг параметры из временного конфига, который формируется из флагов, энва и файла
+// для каждого вида конфигурации свой тмп, вносятся в порядке роста приоритета конфига
 func (c *Config) SetFromTmpConfig(tmp *tmpConfig) {
 	if tmp.ServerAddress != "" {
 		cfg.NetAddr = tmp.ServerAddress
