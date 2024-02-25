@@ -19,8 +19,7 @@ func TestNewStorage(t *testing.T) {
 	defer ctrl.Finish()
 	cfg, err := config.NewConfig()
 	assert.Nil(t, err)
-	err = cfg.DBConfig.Set("test string")
-	assert.Nil(t, err)
+	cfg.DBConfig = "test string"
 	lg, err := logger.NewLogger()
 	assert.Nil(t, err)
 	bd := mock_storage.NewMockdataBaser(ctrl)

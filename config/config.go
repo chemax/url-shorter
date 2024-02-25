@@ -3,7 +3,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -26,10 +25,10 @@ var (
 // такой тупой фигней как 100500 вариантов конфигурации сервиса никто в здравом уме делать не будет.
 // это понижает надежность сервиса в разы. 100500 способов отстрелить себе ногу, привет Си.
 func NewConfig() (*Config, error) {
-	defer cfg.beautiPrint()
+	//defer cfg.beautiPrint()
 	tmpConfigForFlags := &tmpConfig{} //сюда мы запишем данные из флагов, чтобы не затереть их потом конфигом из JSON
 	cfg.initFlags(tmpConfigForFlags)  // прихраним их и спарсим жсончик.
-	fmt.Println("tmpConfigForFlags", tmpConfigForFlags)
+	//fmt.Println("tmpConfigForFlags", tmpConfigForFlags)
 	// нам надо определить есть ли у нас конфигФайл. Сначала проверяем энв.
 	cfgPath := os.Getenv(models.CONFIG)
 	if cfgPath == "" {

@@ -11,7 +11,6 @@ func (c *Config) parseJSON(data []byte) error {
 	if err != nil {
 		return fmt.Errorf("error parse json config: %w", err)
 	}
-	fmt.Println("111", tmp)
 	c.SetFromTmpConfig(tmp)
 	return nil
 }

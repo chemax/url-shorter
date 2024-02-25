@@ -37,7 +37,7 @@ func Run() (err error) {
 	defer log.Shutdown()
 	pprofserver.NewPprof(ctx, log)
 
-	dbObj, err := db.NewDB(cfg.DBConfig.String(), log)
+	dbObj, err := db.NewDB(cfg.DBConfig, log)
 	if err != nil {
 		return fmt.Errorf("db init error: %w", err)
 	}
