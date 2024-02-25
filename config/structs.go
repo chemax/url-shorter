@@ -6,8 +6,9 @@ In this file only type structs and its methods
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/integrii/flaggy"
 	"time"
+
+	"github.com/integrii/flaggy"
 )
 
 // Config содержит в себе весь конфиг включая подструктуры
