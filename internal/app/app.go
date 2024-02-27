@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/chemax/url-shorter/httpserver"
 
@@ -23,6 +26,9 @@ import (
 
 // Run точка входа в приложение
 func Run() (err error) {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cfg, err := config.NewConfig()
@@ -51,7 +57,7 @@ func Run() (err error) {
 
 	handler := handlers.NewHandlers(st, cfg, log, usersObj)
 
-	err = httpserver.New(ctx, cfg, log, handler.Router)
+	err = httpserver.New(ctx, cfg, log, handler.Router, sig)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil

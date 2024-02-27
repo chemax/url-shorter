@@ -6,8 +6,6 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/chemax/url-shorter/certgen"
@@ -22,7 +20,7 @@ type Loggerer interface {
 	Errorln(args ...interface{})
 }
 
-func New(ctx context.Context, cfg *config.Config, log Loggerer, r http.Handler) error {
+func New(ctx context.Context, cfg *config.Config, log Loggerer, r http.Handler, sig chan os.Signal) error {
 	server := http.Server{
 		IdleTimeout: time.Second * 30,
 		ReadTimeout: time.Second * 30,
@@ -30,8 +28,6 @@ func New(ctx context.Context, cfg *config.Config, log Loggerer, r http.Handler) 
 		Handler:     r,
 	}
 	serverCtx, serverStopCtx := context.WithCancel(ctx)
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	go func() {
 		// https://github.com/go-chi/chi/blob/master/_examples/graceful/main.go
