@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/chemax/url-shorter/logger"
 	"github.com/chemax/url-shorter/models"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestNewDB(t *testing.T) {
