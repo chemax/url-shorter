@@ -1,3 +1,4 @@
+// Package httpserver создаёт новый http(s) сервер
 package httpserver
 
 import (
@@ -20,6 +21,7 @@ type Loggerer interface {
 	Errorln(args ...interface{})
 }
 
+// New создаёт новый http(s) сервер
 func New(ctx context.Context, cfg *config.Config, log Loggerer, r http.Handler, sig chan os.Signal) error {
 	server := http.Server{
 		IdleTimeout: time.Second * 30,
