@@ -2,7 +2,7 @@ module github.com/chemax/url-shorter
 
 go 1.21
 
-toolchain go1.22.0
+toolchain go1.21.7
 
 require (
 	github.com/go-chi/chi/v5 v5.0.10
@@ -37,6 +37,8 @@ require (
 	golang.org/x/exp/typeparams v0.0.0-20221208152030-732eee02a75a // indirect
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/tools/cmd/cover v0.1.0-deprecated // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
