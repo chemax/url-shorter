@@ -18,8 +18,8 @@ type configer interface {
 	GetHTTPAddr() string
 }
 
-// userser интерфейс юзер-менеджера
-type userser interface {
+// Userser интерфейс юзер-менеджера
+type Userser interface {
 	Middleware(next http.Handler) http.Handler
 }
 
@@ -73,7 +73,7 @@ func initRender() {
 }
 
 // NewHandlers возвращает хендлер всех ручек
-func NewHandlers(s storager, cfg configer, log loggerer, users userser) *handlers {
+func NewHandlers(s storager, cfg configer, log loggerer, users Userser) *handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &handlers{

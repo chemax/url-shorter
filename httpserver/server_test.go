@@ -2,15 +2,16 @@ package httpserver
 
 import (
 	"context"
-	"github.com/chemax/url-shorter/config"
-	"github.com/chemax/url-shorter/logger"
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"os"
 	"syscall"
 	"testing"
 	"time"
+
+	"github.com/chemax/url-shorter/config"
+	"github.com/chemax/url-shorter/logger"
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
