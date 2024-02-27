@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"github.com/chemax/url-shorter/logger"
+	"github.com/chemax/url-shorter/models"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -87,5 +88,72 @@ func TestNewDB(t *testing.T) {
 
 		_, err = db.GetAllURLs("123")
 		assert.Nil(t, err)
+	})
+	t.Run("db.Get", func(t *testing.T) {
+		log, _ := logger.NewLogger()
+		db, err := NewDB("", log)
+		assert.Nil(t, err)
+		assert.NotNil(t, db)
+		mock, err := pgxmock.NewPool()
+		defer mock.Close()
+		assert.Nil(t, err)
+
+		db.conn = mock
+		rows := mock.NewRows([]string{"url", "deleted"}).
+			AddRow("xxx", false)
+		mock.ExpectQuery(`SELECT url, deleted FROM urls .+`).WithArgs("123").WillReturnRows(rows)
+
+		xxx, err := db.Get("123")
+		assert.Nil(t, err)
+		assert.Equal(t, "xxx", xxx)
+	})
+	t.Run("db.Get err1", func(t *testing.T) {
+		log, _ := logger.NewLogger()
+		db, err := NewDB("", log)
+		assert.Nil(t, err)
+		assert.NotNil(t, db)
+		mock, err := pgxmock.NewPool()
+		defer mock.Close()
+		assert.Nil(t, err)
+
+		db.conn = mock
+		mock.ExpectQuery(`SELECT url, deleted FROM urls .+`).WithArgs("123").WillReturnError(fmt.Errorf("test error"))
+
+		_, err = db.Get("123")
+		assert.NotNil(t, err)
+	})
+	t.Run("db.Get err2", func(t *testing.T) {
+		log, _ := logger.NewLogger()
+		db, err := NewDB("", log)
+		assert.Nil(t, err)
+		assert.NotNil(t, db)
+		mock, err := pgxmock.NewPool()
+		defer mock.Close()
+		assert.Nil(t, err)
+
+		db.conn = mock
+		rows := mock.NewRows([]string{"url", "deleted"}).
+			AddRow("xxx", true)
+		mock.ExpectQuery(`SELECT url, deleted FROM urls .+`).WithArgs("123").WillReturnRows(rows)
+
+		_, err = db.Get("123")
+		assert.NotNil(t, err)
+	})
+	t.Run("db.SaveURL AlreadyHaveThisURLError", func(t *testing.T) {
+		log, _ := logger.NewLogger()
+		db, err := NewDB("", log)
+		assert.Nil(t, err)
+		assert.NotNil(t, db)
+		mock, err := pgxmock.NewPool()
+		defer mock.Close()
+		assert.Nil(t, err)
+
+		db.conn = mock
+		rows := mock.NewRows([]string{"shortcode"}).
+			AddRow("xxx")
+		mock.ExpectQuery(`.+`).WithArgs("123", "456", "789").WillReturnRows(rows)
+
+		_, err = db.SaveURL("123", "456", "789")
+		assert.ErrorIs(t, &models.AlreadyHaveThisURLError{}, err)
 	})
 }
