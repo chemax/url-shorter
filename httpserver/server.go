@@ -4,13 +4,14 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
-	"github.com/chemax/url-shorter/certgen"
-	"github.com/chemax/url-shorter/config"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/chemax/url-shorter/certgen"
+	"github.com/chemax/url-shorter/config"
 )
 
 // Loggerer интерфейс логера
@@ -36,7 +37,8 @@ func New(ctx context.Context, cfg *config.Config, log Loggerer, r http.Handler) 
 		// https://github.com/go-chi/chi/blob/master/_examples/graceful/main.go
 		<-sig
 
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		shutdownCtx, shutDownCancelFunc := context.WithTimeout(serverCtx, 30*time.Second)
+		defer shutDownCancelFunc() // подавись, линтер
 
 		go func() {
 			<-shutdownCtx.Done()
