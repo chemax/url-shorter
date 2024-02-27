@@ -3,12 +3,10 @@ package app
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/httpserver"
 	"net/http"
-
-	"github.com/chemax/url-shorter/certgen"
 
 	"github.com/chemax/url-shorter/config"
 
@@ -51,31 +49,9 @@ func Run() (err error) {
 	}
 
 	handler := handlers.NewHandlers(st, cfg, log, usersObj)
-	if cfg.HTTPSEnabled {
-		log.Infoln("start https server")
-		// с одной стороны, стоит передавать в генератор серта свой хост. из конфига.
-		// с другой стороны, в нормальной ситуации такой фигней заниматься не придётся, серт будет рядом лежать.
-		// девопсы, let's encrypt или ещё кто
-		// да и я бы предпочел, для вебсервера тупого, прикрыть его nginx'ом. нежели поднимать на нём хттпс. просто удобней.
-		c1, c2 := certgen.NewCert()
-		var pair tls.Certificate
-		pair, err = tls.X509KeyPair(c1.Bytes(), c2.Bytes())
-		if err != nil {
-			return err
-		}
-		tlsConfig := &tls.Config{
-			Certificates: []tls.Certificate{pair},
-		}
-		server := http.Server{
-			Addr:      cfg.GetNetAddr(),
-			TLSConfig: tlsConfig,
-			Handler:   handler.Router,
-		}
-		err = server.ListenAndServeTLS("", "")
-	} else {
-		log.Infoln("start http server")
-		err = http.ListenAndServe(cfg.GetNetAddr(), handler.Router)
-	}
+
+	err = httpserver.New(ctx, cfg, log, handler.Router)
+
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil
 	}
