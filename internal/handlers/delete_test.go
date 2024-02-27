@@ -2,6 +2,10 @@ package handlers
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/logger"
@@ -10,9 +14,6 @@ import (
 	"github.com/chemax/url-shorter/users"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestHandlers_DeleteUserURLsHandler(t *testing.T) {

@@ -2,11 +2,12 @@ package app
 
 import (
 	"fmt"
-	"github.com/chemax/url-shorter/models"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/chemax/url-shorter/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestApp(t *testing.T) {
