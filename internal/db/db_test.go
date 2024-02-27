@@ -78,11 +78,13 @@ func TestNewDB(t *testing.T) {
 		mock, err := pgxmock.NewPool()
 		defer mock.Close()
 		assert.Nil(t, err)
+
 		db.conn = mock
 		rows := mock.NewRows([]string{"url", "shortcode"}).
 			AddRow("xxx", "hello").
 			AddRow("yyy", "world")
 		mock.ExpectQuery(`SELECT url, shortcode FROM urls`).WithArgs("123").WillReturnRows(rows)
+
 		_, err = db.GetAllURLs("123")
 		assert.Nil(t, err)
 	})
