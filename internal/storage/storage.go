@@ -163,7 +163,6 @@ func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err err
 	for {
 		code = randStringRunes(models.CodeLength)
 		dupCode, err := u.db.SaveURL(code, parsedURL, userID)
-		u.log.Error(err)
 		if err != nil && !errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			loop++
 			if loop > models.CodeGenerateAttempts {

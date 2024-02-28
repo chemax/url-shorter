@@ -46,8 +46,12 @@ type log struct {
 func NewLogger() (*log, error) {
 	l := &log{}
 	cfgLogger := zap.NewDevelopmentConfig()
+	opts := []zap.Option{
+		zap.AddCallerSkip(1), // traverse call depth for more useful log lines
+		zap.AddCaller(),
+	}
 	cfgLogger.DisableStacktrace = true
-	lx, err := cfgLogger.Build()
+	lx, err := cfgLogger.Build(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("build logger error: %w", err)
 	}
