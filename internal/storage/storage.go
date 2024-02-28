@@ -163,11 +163,12 @@ func (u *managerURL) dbAddNewURL(parsedURL, userID string) (code string, err err
 	for {
 		code = randStringRunes(models.CodeLength)
 		dupCode, err := u.db.SaveURL(code, parsedURL, userID)
+		u.log.Error(err)
 		if err != nil && !errors.Is(err, &models.AlreadyHaveThisURLError{}) {
 			loop++
 			if loop > models.CodeGenerateAttempts {
 				code = ""
-				return code, fmt.Errorf("can not found free code for short url")
+				return code, fmt.Errorf("can not found free code for short url in db")
 			}
 			continue
 		}

@@ -20,8 +20,12 @@ func TestHandlers_DeleteUserURLsHandler(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	JSONURL := "{\"url\": \"http://ya.ru\"}"
-	URLSForDelete := "[\"1234\"]"
 	newUrlCode := "1234"
+	JSONURL2 := "{\"url\": \"http://yandex.ru\"}"
+	newUrlCode2 := "1235"
+	JSONURL3 := "{\"url\": \"vk.com\"}"
+	newUrlCode3 := "1236"
+	URLSForDelete := "[\"1234\"]"
 	userUrls := []models.URLWithShort{{Shortcode: newUrlCode, URL: "http://ya.ru"}}
 	t.Run("1", func(t *testing.T) {
 		cfg, _ := config.NewConfig()
@@ -72,13 +76,24 @@ func TestHandlers_DeleteUserURLsHandler(t *testing.T) {
 		defer res4.Body.Close()
 		assert.Equal(t, http.StatusBadRequest, res4.StatusCode)
 
-		request5 := httptest.NewRequest(http.MethodDelete, "/api/user/urls", bytes.NewBuffer([]byte("{{")))
+		st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).AnyTimes().Return(newUrlCode2, nil)
+		request5 := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL2)))
 		request5.AddCookie(res.Cookies()[0])
 		request5.Header.Set("Content-Type", "application/json")
 		w5 := httptest.NewRecorder()
 		handlersForTest.Router.ServeHTTP(w5, request5)
 		res5 := w5.Result()
 		defer res5.Body.Close()
-		assert.Equal(t, http.StatusBadRequest, res5.StatusCode)
+		assert.Equal(t, http.StatusCreated, res5.StatusCode)
+
+		st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).AnyTimes().Return(newUrlCode3, nil)
+		request6 := httptest.NewRequest(http.MethodPost, "/api/shorten", bytes.NewBuffer([]byte(JSONURL3)))
+		request6.AddCookie(res.Cookies()[0])
+		request6.Header.Set("Content-Type", "application/json")
+		w6 := httptest.NewRecorder()
+		handlersForTest.Router.ServeHTTP(w6, request6)
+		res6 := w5.Result()
+		defer res6.Body.Close()
+		assert.Equal(t, http.StatusCreated, res6.StatusCode)
 	})
 }

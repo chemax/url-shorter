@@ -243,6 +243,12 @@ func (db *managerDB) CreateUser() (string, error) {
 	return id, nil
 }
 
+// SetCon исключительно для моканья БД
+func (db *managerDB) SetCon(mockCon PgxIface) {
+	db.conn = mockCon
+	db.configured = true
+}
+
 // Ping базы данных
 func (db *managerDB) Ping() error {
 	// мьютекс нужен, потому что я использую пинг для реконнекта
