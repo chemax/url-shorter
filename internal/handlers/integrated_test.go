@@ -2,14 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"github.com/chemax/url-shorter/config"
-	"github.com/chemax/url-shorter/internal/db"
-	"github.com/chemax/url-shorter/internal/storage"
-	"github.com/chemax/url-shorter/logger"
-	"github.com/chemax/url-shorter/models"
-	"github.com/chemax/url-shorter/users"
-	"github.com/pashagolub/pgxmock/v3"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +10,15 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+
+	"github.com/chemax/url-shorter/config"
+	"github.com/chemax/url-shorter/internal/db"
+	"github.com/chemax/url-shorter/internal/storage"
+	"github.com/chemax/url-shorter/logger"
+	"github.com/chemax/url-shorter/models"
+	"github.com/chemax/url-shorter/users"
+	"github.com/pashagolub/pgxmock/v3"
+	"github.com/stretchr/testify/assert"
 )
 
 // Ещё одна попытка сделать интеграционный тест
