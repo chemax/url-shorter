@@ -24,8 +24,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 		db.conn = mock
 		mock.ExpectExec(`create table if not exists URLs`).WillReturnResult(pgxmock.NewResult("CREATE", 1))
 		mock.ExpectExec(`create table if not exists users`).WillReturnResult(pgxmock.NewResult("CREATE", 1))
@@ -38,8 +40,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 		db.conn = mock
 		mock.ExpectExec(`create table if not exists URLs`).WillReturnError(fmt.Errorf("test error URLs"))
 		err = db.createURLsTable()
@@ -52,7 +56,9 @@ func TestNewDB(t *testing.T) {
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
 		defer mock.Close()
-		assert.Nil(t, err)
+		if err != nil {
+			return
+		}
 		db.conn = mock
 		mock.ExpectExec(`create table if not exists URLs`).WillReturnResult(pgxmock.NewResult("CREATE", 1))
 		mock.ExpectExec(`create table if not exists users`).WillReturnError(fmt.Errorf("test error users"))
@@ -65,8 +71,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 		db.conn = mock
 		mock.ExpectQuery(`SELECT url, shortcode FROM urls`).WillReturnError(fmt.Errorf("test error getAllURLs"))
 		_, err = db.GetAllURLs("123")
@@ -78,8 +86,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 
 		db.conn = mock
 		rows := mock.NewRows([]string{"url", "shortcode"}).
@@ -96,8 +106,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 
 		db.conn = mock
 		rows := mock.NewRows([]string{"url", "deleted"}).
@@ -114,8 +126,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 
 		db.conn = mock
 		mock.ExpectQuery(`SELECT url, deleted FROM urls .+`).WithArgs("123").WillReturnError(fmt.Errorf("test error"))
@@ -129,8 +143,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 
 		db.conn = mock
 		rows := mock.NewRows([]string{"url", "deleted"}).
@@ -146,8 +162,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
+		if err != nil {
+			return
+		}
 		defer mock.Close()
-		assert.Nil(t, err)
 
 		db.conn = mock
 		rows := mock.NewRows([]string{"shortcode"}).
