@@ -62,6 +62,6 @@ func Run() (err error) {
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil
 	}
-	log.Debugln(err)
+	log.Debug(err)
 	return err
 }

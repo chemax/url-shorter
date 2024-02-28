@@ -12,8 +12,8 @@ import (
 
 // loggerer интерфейс логера
 type loggerer interface {
-	Infoln(args ...interface{})
-	Errorln(args ...interface{})
+	Info(args ...interface{})
+	Error(args ...interface{})
 }
 
 // NewPprof включает в проекте pprof
@@ -41,10 +41,10 @@ func NewPprof(ctx context.Context, log loggerer) {
 	go func(ctx context.Context, notErr chan error) {
 		select {
 		case err := <-notErr:
-			log.Errorln(fmt.Errorf("pprof server error: %w", err))
+			log.Error(fmt.Errorf("pprof server error: %w", err))
 		case <-ctx.Done():
 			s.Shutdown(ctx)
 		}
-		log.Infoln("pprof server stopped")
+		log.Info("pprof server stopped")
 	}(ctx, notifyErr)
 }

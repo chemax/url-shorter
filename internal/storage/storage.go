@@ -23,7 +23,7 @@ type configer interface {
 
 // loggerer интерфейс логера
 type loggerer interface {
-	Debugln(args ...interface{})
+	Debug(args ...interface{})
 	Error(args ...interface{})
 }
 
@@ -101,7 +101,7 @@ func (u *managerURL) restore() error {
 			continue
 		}
 		u.URLs[parsedURL.Code] = parsedURL
-		u.log.Debugln("restored: ", scanner.Text())
+		u.log.Debug("restored: ", scanner.Text())
 	}
 	return nil
 }

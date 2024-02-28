@@ -15,10 +15,10 @@ import (
 
 // Loggerer интерфейс логера
 type Loggerer interface {
-	Infoln(args ...interface{})
-	Debugln(args ...interface{})
-	Fatalln(args ...interface{})
-	Errorln(args ...interface{})
+	Info(args ...interface{})
+	Debug(args ...interface{})
+	Fatal(args ...interface{})
+	Error(args ...interface{})
 }
 
 // New создаёт новый http(s) сервер
@@ -41,19 +41,19 @@ func New(ctx context.Context, cfg *config.Config, log Loggerer, r http.Handler, 
 		go func() {
 			<-shutdownCtx.Done()
 			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
-				log.Fatalln("graceful shutdown timed out.. forcing exit.")
+				log.Fatal("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
 
 		err := server.Shutdown(shutdownCtx)
 		if err != nil {
-			log.Fatalln(err) // если шатдаун не прошёл - кладём сервер принудительно, а то зависнет
+			log.Fatal(err) // если шатдаун не прошёл - кладём сервер принудительно, а то зависнет
 		}
 		serverStopCtx()
 	}()
 	var serverErr error
 	if cfg.HTTPSEnabled {
-		log.Infoln("start https server")
+		log.Info("start https server")
 		// с одной стороны, стоит передавать в генератор серта свой хост. из конфига.
 		// с другой стороны, в нормальной ситуации такой фигней заниматься не придётся, серт будет рядом лежать.
 		// девопсы, let's encrypt или ещё кто
@@ -62,14 +62,14 @@ func New(ctx context.Context, cfg *config.Config, log Loggerer, r http.Handler, 
 		var pair tls.Certificate
 		pair, err := tls.X509KeyPair(c1.Bytes(), c2.Bytes())
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatal(err)
 		}
 		server.TLSConfig = &tls.Config{
 			Certificates: []tls.Certificate{pair},
 		}
 		serverErr = server.ListenAndServeTLS("", "")
 	} else {
-		log.Infoln("start http server")
+		log.Info("start http server")
 		serverErr = server.ListenAndServe()
 	}
 	<-serverCtx.Done()

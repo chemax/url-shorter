@@ -84,6 +84,11 @@ func (l *log) Error(args ...interface{}) {
 	l.Errorln(args)
 }
 
+// Fatal debug
+func (l *log) Fatal(args ...interface{}) {
+	l.Fatalln(args)
+}
+
 // Middleware для логирования хттп запросов
 func (l *log) Middleware(next http.Handler) http.Handler {
 
