@@ -64,6 +64,16 @@ func TestIntegrated(t *testing.T) {
 	authCookie := res.Cookies()[0]
 	res.Body.Close()
 
+	mock.ExpectQuery(`.+`).WithArgs(pgxmock.AnyArg(), "http://habr.com", userID1).WillReturnRows(rows2)
+	request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("http://habr.com")))
+	request.Header.Set("Content-Type", "text/plain")
+	request.AddCookie(authCookie)
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusCreated, res.StatusCode)
+	res.Body.Close()
+
 	mock.ExpectQuery(`.+`).WithArgs(pgxmock.AnyArg(), "youtube.com", "").WillReturnRows(rows2)
 	mock.ExpectQuery(`.+`).WithArgs(pgxmock.AnyArg(), "vk.com", "").WillReturnRows(rows2)
 	request = httptest.NewRequest(http.MethodPost, "/api/shorten/batch", bytes.NewBuffer([]byte(URLSForBatch)))
@@ -88,4 +98,16 @@ func TestIntegrated(t *testing.T) {
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	res.Body.Close()
 
+	//rows3 := mock.NewRows([]string{"url", "shortcode"}). //URLs пользователя
+	//	AddRow("1", "vk.com").
+	//	AddRow("2", "youtube.com").
+	//	AddRow("3", "http://ya.ru")
+	mock.ExpectQuery("SELECT url, shortcode FROM urls .+").WithArgs(userID1).WillReturnRows(rows3)
+	request = httptest.NewRequest(http.MethodGet, "/api/user/urls", nil)
+	request.AddCookie(authCookie)
+	handlersForTest.Router.ServeHTTP(w, request)
+	w = httptest.NewRecorder()
+	res = w.Result()
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	res.Body.Close()
 }
