@@ -9,6 +9,7 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+	"time"
 
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/internal/db"
@@ -92,22 +93,56 @@ func TestIntegrated(t *testing.T) {
 	mock.ExpectQuery("SELECT url, shortcode FROM urls .+").WithArgs(userID1).WillReturnRows(rows3)
 	request = httptest.NewRequest(http.MethodGet, "/api/user/urls", nil)
 	request.AddCookie(authCookie)
-	handlersForTest.Router.ServeHTTP(w, request)
 	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
 	res = w.Result()
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	res.Body.Close()
 
-	//rows3 := mock.NewRows([]string{"url", "shortcode"}). //URLs пользователя
-	//	AddRow("1", "vk.com").
-	//	AddRow("2", "youtube.com").
-	//	AddRow("3", "http://ya.ru")
+	//204
 	mock.ExpectQuery("SELECT url, shortcode FROM urls .+").WithArgs(userID1).WillReturnRows(rows3)
 	request = httptest.NewRequest(http.MethodGet, "/api/user/urls", nil)
 	request.AddCookie(authCookie)
-	handlersForTest.Router.ServeHTTP(w, request)
 	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusNoContent, res.StatusCode)
+	res.Body.Close()
+
+	request = httptest.NewRequest(http.MethodGet, "/ping", nil)
+	request.AddCookie(authCookie)
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
+	res.Body.Close()
+
+	mock.ExpectPing().WillDelayFor(time.Millisecond * 100)
+	request = httptest.NewRequest(http.MethodGet, "/ping", nil)
+	request.AddCookie(authCookie)
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
 	res = w.Result()
 	assert.Equal(t, http.StatusOK, res.StatusCode)
+	res.Body.Close()
+
+	rows4 := mock.NewRows([]string{"url", "deleted"}).AddRow("http://habr.com", false)
+	mock.ExpectQuery("SELECT url, deleted FROM urls .+").WithArgs("1234").WillReturnRows(rows4)
+	request = httptest.NewRequest(http.MethodGet, "/1234", nil)
+	request.AddCookie(authCookie)
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusTemporaryRedirect, res.StatusCode)
+	res.Body.Close()
+
+	rows5 := mock.NewRows([]string{"url", "deleted"}).AddRow("http://habr.com", true)
+	mock.ExpectQuery("SELECT url, deleted FROM urls .+").WithArgs("1234").WillReturnRows(rows5)
+	request = httptest.NewRequest(http.MethodGet, "/1234", nil)
+	request.AddCookie(authCookie)
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusGone, res.StatusCode)
 	res.Body.Close()
 }
