@@ -1,8 +1,9 @@
 package certgen
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewCert(t *testing.T) {
