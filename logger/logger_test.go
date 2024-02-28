@@ -13,5 +13,9 @@ func TestNewLogger(t *testing.T) {
 	defer func(lg *log) {
 		err = lg.Shutdown()
 	}(lg)
+	lg.Debug("debug")
+	lg.Info("info")
+	lg.Warn("warn")
+	lg.Error("error")
 
 }
