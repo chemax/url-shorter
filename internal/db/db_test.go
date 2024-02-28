@@ -55,10 +55,10 @@ func TestNewDB(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, db)
 		mock, err := pgxmock.NewPool()
-		defer mock.Close()
 		if err != nil {
 			return
 		}
+		defer mock.Close()
 		db.conn = mock
 		mock.ExpectExec(`create table if not exists URLs`).WillReturnResult(pgxmock.NewResult("CREATE", 1))
 		mock.ExpectExec(`create table if not exists users`).WillReturnError(fmt.Errorf("test error users"))
