@@ -94,14 +94,14 @@ func (db *managerDB) backgroundDeleteHandler() {
 			fmt.Fprintf(buf, "'%s'", v)
 		}
 		buf.WriteString(") AND userid = $1;")
-		//conn, err := db.conn.Acquire(context.Background())
-		//if err != nil {
-		//	db.log.Error("batch delete managerDB.conn.Acquire error %w", err)
-		//	continue
-		//}
+		conn, err := db.conn.Acquire(context.Background())
+		if err != nil {
+			db.log.Error("batch delete managerDB.conn.Acquire error %w", err)
+			continue
+		}
 
-		_, err := db.conn.Query(context.Background(), buf.String(), task.UserID)
-		//conn.Release()
+		_, err = conn.Query(context.Background(), buf.String(), task.UserID)
+		conn.Release()
 		if err != nil {
 			db.log.Error("batch delete error %w", err)
 			continue
