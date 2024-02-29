@@ -46,8 +46,12 @@ type log struct {
 func NewLogger() (*log, error) {
 	l := &log{}
 	cfgLogger := zap.NewDevelopmentConfig()
+	opts := []zap.Option{
+		zap.AddCallerSkip(1), // traverse call depth for more useful log lines
+		zap.AddCaller(),
+	}
 	cfgLogger.DisableStacktrace = true
-	lx, err := cfgLogger.Build()
+	lx, err := cfgLogger.Build(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("build logger error: %w", err)
 	}
@@ -78,6 +82,11 @@ func (l *log) Warn(args ...interface{}) {
 // Error error log
 func (l *log) Error(args ...interface{}) {
 	l.Errorln(args)
+}
+
+// Fatal debug
+func (l *log) Fatal(args ...interface{}) {
+	l.Fatalln(args)
 }
 
 // Middleware для логирования хттп запросов

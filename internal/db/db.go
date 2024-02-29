@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgconn"
+
 	"github.com/chemax/url-shorter/models"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,6 +22,29 @@ type Loggerer interface {
 	Error(args ...interface{})
 }
 
+// PgxIfacer
+type PgxIface interface {
+	Acquire(ctx context.Context) (*pgxpool.Conn, error)
+	Close()
+	Stat() *pgxpool.Stat
+	Reset()
+	Config() *pgxpool.Config
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Ping(context.Context) error
+}
+
+//type PgxIface interface {
+//	Begin(context.Context) (pgx.Tx, error)
+//	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+//	QueryRow(context.Context, string, ...interface{}) pgx.Row
+//	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+//	Ping(context.Context) error
+//	Prepare(context.Context, string, string) (*pgconn.StatementDescription, error)
+//	Close(context.Context) error
+//}
+
 // DeleteTask задача на удаление
 type DeleteTask struct {
 	Codes  []string
@@ -27,7 +52,8 @@ type DeleteTask struct {
 }
 
 type managerDB struct {
-	conn       *pgxpool.Pool
+	conn PgxIface
+	//conn       *pgxpool.Pool
 	url        string
 	pingSync   sync.Mutex
 	configured bool
@@ -101,12 +127,12 @@ func (db *managerDB) Use() bool {
 // GetAllURLs возвращает все сокращенные URL пользователя
 func (db *managerDB) GetAllURLs(userID string) ([]models.URLWithShort, error) {
 	var URLs []models.URLWithShort
-	conn, err := db.conn.Acquire(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("managerDB.conn.Acquire error: %w", err)
-	}
-	defer conn.Release()
-	rows, err := conn.Query(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1 AND deleted = false`, userID)
+	//conn, err := db.conn.Acquire(context.Background())
+	//if err != nil {
+	//	return nil, fmt.Errorf("managerDB.conn.Acquire error: %w", err)
+	//}
+	//defer conn.Release()
+	rows, err := db.conn.Query(context.Background(), `SELECT url, shortcode FROM urls WHERE userid = $1 AND deleted = false`, userID)
 	if err != nil {
 		return nil, fmt.Errorf("query URLs get error: %w", err)
 	}
@@ -126,12 +152,12 @@ func (db *managerDB) GetAllURLs(userID string) ([]models.URLWithShort, error) {
 func (db *managerDB) Get(shortcode string) (string, error) {
 	var URL string
 	var deleted bool
-	conn, err := db.conn.Acquire(context.Background())
-	if err != nil {
-		return "", fmt.Errorf("managerDB.conn.Acquire error: %w", err)
-	}
-	defer conn.Release()
-	err = conn.QueryRow(context.Background(), `SELECT url, deleted FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL, &deleted)
+	//conn, err := db.conn.Acquire(context.Background())
+	//if err != nil {
+	//	return "", fmt.Errorf("managerDB.conn.Acquire error: %w", err)
+	//}
+	//defer conn.Release()
+	err := db.conn.QueryRow(context.Background(), `SELECT url, deleted FROM urls WHERE shortcode = $1`, shortcode).Scan(&URL, &deleted)
 	if err != nil {
 		return "", fmt.Errorf("query shortcode error: %w", err)
 	}
@@ -181,14 +207,14 @@ values
 	returning url, shortcode
 ) 
 select shortcode from dup ;`
-	conn, err := db.conn.Acquire(context.Background())
-	if err != nil {
-		return "", fmt.Errorf("SaveURL managerDB.conn.Acquire error %w", err)
-	}
-	defer conn.Release()
-	row := conn.QueryRow(context.Background(), sqlString, shortcode, URL, userID)
+	//conn, err := db.conn.Acquire(context.Background())
+	//if err != nil {
+	//	return "", fmt.Errorf("SaveURL managerDB.conn.Acquire error %w", err)
+	//}
+	//defer conn.Release()
+	row := db.conn.QueryRow(context.Background(), sqlString, shortcode, URL, userID)
 	var rowString string
-	err = row.Scan(&rowString)
+	err := row.Scan(&rowString)
 	if err != nil {
 		//Ошибка это хорошо, конкретно эта. Она означает отсутствие дюпа.
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -203,18 +229,24 @@ select shortcode from dup ;`
 // CreateUser создает в бд нового пользователя
 func (db *managerDB) CreateUser() (string, error) {
 	sqlString := `INSERT INTO users values(default) RETURNING id;`
-	conn, err := db.conn.Acquire(context.Background())
-	if err != nil {
-		return "", fmt.Errorf("CreateUser managerDB.conn.Acquire error %w", err)
-	}
-	defer conn.Release()
-	row := conn.QueryRow(context.Background(), sqlString)
+	//conn, err := db.conn.Acquire(context.Background())
+	//if err != nil {
+	//	return "", fmt.Errorf("CreateUser managerDB.conn.Acquire error %w", err)
+	//}
+	//defer conn.Release()
+	row := db.conn.QueryRow(context.Background(), sqlString)
 	var id string
-	err = row.Scan(&id)
+	err := row.Scan(&id)
 	if err != nil {
 		return "", fmt.Errorf("error create new user: %w", err)
 	}
 	return id, nil
+}
+
+// SetCon исключительно для моканья БД
+func (db *managerDB) SetCon(mockCon PgxIface) {
+	db.conn = mockCon
+	db.configured = true
 }
 
 // Ping базы данных
@@ -228,12 +260,12 @@ func (db *managerDB) Ping() error {
 	if db.conn == nil {
 		return fmt.Errorf("connection is nil")
 	}
-	conn, err := db.conn.Acquire(context.Background())
-	if err != nil {
-		return fmt.Errorf("ping managerDB.conn.Acquire error %w", err)
-	}
-	defer conn.Release()
-	return conn.Ping(context.Background())
+	//conn, err := db.conn.Acquire(context.Background())
+	//if err != nil {
+	//	return fmt.Errorf("ping managerDB.conn.Acquire error %w", err)
+	//}
+	//defer conn.Release()
+	return db.conn.Ping(context.Background())
 }
 
 func (db *managerDB) pingAllTime() {

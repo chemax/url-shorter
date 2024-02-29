@@ -6,6 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/chemax/url-shorter/httpserver"
 
 	"github.com/chemax/url-shorter/config"
 
@@ -20,7 +25,10 @@ import (
 )
 
 // Run точка входа в приложение
-func Run() error {
+func Run() (err error) {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cfg, err := config.NewConfig()
@@ -34,7 +42,7 @@ func Run() error {
 	defer log.Shutdown()
 	pprofserver.NewPprof(ctx, log)
 
-	dbObj, err := db.NewDB(cfg.DBConfig.String(), log)
+	dbObj, err := db.NewDB(cfg.DBConfig, log)
 	if err != nil {
 		return fmt.Errorf("db init error: %w", err)
 	}
@@ -48,9 +56,12 @@ func Run() error {
 	}
 
 	handler := handlers.NewHandlers(st, cfg, log, usersObj)
-	err = http.ListenAndServe(cfg.GetNetAddr(), handler.Router)
+
+	err = httpserver.New(ctx, cfg, log, handler.Router, sig)
+
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil
 	}
+	log.Debug(err)
 	return err
 }

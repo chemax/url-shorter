@@ -20,7 +20,7 @@ type configer interface {
 
 // loggerer интерфейс логера
 type loggerer interface {
-	Debugln(args ...interface{})
+	Debug(args ...interface{})
 	Error(args ...interface{})
 }
 
@@ -44,7 +44,7 @@ type dataBaser interface {
 }
 
 func (u *users) createNewUser(w http.ResponseWriter) (userID string, err error) {
-	u.log.Debugln("Create new user")
+	u.log.Debug("Create new user")
 	if !u.Use() {
 		userID = uuid.New().String()
 	} else {
