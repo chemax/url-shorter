@@ -249,6 +249,24 @@ func (db *managerDB) SetCon(mockCon PgxIface) {
 	db.configured = true
 }
 
+// GetStatus возвращает статистику сервиса
+func (db *managerDB) GetStatus() (m models.Stats, err error) {
+	var URLs, users int
+	defer func() {
+		m.Users = users
+		m.URLs = URLs
+	}()
+	err = db.conn.QueryRow(context.Background(), `SELECT count(*) FROM urls`).Scan(&URLs)
+	if err != nil {
+		return m, fmt.Errorf("query shortcode error: %w", err)
+	}
+	err = db.conn.QueryRow(context.Background(), `SELECT count(*) FROM users`).Scan(&users)
+	if err != nil {
+		return m, fmt.Errorf("query shortcode error: %w", err)
+	}
+	return m, nil
+}
+
 // Ping базы данных
 func (db *managerDB) Ping() error {
 	// мьютекс нужен, потому что я использую пинг для реконнекта

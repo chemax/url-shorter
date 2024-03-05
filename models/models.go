@@ -24,7 +24,7 @@ type URLForBatchResponse struct {
 }
 
 type Stats struct {
-	Urls  int `json:"urls"`
+	URLs  int `json:"urls"`
 	Users int `json:"users"`
 }
 

@@ -35,6 +35,7 @@ type dataBaser interface {
 	Get(code string) (string, error)
 	GetAllURLs(userID string) ([]models.URLWithShort, error)
 	Use() bool
+	GetStats() (models.Stats, error)
 }
 
 type singleURL struct {
@@ -257,4 +258,12 @@ func (u *managerURL) Ping() bool {
 		return false
 	}
 	return true
+}
+
+func (u *managerURL) GetStats() (models.Stats, error) {
+	if u.db != nil {
+		return u.db.GetStats()
+	}
+	//Мы же вроде не храним пользователей в файловой базе
+	return models.Stats{URLs: len(u.URLs)}, nil
 }
