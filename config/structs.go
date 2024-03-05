@@ -22,6 +22,7 @@ type Config struct {
 	secretKey       string
 	tokenExp        time.Duration
 	ConfigPath      string
+	TrustedSubnet   string
 }
 
 type tmpConfig struct {
@@ -31,6 +32,7 @@ type tmpConfig struct {
 	DatabaseDsn     string `json:"database_dsn"`
 	EnableHttps     bool   `json:"enable_https"`
 	ConfigPath      string `json:"-"`
+	TrustedSubnet   string `json:"trusted_subnet"`
 }
 
 //нафиг оверинжиниринг
@@ -65,6 +67,11 @@ func (c *Config) GetHTTPAddr() string {
 	return c.HTTPAddr
 }
 
+// GetTrustedSubnet возвращает http адрес сервиса (для генерации сокращенных ссылок)
+func (c *Config) GetTrustedSubnet() string {
+	return c.TrustedSubnet
+}
+
 func (c *Config) initFlags(tmpCfg *tmpConfig) {
 	if c.flagInitialized {
 		return
@@ -74,6 +81,7 @@ func (c *Config) initFlags(tmpCfg *tmpConfig) {
 	flaggy.String(&tmpCfg.ConfigPath, "c", "config", "config file path")
 
 	flaggy.Bool(&tmpCfg.EnableHttps, "s", "", "enable https")
+	flaggy.String(&tmpCfg.TrustedSubnet, "t", "", "setup trusted subnet")
 	flaggy.String(&tmpCfg.ServerAddress, "a", "", "Net address Host:Port")
 	flaggy.String(&tmpCfg.BaseUrl, "b", "", "http(s) address http://host:port")
 	flaggy.String(&tmpCfg.FileStoragePath, "f", "", "full path to file for save url's")
@@ -96,6 +104,9 @@ func (c *Config) SetFromTmpConfig(tmp *tmpConfig) {
 	}
 	if tmp.DatabaseDsn != "" {
 		cfg.DBConfig = tmp.DatabaseDsn
+	}
+	if tmp.TrustedSubnet != "" {
+		cfg.TrustedSubnet = tmp.TrustedSubnet
 	}
 	cfg.HTTPSEnabled = tmp.EnableHttps // вот тут вопрос, что делать, ведь это инициализируется как фолс и будет перезатираться фолсом
 }

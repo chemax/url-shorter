@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 // configer интерфейс конфиг-структуры
 type configer interface {
 	GetHTTPAddr() string
+	GetTrustedSubnet() string
 }
 
 // Userser интерфейс юзер-менеджера
@@ -40,13 +42,15 @@ type storager interface {
 	AddNewURL(parsedURL string, userID string) (code string, err error)
 	Ping() bool
 	BatchSave(arr []*models.URLForBatch, httpPrefix string) (responseArr []models.URLForBatchResponse, err error)
+	GetStats() (models.Stats, error)
 }
 
 type handlers struct {
-	storage storager
-	Router  *chi.Mux
-	Cfg     configer
-	Log     loggerer
+	storage       storager
+	Router        *chi.Mux
+	Cfg           configer
+	Log           loggerer
+	TrustedSubnet *net.IPNet
 }
 
 func checkHeaderIsValidType(header string) bool {
@@ -82,6 +86,12 @@ func NewHandlers(s storager, cfg configer, log loggerer, users Userser) *handler
 		Cfg:     cfg,
 		Log:     log,
 	}
+	_, network, err := net.ParseCIDR(cfg.GetTrustedSubnet())
+	if err != nil {
+		h.Log.Warn(fmt.Errorf("WARN err setup trusted subnet: %w", err))
+	} else {
+		h.TrustedSubnet = network
+	}
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 	})
@@ -95,6 +105,7 @@ func NewHandlers(s storager, cfg configer, log loggerer, users Userser) *handler
 	r.Get("/ping", h.pingHandler)
 	r.Get("/{id}", h.getHandler)
 	r.Get("/api/user/urls", h.getUserURLsHandler)
+	r.Get("/api/internal/stats", h.statHandler)
 	r.Delete("/api/user/urls", h.DeleteUserURLsHandler)
 	return h
 }

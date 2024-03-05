@@ -11,12 +11,13 @@ import (
 
 var (
 	cfg = &Config{
-		NetAddr:   "localhost:8080",
-		HTTPAddr:  "http://localhost:8080",
-		PathSave:  "/tmp/short-url-db.json",
-		DBConfig:  "",
-		tokenExp:  time.Hour * 3,
-		secretKey: "XXXXXX",
+		NetAddr:       "localhost:8080",
+		HTTPAddr:      "http://localhost:8080",
+		PathSave:      "/tmp/short-url-db.json",
+		DBConfig:      "",
+		tokenExp:      time.Hour * 3,
+		secretKey:     "XXXXXX",
+		TrustedSubnet: "",
 	}
 )
 
@@ -27,8 +28,7 @@ var (
 func NewConfig() (*Config, error) {
 	//defer cfg.beautiPrint()
 	tmpConfigForFlags := &tmpConfig{} //сюда мы запишем данные из флагов, чтобы не затереть их потом конфигом из JSON
-	cfg.initFlags(tmpConfigForFlags)  // прихраним их и спарсим жсончик.
-	//fmt.Println("tmpConfigForFlags", tmpConfigForFlags)
+	cfg.initFlags(tmpConfigForFlags)  // прихраним их и спарсим жсончи
 	// нам надо определить есть ли у нас конфигФайл. Сначала проверяем энв.
 	cfgPath := os.Getenv(models.CONFIG)
 	if cfgPath == "" {
@@ -46,9 +46,7 @@ func NewConfig() (*Config, error) {
 		}
 		// Данные из файла подтянуты, теперь можно флаги записать.
 	}
-	//cfg.beautiPrint()
 	cfg.SetFromTmpConfig(tmpConfigForFlags)
-	//cfg.beautiPrint()
 	// а теперь по классике, там где есть энв переменная, мы её считываем.
 	if srvAddr, ok := os.LookupEnv(models.ServerAddressEnv); ok && srvAddr != "" {
 		cfg.NetAddr = srvAddr
@@ -61,6 +59,9 @@ func NewConfig() (*Config, error) {
 	}
 	if connectString, ok := os.LookupEnv(models.DBConnectString); ok {
 		cfg.DBConfig = connectString
+	}
+	if trustedSubnet, ok := os.LookupEnv(models.TrustedSubnet); ok {
+		cfg.TrustedSubnet = trustedSubnet
 	}
 	if _, ok := os.LookupEnv(models.HTTPSEnabled); ok {
 		cfg.HTTPSEnabled = true
