@@ -27,8 +27,8 @@ type loggerer interface {
 	Error(args ...interface{})
 }
 
-// dataBaser интерфейс для базы данных
-type dataBaser interface {
+// DataBaser интерфейс для базы данных
+type DataBaser interface {
 	BatchDelete([]string, string)
 	Ping() error
 	SaveURL(code string, URL string, userID string) (string, error)
@@ -44,7 +44,7 @@ type singleURL struct {
 	UserID string `json:"userID"`
 }
 type managerURL struct {
-	db       dataBaser
+	db       DataBaser
 	URLs     map[string]*singleURL
 	URLMx    sync.RWMutex
 	SavePath string
@@ -64,7 +64,7 @@ func randStringRunes(n int) string {
 }
 
 // NewStorage создает и возвращает структуру управления URL'ами
-func NewStorage(cfg configer, logger loggerer, db dataBaser) (*managerURL, error) {
+func NewStorage(cfg configer, logger loggerer, db DataBaser) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {

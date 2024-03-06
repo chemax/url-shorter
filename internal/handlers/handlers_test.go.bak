@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	mock_handlers "github.com/chemax/url-shorter/mocks/newhandlers"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -44,8 +45,9 @@ func gzipString(src string) ([]byte, error) {
 func Test_urlManger_ServeHTTP(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	cfg := mock_util.NewMockConfigInterface(ctrl)
-	cfg.EXPECT().GetDBUse().Return(false).AnyTimes()
+	cfgHandler := mock_handlers.NewMockconfiger(ctrl)
+	cfgHandler.EXPECT().GetHTTPAddr().AnyTimes()
+	cfgHandler.EXPECT().GetTrustedSubnet().AnyTimes()
 	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
 	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
 	cfg.EXPECT().GetSavePath().Return("").AnyTimes()
@@ -179,7 +181,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			usersManager, _ := users.NewUser(cfg, lg, bd)
 			storageObj, _ := storage.NewStorage(cfg, lg, bd)
 
-			h := NewHandlers(storageObj, cfg, lg, usersManager)
+			h := NewHandlers(storageObj, cfgHandler, lg, usersManager)
 			if tt.args.target == "replaceme" {
 				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
 			}
@@ -212,6 +214,9 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	cfg := mock_util.NewMockConfigInterface(ctrl)
+	cfgHandler := mock_handlers.NewMockconfiger(ctrl)
+	cfgHandler.EXPECT().GetHTTPAddr().AnyTimes()
+	cfgHandler.EXPECT().GetTrustedSubnet().AnyTimes()
 	cfg.EXPECT().GetDBUse().Return(false).AnyTimes()
 	cfg.EXPECT().GetSavePath().Return("").AnyTimes()
 	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
@@ -295,7 +300,7 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			u, _ := storage.NewStorage(cfg, lg, bd)
 			usersManager, _ := users.NewUser(cfg, lg, bd)
-			h := NewHandlers(u, cfg, lg, usersManager)
+			h := NewHandlers(u, cfgHandler, lg, usersManager)
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
 
 			if tt.args.body != nil {
@@ -320,16 +325,19 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 func TestHandlers(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+	cfgHandler := mock_handlers.NewMockconfiger(ctrl)
+	cfgHandler.EXPECT().GetHTTPAddr().AnyTimes()
+	cfgHandler.EXPECT().GetTrustedSubnet().AnyTimes()
 	cfg := mock_util.NewMockConfigInterface(ctrl)
 	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
 	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
 	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
-	st := mock_util.NewMockStorageInterface(ctrl)
+	st := mock_handlers.NewMockstorager(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	log, _ := logger.NewLogger()
 	bd, _ := db.NewDB("", log)
 	usersManager, _ := users.NewUser(cfg, log, bd)
-	handlersForTest := NewHandlers(st, cfg, log, usersManager)
+	handlersForTest := NewHandlers(st, cfgHandler, log, usersManager)
 	assert.NotNil(t, handlersForTest)
 	JSONURL := "{\"url\": \"http://ya.ru\"}"
 	JSONURLArray := "[{\"correlation_id\":\"1\",\"original_url\": \"http://ya.ru\"}, {\"correlation_id\":\"2\",\"original_url\": \"http://ya.ru\"}]"

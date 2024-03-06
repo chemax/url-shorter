@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"fmt"
+	mock_handlers "github.com/chemax/url-shorter/mocks/newhandlers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -21,17 +22,18 @@ func BenchmarkHandlers_PostHandler(b *testing.B) {
 	ctrl := gomock.NewController(b)
 	defer ctrl.Finish()
 	cfg := mock_util.NewMockConfigInterface(ctrl)
+	cfgHandlers := mock_handlers.NewMockconfiger(ctrl)
 	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
 	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
 	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
-	st := mock_util.NewMockStorageInterface(ctrl)
+	st := mock_handlers.NewMockstorager(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).Return("12345678", nil).AnyTimes()
 
 	log, _ := logger.NewLogger()
 	bd, _ := db.NewDB("", log)
 	usersManager, _ := users.NewUser(cfg, log, bd)
-	handlers := NewHandlers(st, cfg, log, usersManager)
+	handlers := NewHandlers(st, cfgHandlers, log, usersManager)
 	JSONURLFmt := "{\"url\": \"http://%d.ya.ru\"}"
 	var cmps int
 	b.ResetTimer()

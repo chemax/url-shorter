@@ -49,6 +49,20 @@ func (mr *MockconfigerMockRecorder) GetHTTPAddr() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHTTPAddr", reflect.TypeOf((*Mockconfiger)(nil).GetHTTPAddr))
 }
 
+// GetTrustedSubnet mocks base method.
+func (m *Mockconfiger) GetTrustedSubnet() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTrustedSubnet")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetTrustedSubnet indicates an expected call of GetTrustedSubnet.
+func (mr *MockconfigerMockRecorder) GetTrustedSubnet() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrustedSubnet", reflect.TypeOf((*Mockconfiger)(nil).GetTrustedSubnet))
+}
+
 // MockUserser is a mock of Userser interface.
 type MockUserser struct {
 	ctrl     *gomock.Controller
@@ -250,6 +264,21 @@ func (m *Mockstorager) DeleteListFor(forDelete []string, userID string) {
 func (mr *MockstoragerMockRecorder) DeleteListFor(forDelete, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListFor", reflect.TypeOf((*Mockstorager)(nil).DeleteListFor), forDelete, userID)
+}
+
+// GetStats mocks base method.
+func (m *Mockstorager) GetStats() (models.Stats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStats")
+	ret0, _ := ret[0].(models.Stats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStats indicates an expected call of GetStats.
+func (mr *MockstoragerMockRecorder) GetStats() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStats", reflect.TypeOf((*Mockstorager)(nil).GetStats))
 }
 
 // GetURL mocks base method.

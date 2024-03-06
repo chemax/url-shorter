@@ -249,8 +249,8 @@ func (db *managerDB) SetCon(mockCon PgxIface) {
 	db.configured = true
 }
 
-// GetStatus возвращает статистику сервиса
-func (db *managerDB) GetStatus() (m models.Stats, err error) {
+// GetStats возвращает статистику сервиса
+func (db *managerDB) GetStats() (m models.Stats, err error) {
 	var URLs, users int
 	defer func() {
 		m.Users = users

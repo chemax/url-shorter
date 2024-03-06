@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	mock_handlers "github.com/chemax/url-shorter/mocks/newhandlers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,7 +10,6 @@ import (
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/logger"
-	mock_util "github.com/chemax/url-shorter/mocks/storage"
 	"github.com/chemax/url-shorter/models"
 	"github.com/chemax/url-shorter/users"
 	"github.com/golang/mock/gomock"
@@ -29,7 +29,7 @@ func TestHandlers_DeleteUserURLsHandler(t *testing.T) {
 	userUrls := []models.URLWithShort{{Shortcode: newUrlCode, URL: "http://ya.ru"}}
 	t.Run("1", func(t *testing.T) {
 		cfg, _ := config.NewConfig()
-		st := mock_util.NewMockStorageInterface(ctrl)
+		st := mock_handlers.NewMockstorager(ctrl)
 		st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 
 		log, _ := logger.NewLogger()
