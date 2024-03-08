@@ -51,7 +51,7 @@ func TestIntegrated(t *testing.T) {
 	//shortCode1 := "1234"
 	userID1 := "userid1"
 	rows := mock.NewRows([]string{"id"}). //создание пользователя
-						AddRow(userID1)
+		AddRow(userID1)
 	rows2 := mock.NewRows([]string{"shortcode"}) //сохранение URL
 	mock.ExpectQuery(`INSERT INTO users .+`).WillReturnRows(rows)
 	mock.ExpectQuery(`.+`).WithArgs(pgxmock.AnyArg(), "http://ya.ru", userID1).WillReturnRows(rows2)
@@ -88,9 +88,9 @@ func TestIntegrated(t *testing.T) {
 	res2.Body.Close()
 
 	rows3 := mock.NewRows([]string{"url", "shortcode"}). //URLs пользователя
-								AddRow("1", "vk.com").
-								AddRow("2", "youtube.com").
-								AddRow("3", "http://ya.ru")
+		AddRow("1", "vk.com").
+		AddRow("2", "youtube.com").
+		AddRow("3", "http://ya.ru")
 	mock.ExpectQuery("SELECT url, shortcode FROM urls .+").WithArgs(userID1).WillReturnRows(rows3)
 	request = httptest.NewRequest(http.MethodGet, "/api/user/urls", nil)
 	request.AddCookie(authCookie)
@@ -152,10 +152,21 @@ func TestIntegrated(t *testing.T) {
 	mock.ExpectQuery("SELECT count(*) FROM urls").WillReturnRows(rows6)
 	mock.ExpectQuery("SELECT count(*) FROM users").WillReturnRows(rows7)
 	request = httptest.NewRequest(http.MethodGet, "/api/internal/stats", nil)
+	request.AddCookie(authCookie)
 	request.Header.Set(models.RealIP, "1.1.1.1")
 	w = httptest.NewRecorder()
 	handlersForTest.Router.ServeHTTP(w, request)
 	res = w.Result()
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	res.Body.Close()
+
+	request = httptest.NewRequest(http.MethodGet, "/api/internal/stats", nil)
+	request.AddCookie(authCookie)
+	request.Header.Set(models.RealIP, "2.2.2.2")
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusForbidden, res.StatusCode)
+	res.Body.Close()
+
 }

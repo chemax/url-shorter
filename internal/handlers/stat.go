@@ -10,7 +10,7 @@ import (
 
 // DeleteUserURLsHandler ручка для удаления пользовательских урл пачкой
 func (h *handlers) statHandler(res http.ResponseWriter, r *http.Request) {
-	if !h.checkIP(res) { // если такая авторизация нужна по нескольким "направлениям", это стоит вынести в мидлварю, но это надо делать реальную систему правил, а у нас четкое ТЗ. Сойдет.
+	if !h.checkIP(r) { // если такая авторизация нужна по нескольким "направлениям", это стоит вынести в мидлварю, но это надо делать реальную систему правил, а у нас четкое ТЗ. Сойдет.
 		h.Log.Warn("unauthorized access to stats!")
 		res.WriteHeader(http.StatusForbidden)
 		return
@@ -27,7 +27,7 @@ func (h *handlers) statHandler(res http.ResponseWriter, r *http.Request) {
 		err = fmt.Errorf("request service stat error: %w", err)
 	}
 	data, err := json.Marshal(stats)
-	if err != nil {
+	if err != nil { // Ну не может моя структура маршалится с ошибкой, ну бред же, а не проверять нельзя - линтер забреет.
 		h.Log.Error(err)
 		res.WriteHeader(http.StatusBadRequest)
 		return
@@ -41,7 +41,7 @@ func (h *handlers) statHandler(res http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *handlers) checkIP(res http.ResponseWriter) bool {
-	realIP := net.ParseIP(res.Header().Get(models.RealIP))
+func (h *handlers) checkIP(res *http.Request) bool {
+	realIP := net.ParseIP(res.Header.Get(models.RealIP))
 	return realIP != nil && h.TrustedSubnet.Contains(realIP)
 }
