@@ -12,31 +12,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// Mockconfiger is a mock of configer interface.
-type Mockconfiger struct {
+// MockConfiger is a mock of Configer interface.
+type MockConfiger struct {
 	ctrl     *gomock.Controller
-	recorder *MockconfigerMockRecorder
+	recorder *MockConfigerMockRecorder
 }
 
-// MockconfigerMockRecorder is the mock recorder for Mockconfiger.
-type MockconfigerMockRecorder struct {
-	mock *Mockconfiger
+// MockConfigerMockRecorder is the mock recorder for MockConfiger.
+type MockConfigerMockRecorder struct {
+	mock *MockConfiger
 }
 
-// NewMockconfiger creates a new mock instance.
-func NewMockconfiger(ctrl *gomock.Controller) *Mockconfiger {
-	mock := &Mockconfiger{ctrl: ctrl}
-	mock.recorder = &MockconfigerMockRecorder{mock}
+// NewMockConfiger creates a new mock instance.
+func NewMockConfiger(ctrl *gomock.Controller) *MockConfiger {
+	mock := &MockConfiger{ctrl: ctrl}
+	mock.recorder = &MockConfigerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *Mockconfiger) EXPECT() *MockconfigerMockRecorder {
+func (m *MockConfiger) EXPECT() *MockConfigerMockRecorder {
 	return m.recorder
 }
 
 // GetHTTPAddr mocks base method.
-func (m *Mockconfiger) GetHTTPAddr() string {
+func (m *MockConfiger) GetHTTPAddr() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetHTTPAddr")
 	ret0, _ := ret[0].(string)
@@ -44,13 +44,13 @@ func (m *Mockconfiger) GetHTTPAddr() string {
 }
 
 // GetHTTPAddr indicates an expected call of GetHTTPAddr.
-func (mr *MockconfigerMockRecorder) GetHTTPAddr() *gomock.Call {
+func (mr *MockConfigerMockRecorder) GetHTTPAddr() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHTTPAddr", reflect.TypeOf((*Mockconfiger)(nil).GetHTTPAddr))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHTTPAddr", reflect.TypeOf((*MockConfiger)(nil).GetHTTPAddr))
 }
 
 // GetTrustedSubnet mocks base method.
-func (m *Mockconfiger) GetTrustedSubnet() string {
+func (m *MockConfiger) GetTrustedSubnet() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTrustedSubnet")
 	ret0, _ := ret[0].(string)
@@ -58,9 +58,9 @@ func (m *Mockconfiger) GetTrustedSubnet() string {
 }
 
 // GetTrustedSubnet indicates an expected call of GetTrustedSubnet.
-func (mr *MockconfigerMockRecorder) GetTrustedSubnet() *gomock.Call {
+func (mr *MockConfigerMockRecorder) GetTrustedSubnet() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrustedSubnet", reflect.TypeOf((*Mockconfiger)(nil).GetTrustedSubnet))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrustedSubnet", reflect.TypeOf((*MockConfiger)(nil).GetTrustedSubnet))
 }
 
 // MockUserser is a mock of Userser interface.
@@ -100,31 +100,31 @@ func (mr *MockUserserMockRecorder) Middleware(next interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Middleware", reflect.TypeOf((*MockUserser)(nil).Middleware), next)
 }
 
-// Mockloggerer is a mock of loggerer interface.
-type Mockloggerer struct {
+// MockLoggerer is a mock of Loggerer interface.
+type MockLoggerer struct {
 	ctrl     *gomock.Controller
-	recorder *MockloggererMockRecorder
+	recorder *MockLoggererMockRecorder
 }
 
-// MockloggererMockRecorder is the mock recorder for Mockloggerer.
-type MockloggererMockRecorder struct {
-	mock *Mockloggerer
+// MockLoggererMockRecorder is the mock recorder for MockLoggerer.
+type MockLoggererMockRecorder struct {
+	mock *MockLoggerer
 }
 
-// NewMockloggerer creates a new mock instance.
-func NewMockloggerer(ctrl *gomock.Controller) *Mockloggerer {
-	mock := &Mockloggerer{ctrl: ctrl}
-	mock.recorder = &MockloggererMockRecorder{mock}
+// NewMockLoggerer creates a new mock instance.
+func NewMockLoggerer(ctrl *gomock.Controller) *MockLoggerer {
+	mock := &MockLoggerer{ctrl: ctrl}
+	mock.recorder = &MockLoggererMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *Mockloggerer) EXPECT() *MockloggererMockRecorder {
+func (m *MockLoggerer) EXPECT() *MockLoggererMockRecorder {
 	return m.recorder
 }
 
 // Error mocks base method.
-func (m *Mockloggerer) Error(args ...interface{}) {
+func (m *MockLoggerer) Error(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range args {
@@ -134,13 +134,13 @@ func (m *Mockloggerer) Error(args ...interface{}) {
 }
 
 // Error indicates an expected call of Error.
-func (mr *MockloggererMockRecorder) Error(args ...interface{}) *gomock.Call {
+func (mr *MockLoggererMockRecorder) Error(args ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Error", reflect.TypeOf((*Mockloggerer)(nil).Error), args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Error", reflect.TypeOf((*MockLoggerer)(nil).Error), args...)
 }
 
 // Errorln mocks base method.
-func (m *Mockloggerer) Errorln(args ...interface{}) {
+func (m *MockLoggerer) Errorln(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range args {
@@ -150,13 +150,13 @@ func (m *Mockloggerer) Errorln(args ...interface{}) {
 }
 
 // Errorln indicates an expected call of Errorln.
-func (mr *MockloggererMockRecorder) Errorln(args ...interface{}) *gomock.Call {
+func (mr *MockLoggererMockRecorder) Errorln(args ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Errorln", reflect.TypeOf((*Mockloggerer)(nil).Errorln), args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Errorln", reflect.TypeOf((*MockLoggerer)(nil).Errorln), args...)
 }
 
 // Middleware mocks base method.
-func (m *Mockloggerer) Middleware(next http.Handler) http.Handler {
+func (m *MockLoggerer) Middleware(next http.Handler) http.Handler {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Middleware", next)
 	ret0, _ := ret[0].(http.Handler)
@@ -164,13 +164,13 @@ func (m *Mockloggerer) Middleware(next http.Handler) http.Handler {
 }
 
 // Middleware indicates an expected call of Middleware.
-func (mr *MockloggererMockRecorder) Middleware(next interface{}) *gomock.Call {
+func (mr *MockLoggererMockRecorder) Middleware(next interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Middleware", reflect.TypeOf((*Mockloggerer)(nil).Middleware), next)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Middleware", reflect.TypeOf((*MockLoggerer)(nil).Middleware), next)
 }
 
 // Warn mocks base method.
-func (m *Mockloggerer) Warn(args ...interface{}) {
+func (m *MockLoggerer) Warn(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range args {
@@ -180,13 +180,13 @@ func (m *Mockloggerer) Warn(args ...interface{}) {
 }
 
 // Warn indicates an expected call of Warn.
-func (mr *MockloggererMockRecorder) Warn(args ...interface{}) *gomock.Call {
+func (mr *MockLoggererMockRecorder) Warn(args ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Warn", reflect.TypeOf((*Mockloggerer)(nil).Warn), args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Warn", reflect.TypeOf((*MockLoggerer)(nil).Warn), args...)
 }
 
 // Warnln mocks base method.
-func (m *Mockloggerer) Warnln(args ...interface{}) {
+func (m *MockLoggerer) Warnln(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range args {
@@ -196,36 +196,36 @@ func (m *Mockloggerer) Warnln(args ...interface{}) {
 }
 
 // Warnln indicates an expected call of Warnln.
-func (mr *MockloggererMockRecorder) Warnln(args ...interface{}) *gomock.Call {
+func (mr *MockLoggererMockRecorder) Warnln(args ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Warnln", reflect.TypeOf((*Mockloggerer)(nil).Warnln), args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Warnln", reflect.TypeOf((*MockLoggerer)(nil).Warnln), args...)
 }
 
-// Mockstorager is a mock of storager interface.
-type Mockstorager struct {
+// MockStorager is a mock of Storager interface.
+type MockStorager struct {
 	ctrl     *gomock.Controller
-	recorder *MockstoragerMockRecorder
+	recorder *MockStoragerMockRecorder
 }
 
-// MockstoragerMockRecorder is the mock recorder for Mockstorager.
-type MockstoragerMockRecorder struct {
-	mock *Mockstorager
+// MockStoragerMockRecorder is the mock recorder for MockStorager.
+type MockStoragerMockRecorder struct {
+	mock *MockStorager
 }
 
-// NewMockstorager creates a new mock instance.
-func NewMockstorager(ctrl *gomock.Controller) *Mockstorager {
-	mock := &Mockstorager{ctrl: ctrl}
-	mock.recorder = &MockstoragerMockRecorder{mock}
+// NewMockStorager creates a new mock instance.
+func NewMockStorager(ctrl *gomock.Controller) *MockStorager {
+	mock := &MockStorager{ctrl: ctrl}
+	mock.recorder = &MockStoragerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *Mockstorager) EXPECT() *MockstoragerMockRecorder {
+func (m *MockStorager) EXPECT() *MockStoragerMockRecorder {
 	return m.recorder
 }
 
 // AddNewURL mocks base method.
-func (m *Mockstorager) AddNewURL(parsedURL, userID string) (string, error) {
+func (m *MockStorager) AddNewURL(parsedURL, userID string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddNewURL", parsedURL, userID)
 	ret0, _ := ret[0].(string)
@@ -234,13 +234,13 @@ func (m *Mockstorager) AddNewURL(parsedURL, userID string) (string, error) {
 }
 
 // AddNewURL indicates an expected call of AddNewURL.
-func (mr *MockstoragerMockRecorder) AddNewURL(parsedURL, userID interface{}) *gomock.Call {
+func (mr *MockStoragerMockRecorder) AddNewURL(parsedURL, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewURL", reflect.TypeOf((*Mockstorager)(nil).AddNewURL), parsedURL, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewURL", reflect.TypeOf((*MockStorager)(nil).AddNewURL), parsedURL, userID)
 }
 
 // BatchSave mocks base method.
-func (m *Mockstorager) BatchSave(arr []*models.URLForBatch, httpPrefix string) ([]models.URLForBatchResponse, error) {
+func (m *MockStorager) BatchSave(arr []*models.URLForBatch, httpPrefix string) ([]models.URLForBatchResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BatchSave", arr, httpPrefix)
 	ret0, _ := ret[0].([]models.URLForBatchResponse)
@@ -249,25 +249,25 @@ func (m *Mockstorager) BatchSave(arr []*models.URLForBatch, httpPrefix string) (
 }
 
 // BatchSave indicates an expected call of BatchSave.
-func (mr *MockstoragerMockRecorder) BatchSave(arr, httpPrefix interface{}) *gomock.Call {
+func (mr *MockStoragerMockRecorder) BatchSave(arr, httpPrefix interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchSave", reflect.TypeOf((*Mockstorager)(nil).BatchSave), arr, httpPrefix)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchSave", reflect.TypeOf((*MockStorager)(nil).BatchSave), arr, httpPrefix)
 }
 
 // DeleteListFor mocks base method.
-func (m *Mockstorager) DeleteListFor(forDelete []string, userID string) {
+func (m *MockStorager) DeleteListFor(forDelete []string, userID string) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "DeleteListFor", forDelete, userID)
 }
 
 // DeleteListFor indicates an expected call of DeleteListFor.
-func (mr *MockstoragerMockRecorder) DeleteListFor(forDelete, userID interface{}) *gomock.Call {
+func (mr *MockStoragerMockRecorder) DeleteListFor(forDelete, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListFor", reflect.TypeOf((*Mockstorager)(nil).DeleteListFor), forDelete, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteListFor", reflect.TypeOf((*MockStorager)(nil).DeleteListFor), forDelete, userID)
 }
 
 // GetStats mocks base method.
-func (m *Mockstorager) GetStats() (models.Stats, error) {
+func (m *MockStorager) GetStats() (models.Stats, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStats")
 	ret0, _ := ret[0].(models.Stats)
@@ -276,13 +276,13 @@ func (m *Mockstorager) GetStats() (models.Stats, error) {
 }
 
 // GetStats indicates an expected call of GetStats.
-func (mr *MockstoragerMockRecorder) GetStats() *gomock.Call {
+func (mr *MockStoragerMockRecorder) GetStats() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStats", reflect.TypeOf((*Mockstorager)(nil).GetStats))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStats", reflect.TypeOf((*MockStorager)(nil).GetStats))
 }
 
 // GetURL mocks base method.
-func (m *Mockstorager) GetURL(code string) (string, error) {
+func (m *MockStorager) GetURL(code string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetURL", code)
 	ret0, _ := ret[0].(string)
@@ -291,13 +291,13 @@ func (m *Mockstorager) GetURL(code string) (string, error) {
 }
 
 // GetURL indicates an expected call of GetURL.
-func (mr *MockstoragerMockRecorder) GetURL(code interface{}) *gomock.Call {
+func (mr *MockStoragerMockRecorder) GetURL(code interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetURL", reflect.TypeOf((*Mockstorager)(nil).GetURL), code)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetURL", reflect.TypeOf((*MockStorager)(nil).GetURL), code)
 }
 
 // GetUserURLs mocks base method.
-func (m *Mockstorager) GetUserURLs(userID string) ([]models.URLWithShort, error) {
+func (m *MockStorager) GetUserURLs(userID string) ([]models.URLWithShort, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserURLs", userID)
 	ret0, _ := ret[0].([]models.URLWithShort)
@@ -306,13 +306,13 @@ func (m *Mockstorager) GetUserURLs(userID string) ([]models.URLWithShort, error)
 }
 
 // GetUserURLs indicates an expected call of GetUserURLs.
-func (mr *MockstoragerMockRecorder) GetUserURLs(userID interface{}) *gomock.Call {
+func (mr *MockStoragerMockRecorder) GetUserURLs(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserURLs", reflect.TypeOf((*Mockstorager)(nil).GetUserURLs), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserURLs", reflect.TypeOf((*MockStorager)(nil).GetUserURLs), userID)
 }
 
 // Ping mocks base method.
-func (m *Mockstorager) Ping() bool {
+func (m *MockStorager) Ping() bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Ping")
 	ret0, _ := ret[0].(bool)
@@ -320,7 +320,7 @@ func (m *Mockstorager) Ping() bool {
 }
 
 // Ping indicates an expected call of Ping.
-func (mr *MockstoragerMockRecorder) Ping() *gomock.Call {
+func (mr *MockStoragerMockRecorder) Ping() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*Mockstorager)(nil).Ping))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockStorager)(nil).Ping))
 }

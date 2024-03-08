@@ -11,31 +11,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// Mockconfiger is a mock of configer interface.
-type Mockconfiger struct {
+// MockConfiger is a mock of Configer interface.
+type MockConfiger struct {
 	ctrl     *gomock.Controller
-	recorder *MockconfigerMockRecorder
+	recorder *MockConfigerMockRecorder
 }
 
-// MockconfigerMockRecorder is the mock recorder for Mockconfiger.
-type MockconfigerMockRecorder struct {
-	mock *Mockconfiger
+// MockConfigerMockRecorder is the mock recorder for MockConfiger.
+type MockConfigerMockRecorder struct {
+	mock *MockConfiger
 }
 
-// NewMockconfiger creates a new mock instance.
-func NewMockconfiger(ctrl *gomock.Controller) *Mockconfiger {
-	mock := &Mockconfiger{ctrl: ctrl}
-	mock.recorder = &MockconfigerMockRecorder{mock}
+// NewMockConfiger creates a new mock instance.
+func NewMockConfiger(ctrl *gomock.Controller) *MockConfiger {
+	mock := &MockConfiger{ctrl: ctrl}
+	mock.recorder = &MockConfigerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *Mockconfiger) EXPECT() *MockconfigerMockRecorder {
+func (m *MockConfiger) EXPECT() *MockConfigerMockRecorder {
 	return m.recorder
 }
 
 // GetDBUse mocks base method.
-func (m *Mockconfiger) GetDBUse() bool {
+func (m *MockConfiger) GetDBUse() bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDBUse")
 	ret0, _ := ret[0].(bool)
@@ -43,13 +43,13 @@ func (m *Mockconfiger) GetDBUse() bool {
 }
 
 // GetDBUse indicates an expected call of GetDBUse.
-func (mr *MockconfigerMockRecorder) GetDBUse() *gomock.Call {
+func (mr *MockConfigerMockRecorder) GetDBUse() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDBUse", reflect.TypeOf((*Mockconfiger)(nil).GetDBUse))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDBUse", reflect.TypeOf((*MockConfiger)(nil).GetDBUse))
 }
 
 // GetSavePath mocks base method.
-func (m *Mockconfiger) GetSavePath() string {
+func (m *MockConfiger) GetSavePath() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSavePath")
 	ret0, _ := ret[0].(string)
@@ -57,36 +57,36 @@ func (m *Mockconfiger) GetSavePath() string {
 }
 
 // GetSavePath indicates an expected call of GetSavePath.
-func (mr *MockconfigerMockRecorder) GetSavePath() *gomock.Call {
+func (mr *MockConfigerMockRecorder) GetSavePath() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSavePath", reflect.TypeOf((*Mockconfiger)(nil).GetSavePath))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSavePath", reflect.TypeOf((*MockConfiger)(nil).GetSavePath))
 }
 
-// Mockloggerer is a mock of loggerer interface.
-type Mockloggerer struct {
+// MockLoggerer is a mock of Loggerer interface.
+type MockLoggerer struct {
 	ctrl     *gomock.Controller
-	recorder *MockloggererMockRecorder
+	recorder *MockLoggererMockRecorder
 }
 
-// MockloggererMockRecorder is the mock recorder for Mockloggerer.
-type MockloggererMockRecorder struct {
-	mock *Mockloggerer
+// MockLoggererMockRecorder is the mock recorder for MockLoggerer.
+type MockLoggererMockRecorder struct {
+	mock *MockLoggerer
 }
 
-// NewMockloggerer creates a new mock instance.
-func NewMockloggerer(ctrl *gomock.Controller) *Mockloggerer {
-	mock := &Mockloggerer{ctrl: ctrl}
-	mock.recorder = &MockloggererMockRecorder{mock}
+// NewMockLoggerer creates a new mock instance.
+func NewMockLoggerer(ctrl *gomock.Controller) *MockLoggerer {
+	mock := &MockLoggerer{ctrl: ctrl}
+	mock.recorder = &MockLoggererMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *Mockloggerer) EXPECT() *MockloggererMockRecorder {
+func (m *MockLoggerer) EXPECT() *MockLoggererMockRecorder {
 	return m.recorder
 }
 
 // Debug mocks base method.
-func (m *Mockloggerer) Debug(args ...interface{}) {
+func (m *MockLoggerer) Debug(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range args {
@@ -96,13 +96,13 @@ func (m *Mockloggerer) Debug(args ...interface{}) {
 }
 
 // Debug indicates an expected call of Debug.
-func (mr *MockloggererMockRecorder) Debug(args ...interface{}) *gomock.Call {
+func (mr *MockLoggererMockRecorder) Debug(args ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Debug", reflect.TypeOf((*Mockloggerer)(nil).Debug), args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Debug", reflect.TypeOf((*MockLoggerer)(nil).Debug), args...)
 }
 
 // Error mocks base method.
-func (m *Mockloggerer) Error(args ...interface{}) {
+func (m *MockLoggerer) Error(args ...interface{}) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range args {
@@ -112,9 +112,9 @@ func (m *Mockloggerer) Error(args ...interface{}) {
 }
 
 // Error indicates an expected call of Error.
-func (mr *MockloggererMockRecorder) Error(args ...interface{}) *gomock.Call {
+func (mr *MockLoggererMockRecorder) Error(args ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Error", reflect.TypeOf((*Mockloggerer)(nil).Error), args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Error", reflect.TypeOf((*MockLoggerer)(nil).Error), args...)
 }
 
 // MockDataBaser is a mock of DataBaser interface.

@@ -15,14 +15,14 @@ import (
 
 var newLineBytes = []byte("\n")
 
-// configer интерфейс конфиг-структуры
-type configer interface {
+// Configer интерфейс конфиг-структуры
+type Configer interface {
 	GetSavePath() string
 	GetDBUse() bool
 }
 
-// loggerer интерфейс логера
-type loggerer interface {
+// Loggerer интерфейс логера
+type Loggerer interface {
 	Debug(args ...interface{})
 	Error(args ...interface{})
 }
@@ -48,7 +48,7 @@ type managerURL struct {
 	URLs     map[string]*singleURL
 	URLMx    sync.RWMutex
 	SavePath string
-	log      loggerer
+	log      Loggerer
 }
 
 var manager = &managerURL{URLs: make(map[string]*singleURL)}
@@ -64,7 +64,7 @@ func randStringRunes(n int) string {
 }
 
 // NewStorage создает и возвращает структуру управления URL'ами
-func NewStorage(cfg configer, logger loggerer, db DataBaser) (*managerURL, error) {
+func NewStorage(cfg Configer, logger Loggerer, db DataBaser) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {

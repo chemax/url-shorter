@@ -14,8 +14,8 @@ import (
 	"github.com/go-chi/render"
 )
 
-// configer интерфейс конфиг-структуры
-type configer interface {
+// Configer интерфейс конфиг-структуры
+type Configer interface {
 	GetHTTPAddr() string
 	GetTrustedSubnet() string
 }
@@ -25,8 +25,8 @@ type Userser interface {
 	Middleware(next http.Handler) http.Handler
 }
 
-// loggerer интерфейс логера
-type loggerer interface {
+// Loggerer интерфейс логера
+type Loggerer interface {
 	Middleware(next http.Handler) http.Handler
 	Warn(args ...interface{})
 	Warnln(args ...interface{})
@@ -34,8 +34,8 @@ type loggerer interface {
 	Errorln(args ...interface{})
 }
 
-// storager интерфейс хранилища
-type storager interface {
+// Storager интерфейс хранилища
+type Storager interface {
 	GetUserURLs(userID string) ([]models.URLWithShort, error)
 	GetURL(code string) (parsedURL string, err error)
 	DeleteListFor(forDelete []string, userID string)
@@ -46,10 +46,10 @@ type storager interface {
 }
 
 type handlers struct {
-	storage       storager
+	storage       Storager
 	Router        *chi.Mux
-	Cfg           configer
-	Log           loggerer
+	Cfg           Configer
+	Log           Loggerer
 	TrustedSubnet *net.IPNet
 }
 
@@ -77,7 +77,7 @@ func initRender() {
 }
 
 // NewHandlers возвращает хендлер всех ручек
-func NewHandlers(s storager, cfg configer, log loggerer, users Userser) *handlers {
+func NewHandlers(s Storager, cfg Configer, log Loggerer, users Userser) *handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &handlers{
