@@ -3,9 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chemax/url-shorter/models"
 	"net"
 	"net/http"
+
+	"github.com/chemax/url-shorter/models"
 )
 
 // DeleteUserURLsHandler ручка для удаления пользовательских урл пачкой

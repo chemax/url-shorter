@@ -2,8 +2,9 @@ package storage
 
 import (
 	"fmt"
-	mock_storage2 "github.com/chemax/url-shorter/mocks/storage"
 	"testing"
+
+	mock_storage2 "github.com/chemax/url-shorter/mocks/storage"
 
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/logger"

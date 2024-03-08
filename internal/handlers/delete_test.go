@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"bytes"
-	mock_handlers "github.com/chemax/url-shorter/mocks/newhandlers"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	mock_handlers "github.com/chemax/url-shorter/mocks/newhandlers"
 
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/internal/db"

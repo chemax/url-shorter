@@ -51,7 +51,7 @@ func TestIntegrated(t *testing.T) {
 	//shortCode1 := "1234"
 	userID1 := "userid1"
 	rows := mock.NewRows([]string{"id"}). //создание пользователя
-		AddRow(userID1)
+						AddRow(userID1)
 	rows2 := mock.NewRows([]string{"shortcode"}) //сохранение URL
 	mock.ExpectQuery(`INSERT INTO users .+`).WillReturnRows(rows)
 	mock.ExpectQuery(`.+`).WithArgs(pgxmock.AnyArg(), "http://ya.ru", userID1).WillReturnRows(rows2)
@@ -88,9 +88,9 @@ func TestIntegrated(t *testing.T) {
 	res2.Body.Close()
 
 	rows3 := mock.NewRows([]string{"url", "shortcode"}). //URLs пользователя
-		AddRow("1", "vk.com").
-		AddRow("2", "youtube.com").
-		AddRow("3", "http://ya.ru")
+								AddRow("1", "vk.com").
+								AddRow("2", "youtube.com").
+								AddRow("3", "http://ya.ru")
 	mock.ExpectQuery("SELECT url, shortcode FROM urls .+").WithArgs(userID1).WillReturnRows(rows3)
 	request = httptest.NewRequest(http.MethodGet, "/api/user/urls", nil)
 	request.AddCookie(authCookie)
