@@ -260,6 +260,7 @@ func (u *managerURL) Ping() bool {
 	return true
 }
 
+// GetStats возвращает статистику сервиса
 func (u *managerURL) GetStats() (models.Stats, error) {
 	if u.db != nil {
 		return u.db.GetStats()
