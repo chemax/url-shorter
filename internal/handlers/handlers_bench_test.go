@@ -3,15 +3,12 @@ package handlers
 import (
 	"bytes"
 	"fmt"
+	"github.com/chemax/url-shorter/config"
+	mock_handlers "github.com/chemax/url-shorter/mocks/handlers"
+	"github.com/chemax/url-shorter/users"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
-
-	mock_handlers "github.com/chemax/url-shorter/mocks/handlers"
-	mock_users "github.com/chemax/url-shorter/mocks/users"
-
-	"github.com/chemax/url-shorter/users"
 
 	"github.com/chemax/url-shorter/logger"
 
@@ -22,11 +19,7 @@ import (
 func BenchmarkHandlers_PostHandler(b *testing.B) {
 	ctrl := gomock.NewController(b)
 	defer ctrl.Finish()
-	cfg := mock_users.NewMockConfiger(ctrl)
-	cfgHandlers := mock_handlers.NewMockConfiger(ctrl)
-	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
-	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
-	cfgHandlers.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
+	cfg, _ := config.NewConfig()
 	st := mock_handlers.NewMockStorager(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).Return("12345678", nil).AnyTimes()
@@ -34,7 +27,7 @@ func BenchmarkHandlers_PostHandler(b *testing.B) {
 	log, _ := logger.NewLogger()
 	bd, _ := db.NewDB("", log)
 	usersManager, _ := users.NewUser(cfg, log, bd)
-	handlers := NewHandlers(st, cfgHandlers, log, usersManager)
+	handlers := NewHandlers(st, cfg, log, usersManager)
 	JSONURLFmt := "{\"url\": \"http://%d.ya.ru\"}"
 	var cmps int
 	b.ResetTimer()
