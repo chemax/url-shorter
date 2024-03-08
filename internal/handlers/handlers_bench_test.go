@@ -3,12 +3,13 @@ package handlers
 import (
 	"bytes"
 	"fmt"
-	"github.com/chemax/url-shorter/config"
-	mock_handlers "github.com/chemax/url-shorter/mocks/handlers"
-	"github.com/chemax/url-shorter/users"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/chemax/url-shorter/config"
+	mock_handlers "github.com/chemax/url-shorter/mocks/handlers"
+	"github.com/chemax/url-shorter/users"
 
 	"github.com/chemax/url-shorter/logger"
 

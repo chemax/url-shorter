@@ -23,6 +23,7 @@ type URLForBatchResponse struct {
 	ShortURL      string `json:"short_url"`
 }
 
+// Stats структура статистики сервиса
 type Stats struct {
 	URLs  int `json:"urls"`
 	Users int `json:"users"`
