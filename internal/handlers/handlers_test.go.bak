@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	mock_handlers "github.com/chemax/url-shorter/mocks/newhandlers"
+	"github.com/chemax/url-shorter/config"
+	mock_handlers "github.com/chemax/url-shorter/mocks/handlers"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/chemax/url-shorter/users"
 
@@ -19,7 +19,6 @@ import (
 
 	"github.com/chemax/url-shorter/internal/db"
 	"github.com/chemax/url-shorter/internal/storage"
-	mock_util "github.com/chemax/url-shorter/mocks/storage"
 	"github.com/chemax/url-shorter/models"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -45,14 +44,7 @@ func gzipString(src string) ([]byte, error) {
 func Test_urlManger_ServeHTTP(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	cfgHandler := mock_handlers.NewMockconfiger(ctrl)
-	cfgHandler.EXPECT().GetHTTPAddr().AnyTimes()
-	cfgHandler.EXPECT().GetTrustedSubnet().AnyTimes()
-	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
-	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
-	cfg.EXPECT().GetSavePath().Return("").AnyTimes()
-	cfg.EXPECT().GetHTTPAddr().Return("http://localhost:8080").AnyTimes()
-	cfg.EXPECT().GetNetAddr().Return("localhost:8080").AnyTimes()
+	cfg, _ := config.NewConfig()
 
 	lg, _ := logger.NewLogger()
 
@@ -181,7 +173,7 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 			usersManager, _ := users.NewUser(cfg, lg, bd)
 			storageObj, _ := storage.NewStorage(cfg, lg, bd)
 
-			h := NewHandlers(storageObj, cfgHandler, lg, usersManager)
+			h := NewHandlers(storageObj, cfg, lg, usersManager)
 			if tt.args.target == "replaceme" {
 				tt.args.target = strings.Replace(tmpCode, "http://localhost:8080", "", 1)
 			}
@@ -213,16 +205,8 @@ func Test_urlManger_ServeHTTP(t *testing.T) {
 func Test_urlManger_ApiServeCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	cfg := mock_util.NewMockConfigInterface(ctrl)
-	cfgHandler := mock_handlers.NewMockconfiger(ctrl)
-	cfgHandler.EXPECT().GetHTTPAddr().AnyTimes()
-	cfgHandler.EXPECT().GetTrustedSubnet().AnyTimes()
-	cfg.EXPECT().GetDBUse().Return(false).AnyTimes()
-	cfg.EXPECT().GetSavePath().Return("").AnyTimes()
-	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
-	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
-	cfg.EXPECT().GetHTTPAddr().Return("http://localhost:8080").AnyTimes()
-	cfg.EXPECT().GetNetAddr().Return("localhost:8080").AnyTimes()
+	cfg, _ := config.NewConfig()
+
 	lg, _ := logger.NewLogger()
 
 	path := "/api/shorten"
@@ -300,7 +284,7 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			u, _ := storage.NewStorage(cfg, lg, bd)
 			usersManager, _ := users.NewUser(cfg, lg, bd)
-			h := NewHandlers(u, cfgHandler, lg, usersManager)
+			h := NewHandlers(u, cfg, lg, usersManager)
 			request := httptest.NewRequest(tt.args.method, path, tt.args.body)
 
 			if tt.args.body != nil {
@@ -325,19 +309,13 @@ func Test_urlManger_ApiServeCreate(t *testing.T) {
 func TestHandlers(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	cfgHandler := mock_handlers.NewMockconfiger(ctrl)
-	cfgHandler.EXPECT().GetHTTPAddr().AnyTimes()
-	cfgHandler.EXPECT().GetTrustedSubnet().AnyTimes()
-	cfg := mock_util.NewMockConfigInterface(ctrl)
-	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
-	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
-	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
-	st := mock_handlers.NewMockstorager(ctrl)
+	cfg, _ := config.NewConfig()
+	st := mock_handlers.NewMockStorager(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	log, _ := logger.NewLogger()
 	bd, _ := db.NewDB("", log)
 	usersManager, _ := users.NewUser(cfg, log, bd)
-	handlersForTest := NewHandlers(st, cfgHandler, log, usersManager)
+	handlersForTest := NewHandlers(st, cfg, log, usersManager)
 	assert.NotNil(t, handlersForTest)
 	JSONURL := "{\"url\": \"http://ya.ru\"}"
 	JSONURLArray := "[{\"correlation_id\":\"1\",\"original_url\": \"http://ya.ru\"}, {\"correlation_id\":\"2\",\"original_url\": \"http://ya.ru\"}]"
