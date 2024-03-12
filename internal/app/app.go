@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chemax/url-shorter/grpcserver"
+	"github.com/chemax/url-shorter/internal/gRPCHandlers"
 	"net/http"
 	"os"
 	"os/signal"
@@ -56,7 +58,13 @@ func Run() (err error) {
 	}
 
 	handler := handlers.NewHandlers(st, cfg, log, usersObj)
-
+	grpcHandler := gRPCHandlers.New(st, cfg, log, usersObj)
+	go func() {
+		err := grpcserver.New(ctx, cfg, log, sig, grpcHandler)
+		if err != nil {
+			log.Error(err)
+		}
+	}()
 	err = httpserver.New(ctx, cfg, log, handler.Router, sig)
 
 	if errors.Is(err, http.ErrServerClosed) {

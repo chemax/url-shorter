@@ -2,8 +2,10 @@
 package gRPCHandlers
 
 import (
+	"context"
 	"github.com/chemax/url-shorter/models"
 	pb "github.com/chemax/url-shorter/proto"
+	"google.golang.org/grpc"
 	"net"
 	"net/http"
 )
@@ -56,4 +58,26 @@ func New(s Storager, cfg Configer, log Loggerer, users Userser) URLShortenerServ
 		storage: s,
 		Cfg:     cfg,
 	}
+}
+
+func (h *URLShortenerServer) Ping(ctx context.Context, in *pb.PingRequest, opts ...grpc.CallOption) (*pb.PingResponse, error) {
+	return nil, nil
+}
+func (h *URLShortenerServer) GetOriginalURL(ctx context.Context, in *pb.UnshortURLRequest, opts ...grpc.CallOption) (*pb.UnshortURLResponse, error) {
+	return nil, nil
+}
+func (h *URLShortenerServer) GetURLsByUserID(ctx context.Context, in *pb.GetUserURLsRequest, opts ...grpc.CallOption) (*pb.GetUserURLsResponse, error) {
+	return nil, nil
+}
+func (h *URLShortenerServer) CreateURL(ctx context.Context, in *pb.ShortURLRequest, opts ...grpc.CallOption) (*pb.ShortURLResponse, error) {
+	return nil, nil
+}
+func (h *URLShortenerServer) CreateURLs(ctx context.Context, in *pb.ShortURLsBatchRequest, opts ...grpc.CallOption) (*pb.ShortURLsBatchResponse, error) {
+	return nil, nil
+}
+func (h *URLShortenerServer) DeleteURLs(ctx context.Context, in *pb.DeleteURLsRequest, opts ...grpc.CallOption) (*pb.DeleteURLsResponse, error) {
+	return nil, nil
+}
+func (h *URLShortenerServer) Stat(ctx context.Context, in *pb.StatRequest, opts ...grpc.CallOption) (*pb.StatResponse, error) {
+	return nil, nil
 }
