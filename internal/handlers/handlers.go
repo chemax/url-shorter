@@ -99,14 +99,14 @@ func NewHandlers(s Storager, cfg Configer, log Loggerer, users Userser) *handler
 	r.Use(middleware.Recoverer)
 	r.Use(users.Middleware)
 	r.Use(compress.Middleware)
-	r.Post("/api/shorten", h.xJSONPostHandler)
-	r.Post("/api/shorten/batch", h.xJSONBatchPostHandler)
-	r.Post("/", h.postHandler)
-	r.Get("/ping", h.pingHandler)
-	r.Get("/{id}", h.getHandler)
-	r.Get("/api/user/urls", h.getUserURLsHandler)
-	r.Get("/api/internal/stats", h.statHandler)
-	r.Delete("/api/user/urls", h.DeleteUserURLsHandler)
+	r.Post("/api/shorten", h.shortJSONHandler)
+	r.Post("/api/shorten/batch", h.shortJSONBatchHandler) //+
+	r.Post("/", h.shortPlainHandler)                      //+
+	r.Get("/ping", h.pingHandler)                         //+
+	r.Get("/{id}", h.unshortHandler)                      //+
+	r.Get("/api/user/urls", h.getUserURLsHandler)         //+
+	r.Get("/api/internal/stats", h.statHandler)           //+
+	r.Delete("/api/user/urls", h.DeleteUserURLsHandler)   //+
 	return h
 }
 
