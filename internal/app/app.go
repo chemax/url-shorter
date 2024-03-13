@@ -59,6 +59,7 @@ func Run() (err error) {
 
 	handler := handlers.NewHandlers(st, cfg, log, usersObj)
 	grpcHandler := gRPCHandlers.New(st, cfg, log, usersObj)
+	//тут надо вэйтгруппу пробросить
 	go func() {
 		err := grpcserver.New(ctx, cfg, log, sig, grpcHandler)
 		if err != nil {

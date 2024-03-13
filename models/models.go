@@ -25,8 +25,8 @@ type URLForBatchResponse struct {
 
 // Stats структура статистики сервиса
 type Stats struct {
-	URLs  int `json:"urls"`
-	Users int `json:"users"`
+	URLs  int64 `json:"urls"`
+	Users int64 `json:"users"`
 }
 
 // UserIDStringType User ID String Type
