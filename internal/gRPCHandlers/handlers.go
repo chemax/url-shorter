@@ -76,7 +76,20 @@ func (h *URLShortenerServer) GetOriginalURL(ctx context.Context, in *pb.UnshortU
 }
 
 func (h *URLShortenerServer) GetURLsByUserID(ctx context.Context, in *pb.GetUserURLsRequest, opts ...grpc.CallOption) (*pb.GetUserURLsResponse, error) {
-	return nil, nil
+	var response pb.GetUserURLsResponse
+	userID := ctx.Value(models.UserID).(string)
+	userURLs, err := h.storage.GetUserURLs(userID)
+	if err != nil {
+		return &pb.GetUserURLsResponse{}, err
+	}
+	for _, u := range userURLs {
+		uGRPC := &pb.URLEntity{
+			ShortUrl:    u.Shortcode,
+			OriginalUrl: u.URL,
+		}
+		response.Result = append(response.Result, uGRPC)
+	}
+	return &response, nil
 }
 
 func (h *URLShortenerServer) CreateURL(ctx context.Context, in *pb.ShortURLRequest, opts ...grpc.CallOption) (*pb.ShortURLResponse, error) {
