@@ -62,12 +62,14 @@ func New(s Storager, cfg Configer, log Loggerer, users Userser) URLShortenerServ
 	}
 }
 
+// Ping связь с базой
 func (h *URLShortenerServer) Ping(ctx context.Context, in *pb.PingRequest, opts ...grpc.CallOption) (*pb.PingResponse, error) {
 	var response pb.PingResponse
 	response.Message = h.storage.Ping()
 	return &response, nil
 }
 
+// GetOriginalURL получить адрес по его короткому коду
 func (h *URLShortenerServer) GetOriginalURL(ctx context.Context, in *pb.UnshortURLRequest, opts ...grpc.CallOption) (*pb.UnshortURLResponse, error) {
 	var response pb.UnshortURLResponse
 	var err error
@@ -75,6 +77,7 @@ func (h *URLShortenerServer) GetOriginalURL(ctx context.Context, in *pb.UnshortU
 	return &response, err
 }
 
+// GetURLsByUserID получить все адреса пользователя
 func (h *URLShortenerServer) GetURLsByUserID(ctx context.Context, in *pb.GetUserURLsRequest, opts ...grpc.CallOption) (*pb.GetUserURLsResponse, error) {
 	var response pb.GetUserURLsResponse
 	userID := ctx.Value(models.UserID).(string)
@@ -92,6 +95,7 @@ func (h *URLShortenerServer) GetURLsByUserID(ctx context.Context, in *pb.GetUser
 	return &response, nil
 }
 
+// CreateURL зашортить URL
 func (h *URLShortenerServer) CreateURL(ctx context.Context, in *pb.ShortURLRequest, opts ...grpc.CallOption) (*pb.ShortURLResponse, error) {
 	var response pb.ShortURLResponse
 	requestURI, err := url.ParseRequestURI(in.Url)
@@ -106,6 +110,7 @@ func (h *URLShortenerServer) CreateURL(ctx context.Context, in *pb.ShortURLReque
 	return &response, nil
 }
 
+// CreateURLs зашортить пачку URL
 func (h *URLShortenerServer) CreateURLs(ctx context.Context, in *pb.ShortURLsBatchRequest, opts ...grpc.CallOption) (*pb.ShortURLsBatchResponse, error) {
 	var response pb.ShortURLsBatchResponse
 	var URLsArr []*models.URLForBatch
@@ -128,11 +133,13 @@ func (h *URLShortenerServer) CreateURLs(ctx context.Context, in *pb.ShortURLsBat
 	return &response, nil
 }
 
+// DeleteURLs удалить пачку урлов.
 func (h *URLShortenerServer) DeleteURLs(ctx context.Context, in *pb.DeleteURLsRequest, opts ...grpc.CallOption) (*pb.DeleteURLsResponse, error) {
 	h.storage.DeleteListFor(in.Urls, ctx.Value(models.UserID).(string))
 	return &pb.DeleteURLsResponse{}, nil
 }
 
+// Stat статистика сервиса под защитой могучей проверки адреса
 func (h *URLShortenerServer) Stat(ctx context.Context, in *pb.StatRequest, opts ...grpc.CallOption) (*pb.StatResponse, error) {
 	if h.checkIP(ctx.Value(models.RealIP).(string)) {
 		stat, err := h.storage.GetStats()
