@@ -5,12 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chemax/url-shorter/grpcserver"
-	"github.com/chemax/url-shorter/internal/gRPCHandlers"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/chemax/url-shorter/grpcserver"
+	"github.com/chemax/url-shorter/internal/gRPCHandlers"
 
 	"github.com/chemax/url-shorter/httpserver"
 

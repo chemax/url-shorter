@@ -4,11 +4,12 @@ package gRPCHandlers
 import (
 	"context"
 	"fmt"
-	"github.com/chemax/url-shorter/models"
-	pb "github.com/chemax/url-shorter/proto"
 	"net"
 	"net/http"
 	"net/url"
+
+	"github.com/chemax/url-shorter/models"
+	pb "github.com/chemax/url-shorter/proto"
 )
 
 // Configer интерфейс конфиг-структуры

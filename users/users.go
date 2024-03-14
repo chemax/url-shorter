@@ -4,11 +4,12 @@ package users
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/chemax/url-shorter/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"net/http"
-	"time"
 
 	"github.com/chemax/url-shorter/models"
 	"github.com/golang-jwt/jwt/v4"

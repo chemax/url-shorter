@@ -3,6 +3,9 @@ package grpcserver
 import (
 	"context"
 	"fmt"
+	"net"
+	"os"
+
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/grpcserver/interceptors"
 	"github.com/chemax/url-shorter/internal/gRPCHandlers"
@@ -10,8 +13,6 @@ import (
 	_ "github.com/chemax/url-shorter/logger"
 	pb "github.com/chemax/url-shorter/proto"
 	"google.golang.org/grpc"
-	"net"
-	"os"
 )
 
 // Loggerer интерфейс логера
