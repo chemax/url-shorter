@@ -3,6 +3,7 @@ package handlers
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 
@@ -13,9 +14,10 @@ import (
 	"github.com/go-chi/render"
 )
 
-// configer интерфейс конфиг-структуры
-type configer interface {
+// Configer интерфейс конфиг-структуры
+type Configer interface {
 	GetHTTPAddr() string
+	GetTrustedSubnet() string
 }
 
 // Userser интерфейс юзер-менеджера
@@ -23,8 +25,8 @@ type Userser interface {
 	Middleware(next http.Handler) http.Handler
 }
 
-// loggerer интерфейс логера
-type loggerer interface {
+// Loggerer интерфейс логера
+type Loggerer interface {
 	Middleware(next http.Handler) http.Handler
 	Warn(args ...interface{})
 	Warnln(args ...interface{})
@@ -32,21 +34,23 @@ type loggerer interface {
 	Errorln(args ...interface{})
 }
 
-// storager интерфейс хранилища
-type storager interface {
+// Storager интерфейс хранилища
+type Storager interface {
 	GetUserURLs(userID string) ([]models.URLWithShort, error)
 	GetURL(code string) (parsedURL string, err error)
 	DeleteListFor(forDelete []string, userID string)
 	AddNewURL(parsedURL string, userID string) (code string, err error)
 	Ping() bool
 	BatchSave(arr []*models.URLForBatch, httpPrefix string) (responseArr []models.URLForBatchResponse, err error)
+	GetStats() (models.Stats, error)
 }
 
 type handlers struct {
-	storage storager
-	Router  *chi.Mux
-	Cfg     configer
-	Log     loggerer
+	storage       Storager
+	Router        *chi.Mux
+	Cfg           Configer
+	Log           Loggerer
+	TrustedSubnet *net.IPNet
 }
 
 func checkHeaderIsValidType(header string) bool {
@@ -73,7 +77,7 @@ func initRender() {
 }
 
 // NewHandlers возвращает хендлер всех ручек
-func NewHandlers(s storager, cfg configer, log loggerer, users Userser) *handlers {
+func NewHandlers(s Storager, cfg Configer, log Loggerer, users Userser) *handlers {
 	initRender()
 	r := chi.NewRouter()
 	h := &handlers{
@@ -81,6 +85,12 @@ func NewHandlers(s storager, cfg configer, log loggerer, users Userser) *handler
 		Router:  r,
 		Cfg:     cfg,
 		Log:     log,
+	}
+	_, network, err := net.ParseCIDR(cfg.GetTrustedSubnet())
+	if err != nil {
+		h.Log.Warn(fmt.Errorf("WARN err setup trusted subnet: %w", err))
+	} else {
+		h.TrustedSubnet = network
 	}
 	r.MethodNotAllowed(func(res http.ResponseWriter, r *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
@@ -95,6 +105,7 @@ func NewHandlers(s storager, cfg configer, log loggerer, users Userser) *handler
 	r.Get("/ping", h.pingHandler)
 	r.Get("/{id}", h.getHandler)
 	r.Get("/api/user/urls", h.getUserURLsHandler)
+	r.Get("/api/internal/stats", h.statHandler)
 	r.Delete("/api/user/urls", h.DeleteUserURLsHandler)
 	return h
 }

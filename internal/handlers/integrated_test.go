@@ -29,6 +29,7 @@ func TestIntegrated(t *testing.T) {
 
 	cfg, _ := config.NewConfig()
 	cfg.DBConfig = "123"
+	cfg.TrustedSubnet = "1.0.0.0/8"
 	log, _ := logger.NewLogger()
 	defer log.Shutdown()
 	dbObj, _ := db.NewDB(cfg.DBConfig, log)
@@ -145,4 +146,27 @@ func TestIntegrated(t *testing.T) {
 	res = w.Result()
 	assert.Equal(t, http.StatusGone, res.StatusCode)
 	res.Body.Close()
+
+	rows6 := mock.NewRows([]string{"count"}).AddRow(1)
+	rows7 := mock.NewRows([]string{"count"}).AddRow(2)
+	mock.ExpectQuery("SELECT count(*) FROM urls").WillReturnRows(rows6)
+	mock.ExpectQuery("SELECT count(*) FROM users").WillReturnRows(rows7)
+	request = httptest.NewRequest(http.MethodGet, "/api/internal/stats", nil)
+	request.AddCookie(authCookie)
+	request.Header.Set(models.RealIP, "1.1.1.1")
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	res.Body.Close()
+
+	request = httptest.NewRequest(http.MethodGet, "/api/internal/stats", nil)
+	request.AddCookie(authCookie)
+	request.Header.Set(models.RealIP, "2.2.2.2")
+	w = httptest.NewRecorder()
+	handlersForTest.Router.ServeHTTP(w, request)
+	res = w.Result()
+	assert.Equal(t, http.StatusForbidden, res.StatusCode)
+	res.Body.Close()
+
 }

@@ -1,5 +1,9 @@
-~/go/bin/mockgen -source=./interfaces/interfaces.go -destination=./mocks/storage/storage_mock.go StorageInterface
-~/go/bin/mockgen -source=./interfaces/interfaces.go -destination=./mocks/db/db_mock.go DBInterface
-~/go/bin/mockgen -source=./interfaces/interfaces.go -destination=./mocks/logger/log_mock.go LoggerInterface
-~/go/bin/mockgen -source=./interfaces/interfaces.go -destination=./mocks/config/config_mock.go ConfigInterface
-~/go/bin/mockgen -source=./interfaces/interfaces.go -destination=./mocks/users/users_mock.go UsersInterface
+~/go/bin/mockgen -source=./httpserver/server.go -destination=./mocks/httpserver/logger
+
+~/go/bin/mockgen -source=./internal/db/db.go -destination=./mocks/db/db_mock.go
+
+~/go/bin/mockgen -source=./internal/handlers/handlers.go -destination=./mocks/handlers/handlers_mock.go
+
+~/go/bin/mockgen -source=./internal/storage/storage.go -destination=./mocks/storage/storage_mock.go
+
+~/go/bin/mockgen -source=./users/users.go -destination=./mocks/users/users_mock.go

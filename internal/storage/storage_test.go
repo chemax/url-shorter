@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+	mock_storage2 "github.com/chemax/url-shorter/mocks/storage"
+
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/logger"
-	mock_storage "github.com/chemax/url-shorter/mocks/newstorage"
 	"github.com/chemax/url-shorter/models"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,9 @@ func TestNewStorage(t *testing.T) {
 	cfg.DBConfig = "test string"
 	lg, err := logger.NewLogger()
 	assert.Nil(t, err)
-	bd := mock_storage.NewMockdataBaser(ctrl)
+
+	bd := mock_storage2.NewMockDataBaser(ctrl)
+	//bd := mock_storage.NewMockdataBaser(ctrl)
 	bd.EXPECT().Ping().Return(nil)
 	bd.EXPECT().Get(gomock.Any()).Return("12345", nil).Times(1)
 	bd.EXPECT().GetAllURLs(gomock.Any()).Return([]models.URLWithShort{{

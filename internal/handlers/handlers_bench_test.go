@@ -6,25 +6,22 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
+	"github.com/chemax/url-shorter/config"
+	mock_handlers "github.com/chemax/url-shorter/mocks/handlers"
 	"github.com/chemax/url-shorter/users"
 
 	"github.com/chemax/url-shorter/logger"
 
 	"github.com/chemax/url-shorter/internal/db"
-	mock_util "github.com/chemax/url-shorter/mocks/storage"
 	"github.com/golang/mock/gomock"
 )
 
 func BenchmarkHandlers_PostHandler(b *testing.B) {
 	ctrl := gomock.NewController(b)
 	defer ctrl.Finish()
-	cfg := mock_util.NewMockConfigInterface(ctrl)
-	cfg.EXPECT().SecretKey().Return("false").AnyTimes()
-	cfg.EXPECT().TokenExp().Return(1 * time.Hour).AnyTimes()
-	cfg.EXPECT().GetHTTPAddr().Return("http://127.0.0.1:8080").AnyTimes()
-	st := mock_util.NewMockStorageInterface(ctrl)
+	cfg, _ := config.NewConfig()
+	st := mock_handlers.NewMockStorager(ctrl)
 	st.EXPECT().GetURL(gomock.Any()).AnyTimes()
 	st.EXPECT().AddNewURL(gomock.Any(), gomock.Any()).Return("12345678", nil).AnyTimes()
 

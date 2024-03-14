@@ -15,26 +15,27 @@ import (
 
 var newLineBytes = []byte("\n")
 
-// configer интерфейс конфиг-структуры
-type configer interface {
+// Configer интерфейс конфиг-структуры
+type Configer interface {
 	GetSavePath() string
 	GetDBUse() bool
 }
 
-// loggerer интерфейс логера
-type loggerer interface {
+// Loggerer интерфейс логера
+type Loggerer interface {
 	Debug(args ...interface{})
 	Error(args ...interface{})
 }
 
-// dataBaser интерфейс для базы данных
-type dataBaser interface {
+// DataBaser интерфейс для базы данных
+type DataBaser interface {
 	BatchDelete([]string, string)
 	Ping() error
 	SaveURL(code string, URL string, userID string) (string, error)
 	Get(code string) (string, error)
 	GetAllURLs(userID string) ([]models.URLWithShort, error)
 	Use() bool
+	GetStats() (models.Stats, error)
 }
 
 type singleURL struct {
@@ -43,11 +44,11 @@ type singleURL struct {
 	UserID string `json:"userID"`
 }
 type managerURL struct {
-	db       dataBaser
+	db       DataBaser
 	URLs     map[string]*singleURL
 	URLMx    sync.RWMutex
 	SavePath string
-	log      loggerer
+	log      Loggerer
 }
 
 var manager = &managerURL{URLs: make(map[string]*singleURL)}
@@ -63,7 +64,7 @@ func randStringRunes(n int) string {
 }
 
 // NewStorage создает и возвращает структуру управления URL'ами
-func NewStorage(cfg configer, logger loggerer, db dataBaser) (*managerURL, error) {
+func NewStorage(cfg Configer, logger Loggerer, db DataBaser) (*managerURL, error) {
 	if cfg.GetDBUse() {
 		manager.db = db
 	} else {
@@ -257,4 +258,13 @@ func (u *managerURL) Ping() bool {
 		return false
 	}
 	return true
+}
+
+// GetStats возвращает статистику сервиса
+func (u *managerURL) GetStats() (models.Stats, error) {
+	if u.db != nil {
+		return u.db.GetStats()
+	}
+	//Мы же вроде не храним пользователей в файловой базе
+	return models.Stats{URLs: len(u.URLs)}, nil
 }

@@ -23,6 +23,12 @@ type URLForBatchResponse struct {
 	ShortURL      string `json:"short_url"`
 }
 
+// Stats структура статистики сервиса
+type Stats struct {
+	URLs  int `json:"urls"`
+	Users int `json:"users"`
+}
+
 // UserIDStringType User ID String Type
 type UserIDStringType string
 
@@ -40,6 +46,8 @@ const (
 	SavePath = "FILE_STORAGE_PATH"
 	// DBConnectString DB Connect String env
 	DBConnectString = "DATABASE_DSN"
+	//TrustedSubnet trusted subnet setup in CIDR format
+	TrustedSubnet = "TRUSTED_SUBNET"
 	//CodeLength длина сокращенного кода урл
 	CodeLength = 8
 	// CodeGenerateAttempts число попыток создать уникальный код
@@ -48,6 +56,8 @@ const (
 	HTTPSEnabled = "ENABLE_HTTPS"
 	// CONFIG path to config file (json)
 	CONFIG = "CONFIG"
+	//RealIP название хидера в котором мы ожидаем реальный айпи клиента от, например, прокси.
+	RealIP = "X-Real-IP"
 )
 
 // AlreadyHaveThisURLError если урл уже существует

@@ -35,16 +35,6 @@ type PgxIface interface {
 	Ping(context.Context) error
 }
 
-//type PgxIface interface {
-//	Begin(context.Context) (pgx.Tx, error)
-//	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
-//	QueryRow(context.Context, string, ...interface{}) pgx.Row
-//	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
-//	Ping(context.Context) error
-//	Prepare(context.Context, string, string) (*pgconn.StatementDescription, error)
-//	Close(context.Context) error
-//}
-
 // DeleteTask задача на удаление
 type DeleteTask struct {
 	Codes  []string
@@ -247,6 +237,24 @@ func (db *managerDB) CreateUser() (string, error) {
 func (db *managerDB) SetCon(mockCon PgxIface) {
 	db.conn = mockCon
 	db.configured = true
+}
+
+// GetStats возвращает статистику сервиса
+func (db *managerDB) GetStats() (m models.Stats, err error) {
+	var URLs, users int
+	defer func() {
+		m.Users = users
+		m.URLs = URLs
+	}()
+	err = db.conn.QueryRow(context.Background(), `SELECT count(*) FROM urls`).Scan(&URLs)
+	if err != nil {
+		return m, fmt.Errorf("query shortcode error: %w", err)
+	}
+	err = db.conn.QueryRow(context.Background(), `SELECT count(*) FROM users`).Scan(&users)
+	if err != nil {
+		return m, fmt.Errorf("query shortcode error: %w", err)
+	}
+	return m, nil
 }
 
 // Ping базы данных
