@@ -4,6 +4,9 @@ package users
 import (
 	"context"
 	"fmt"
+	"github.com/chemax/url-shorter/logger"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"net/http"
 	"time"
 
@@ -20,8 +23,12 @@ type Configer interface {
 
 // Loggerer интерфейс логера
 type Loggerer interface {
+	Warn(args ...interface{})
 	Debug(args ...interface{})
+	Info(args ...interface{})
+	Warnln(args ...interface{})
 	Error(args ...interface{})
+	Errorln(args ...interface{})
 }
 
 type users struct {
@@ -43,7 +50,7 @@ type dataBaser interface {
 	Use() bool
 }
 
-func (u *users) createNewUser(w http.ResponseWriter) (userID string, err error) {
+func (u *users) createUser() (userID, JWTToken string, err error) {
 	u.log.Debug("Create new user")
 	if !u.Use() {
 		userID = uuid.New().String()
@@ -51,9 +58,14 @@ func (u *users) createNewUser(w http.ResponseWriter) (userID string, err error) 
 		userID, err = u.CreateUser()
 	}
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	token, err := usersManager.BuildJWTString(userID)
+	return userID, token, err
+}
+
+func (u *users) writeUserToResponse(w http.ResponseWriter) (userID string, err error) {
+	userID, token, err := usersManager.createUser()
 	if err != nil {
 		return "", err
 	}
@@ -84,7 +96,7 @@ func (u *users) Middleware(next http.Handler) http.Handler {
 			return
 		}
 		if err != nil || (tkn != nil && !tkn.Valid) {
-			userID, err = u.createNewUser(w)
+			userID, err = u.writeUserToResponse(w)
 			if err != nil {
 				usersManager.log.Error(err)
 				w.WriteHeader(http.StatusBadRequest)
@@ -113,6 +125,52 @@ func (u *users) BuildJWTString(userID string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+// GetFromContextGRPC gets jwt token from context.
+func GetFromContextGRPC(ctx context.Context) (string, error) {
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		values := md.Get("access-token")
+		if len(values) > 0 {
+			return values[0], nil
+		}
+	}
+
+	return "", fmt.Errorf("no data")
+}
+
+func (u *users) JWTInterceptor(log *logger.Log) grpc.UnaryServerInterceptor {
+	log.Debug("JWT interceptor enabled")
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+		var tkn *jwt.Token
+		var userID string
+		var token string
+		claims := &claimsStruct{}
+
+		token, err := GetFromContextGRPC(ctx)
+		if err != nil {
+			userID, token, err = u.createUser() //TODO встроить в контекст нового пользователя
+			if err != nil {
+				usersManager.log.Error(err)
+				return nil, err
+			}
+		}
+		tkn, err = jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (any, error) {
+			return []byte(u.SecretKey), nil
+		})
+		if err != nil || (tkn != nil && tkn.Valid) {
+			userID, token, err = u.createUser() //TODO встроить в контекст нового пользователя
+			if err != nil {
+				usersManager.log.Error(err)
+				return nil, err
+			}
+		}
+		newCTX := context.WithValue(ctx, models.UserID, userID)
+		newCTX = context.WithValue(newCTX, "access-token", token)
+		resp, err := handler(newCTX, req)
+
+		return resp, err
+	}
 }
 
 // NewUser возвращает юзер менеджера

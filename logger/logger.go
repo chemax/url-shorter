@@ -38,13 +38,13 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
-type log struct {
+type Log struct {
 	*zap.SugaredLogger
 }
 
 // NewLogger делает новый логгер
-func NewLogger() (*log, error) {
-	l := &log{}
+func NewLogger() (*Log, error) {
+	l := &Log{}
 	cfgLogger := zap.NewDevelopmentConfig()
 	opts := []zap.Option{
 		zap.AddCallerSkip(1), // traverse call depth for more useful log lines
@@ -60,37 +60,37 @@ func NewLogger() (*log, error) {
 }
 
 // Shutdown зачищает логгер
-func (l *log) Shutdown() error {
+func (l *Log) Shutdown() error {
 	return l.Sync()
 }
 
 // Debug debug
-func (l *log) Debug(args ...interface{}) {
+func (l *Log) Debug(args ...interface{}) {
 	l.Debugln(args)
 }
 
 // Info info log
-func (l *log) Info(args ...interface{}) {
+func (l *Log) Info(args ...interface{}) {
 	l.Infoln(args)
 }
 
 // Warn warning log
-func (l *log) Warn(args ...interface{}) {
+func (l *Log) Warn(args ...interface{}) {
 	l.Warnln(args)
 }
 
 // Error error log
-func (l *log) Error(args ...interface{}) {
+func (l *Log) Error(args ...interface{}) {
 	l.Errorln(args)
 }
 
 // Fatal debug
-func (l *log) Fatal(args ...interface{}) {
+func (l *Log) Fatal(args ...interface{}) {
 	l.Fatalln(args)
 }
 
 // Middleware для логирования хттп запросов
-func (l *log) Middleware(next http.Handler) http.Handler {
+func (l *Log) Middleware(next http.Handler) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Del("Content-Length")

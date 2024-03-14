@@ -266,5 +266,5 @@ func (u *managerURL) GetStats() (models.Stats, error) {
 		return u.db.GetStats()
 	}
 	//Мы же вроде не храним пользователей в файловой базе
-	return models.Stats{URLs: len(u.URLs)}, nil
+	return models.Stats{URLs: int64(len(u.URLs))}, nil
 }

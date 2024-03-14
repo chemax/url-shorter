@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/chemax/url-shorter/models"
 	pb "github.com/chemax/url-shorter/proto"
-	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"net/url"
@@ -54,8 +53,8 @@ type URLShortenerServer struct {
 }
 
 // New creates a new URLShortenerServer
-func New(s Storager, cfg Configer, log Loggerer, users Userser) URLShortenerServer {
-	return URLShortenerServer{
+func New(s Storager, cfg Configer, log Loggerer, users Userser) *URLShortenerServer {
+	return &URLShortenerServer{
 		log:     log,
 		storage: s,
 		Cfg:     cfg,
@@ -63,14 +62,14 @@ func New(s Storager, cfg Configer, log Loggerer, users Userser) URLShortenerServ
 }
 
 // Ping связь с базой
-func (h *URLShortenerServer) Ping(ctx context.Context, in *pb.PingRequest, opts ...grpc.CallOption) (*pb.PingResponse, error) {
+func (h *URLShortenerServer) Ping(ctx context.Context, in *pb.PingRequest) (*pb.PingResponse, error) {
 	var response pb.PingResponse
 	response.Message = h.storage.Ping()
 	return &response, nil
 }
 
 // GetOriginalURL получить адрес по его короткому коду
-func (h *URLShortenerServer) GetOriginalURL(ctx context.Context, in *pb.UnshortURLRequest, opts ...grpc.CallOption) (*pb.UnshortURLResponse, error) {
+func (h *URLShortenerServer) GetOriginalURL(ctx context.Context, in *pb.UnshortURLRequest) (*pb.UnshortURLResponse, error) {
 	var response pb.UnshortURLResponse
 	var err error
 	response.OriginalUrl, err = h.storage.GetURL(in.ShortUrl)
@@ -78,7 +77,7 @@ func (h *URLShortenerServer) GetOriginalURL(ctx context.Context, in *pb.UnshortU
 }
 
 // GetURLsByUserID получить все адреса пользователя
-func (h *URLShortenerServer) GetURLsByUserID(ctx context.Context, in *pb.GetUserURLsRequest, opts ...grpc.CallOption) (*pb.GetUserURLsResponse, error) {
+func (h *URLShortenerServer) GetURLsByUserID(ctx context.Context, in *pb.GetUserURLsRequest) (*pb.GetUserURLsResponse, error) {
 	var response pb.GetUserURLsResponse
 	userID := ctx.Value(models.UserID).(string)
 	userURLs, err := h.storage.GetUserURLs(userID)
@@ -96,7 +95,7 @@ func (h *URLShortenerServer) GetURLsByUserID(ctx context.Context, in *pb.GetUser
 }
 
 // CreateURL зашортить URL
-func (h *URLShortenerServer) CreateURL(ctx context.Context, in *pb.ShortURLRequest, opts ...grpc.CallOption) (*pb.ShortURLResponse, error) {
+func (h *URLShortenerServer) CreateURL(ctx context.Context, in *pb.ShortURLRequest) (*pb.ShortURLResponse, error) {
 	var response pb.ShortURLResponse
 	requestURI, err := url.ParseRequestURI(in.Url)
 	if err != nil {
@@ -111,7 +110,7 @@ func (h *URLShortenerServer) CreateURL(ctx context.Context, in *pb.ShortURLReque
 }
 
 // CreateURLs зашортить пачку URL
-func (h *URLShortenerServer) CreateURLs(ctx context.Context, in *pb.ShortURLsBatchRequest, opts ...grpc.CallOption) (*pb.ShortURLsBatchResponse, error) {
+func (h *URLShortenerServer) CreateURLs(ctx context.Context, in *pb.ShortURLsBatchRequest) (*pb.ShortURLsBatchResponse, error) {
 	var response pb.ShortURLsBatchResponse
 	var URLsArr []*models.URLForBatch
 	for _, v := range in.Dto {
@@ -134,13 +133,13 @@ func (h *URLShortenerServer) CreateURLs(ctx context.Context, in *pb.ShortURLsBat
 }
 
 // DeleteURLs удалить пачку урлов.
-func (h *URLShortenerServer) DeleteURLs(ctx context.Context, in *pb.DeleteURLsRequest, opts ...grpc.CallOption) (*pb.DeleteURLsResponse, error) {
+func (h *URLShortenerServer) DeleteURLs(ctx context.Context, in *pb.DeleteURLsRequest) (*pb.DeleteURLsResponse, error) {
 	h.storage.DeleteListFor(in.Urls, ctx.Value(models.UserID).(string))
 	return &pb.DeleteURLsResponse{}, nil
 }
 
 // Stat статистика сервиса под защитой могучей проверки адреса
-func (h *URLShortenerServer) Stat(ctx context.Context, in *pb.StatRequest, opts ...grpc.CallOption) (*pb.StatResponse, error) {
+func (h *URLShortenerServer) Stat(ctx context.Context, in *pb.StatRequest) (*pb.StatResponse, error) {
 	if h.checkIP(ctx.Value(models.RealIP).(string)) {
 		stat, err := h.storage.GetStats()
 		if err != nil {

@@ -61,7 +61,7 @@ func Run() (err error) {
 	grpcHandler := gRPCHandlers.New(st, cfg, log, usersObj)
 	//тут надо вэйтгруппу пробросить
 	go func() {
-		err := grpcserver.New(ctx, cfg, log, sig, grpcHandler)
+		err := grpcserver.New(ctx, cfg, log, sig, grpcHandler, usersObj)
 		if err != nil {
 			log.Error(err)
 		}
