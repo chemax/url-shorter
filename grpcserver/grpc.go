@@ -10,7 +10,6 @@ import (
 	"github.com/chemax/url-shorter/grpcserver/interceptors"
 	"github.com/chemax/url-shorter/internal/gRPCHandlers"
 	"github.com/chemax/url-shorter/logger"
-	_ "github.com/chemax/url-shorter/logger"
 	pb "github.com/chemax/url-shorter/proto"
 	"google.golang.org/grpc"
 )
