@@ -8,7 +8,7 @@ import (
 
 	"github.com/chemax/url-shorter/config"
 	"github.com/chemax/url-shorter/grpcserver/interceptors"
-	"github.com/chemax/url-shorter/internal/gRPCHandlers"
+	"github.com/chemax/url-shorter/internal/grpchandlers"
 	"github.com/chemax/url-shorter/logger"
 	pb "github.com/chemax/url-shorter/proto"
 	"google.golang.org/grpc"
@@ -31,7 +31,7 @@ type Userser interface {
 
 // New возвращает grpc сервер
 // контекст должен использоваться для грейсфула, конфиг для порта и всё такое, сиг тоже для грейсфула.
-func New(ctx context.Context, cfg *config.Config, log *logger.Log, sig chan os.Signal, h *gRPCHandlers.URLShortenerServer, users Userser) error {
+func New(ctx context.Context, cfg *config.Config, log *logger.Log, sig chan os.Signal, h *grpchandlers.URLShortenerServer, users Userser) error {
 	listen, err := net.Listen("tcp", ":3200")
 	if err != nil {
 		return err

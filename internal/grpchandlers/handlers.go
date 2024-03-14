@@ -1,5 +1,5 @@
-// Package gRPCHandlers обработчики и перехватчики для gRPC сервера
-package gRPCHandlers
+// Package grpchandlers обработчики и перехватчики для gRPC сервера
+package grpchandlers
 
 import (
 	"context"
