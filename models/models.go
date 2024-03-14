@@ -38,6 +38,8 @@ const (
 	TokenCookieName = "token"
 	// UserID отдельный тип для приведения к нему из контекста
 	UserID = UserIDStringType("userID")
+	// AccessToken название токена для спелчекра
+	AccessToken = UserIDStringType("access-token")
 	// ServerAddressEnv Server Address Env
 	ServerAddressEnv = "SERVER_ADDRESS"
 	// BaseURLEnv Base URL Env

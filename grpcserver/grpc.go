@@ -30,6 +30,8 @@ type Userser interface {
 	JWTInterceptor(log *logger.Log) grpc.UnaryServerInterceptor
 }
 
+// New возвращает grpc сервер
+// контекст должен использоваться для грейсфула, конфиг для порта и всё такое, сиг тоже для грейсфула.
 func New(ctx context.Context, cfg *config.Config, log *logger.Log, sig chan os.Signal, h *gRPCHandlers.URLShortenerServer, users Userser) error {
 	listen, err := net.Listen("tcp", ":3200")
 	if err != nil {

@@ -140,6 +140,7 @@ func GetFromContextGRPC(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("no data")
 }
 
+// JWTInterceptor аналог мидлвари но для gRPC
 func (u *users) JWTInterceptor(log *logger.Log) grpc.UnaryServerInterceptor {
 	log.Debug("JWT interceptor enabled")
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
@@ -167,7 +168,7 @@ func (u *users) JWTInterceptor(log *logger.Log) grpc.UnaryServerInterceptor {
 			}
 		}
 		newCTX := context.WithValue(ctx, models.UserID, userID)
-		newCTX = context.WithValue(newCTX, "access-token", token)
+		newCTX = context.WithValue(newCTX, models.AccessToken, token)
 		resp, err := handler(newCTX, req)
 
 		return resp, err
