@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package url_shortener;
+
+option go_package = "urlshortener/api";
+
+message PingRequest {}
+message PingResponse {
+  bool message = 1;
+}
+
+message UnshortURLRequest {
+  string short_url = 1;
+}
+message UnshortURLResponse {
+  string original_url = 1;
+}
+
+message GetUserURLsRequest {
+  string user_id = 1;
+}
+message GetUserURLsResponse {
+  repeated URLEntity result = 1;
+}
+
+message ShortURLRequest {
+  string url = 1;
+}
+
+message ShortURLResponse {
+  string result = 1;
+}
+
+message ShortURLsBatchRequest {
+  message Task {
+    string correlation_id = 1;
+    string original_url = 2;
+  }
+
+  repeated Task dto = 1;
+}
+
+message ShortURLsBatchResponse {
+  message Data {
+    string correlation_id = 1;
+    string short_url = 2;
+  }
+
+  repeated Data result = 1;
+}
+
+message DeleteURLsRequest {
+  repeated string urls = 1;
+}
+message DeleteURLsResponse {}
+
+message StatRequest {}
+message StatResponse {
+  int64 urls = 1;
+  int64 users = 2;
+}
+
+message URLEntity {
+  string short_url = 3;
+  string original_url = 4;
+}
+
+service URLShortenerV1 {
+  rpc Ping(PingRequest) returns (PingResponse) {}
+  rpc GetOriginalURL(UnshortURLRequest) returns (UnshortURLResponse) {}
+  rpc GetURLsByUserID(GetUserURLsRequest) returns (GetUserURLsResponse) {}
+  rpc CreateURL(ShortURLRequest) returns (ShortURLResponse) {}
+  rpc CreateURLs(ShortURLsBatchRequest) returns (ShortURLsBatchResponse) {}
+  rpc DeleteURLs(DeleteURLsRequest) returns (DeleteURLsResponse) {}
+  rpc Stat(StatRequest) returns (StatResponse) {}
+}

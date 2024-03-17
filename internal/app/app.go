@@ -10,6 +10,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/chemax/url-shorter/grpcserver"
+	"github.com/chemax/url-shorter/internal/grpchandlers"
+
 	"github.com/chemax/url-shorter/httpserver"
 
 	"github.com/chemax/url-shorter/config"
@@ -56,7 +59,14 @@ func Run() (err error) {
 	}
 
 	handler := handlers.NewHandlers(st, cfg, log, usersObj)
-
+	grpcHandler := grpchandlers.New(st, cfg, log, usersObj)
+	//тут надо вэйтгруппу пробросить
+	go func() {
+		err := grpcserver.New(ctx, cfg, log, sig, grpcHandler, usersObj)
+		if err != nil {
+			log.Error(err)
+		}
+	}()
 	err = httpserver.New(ctx, cfg, log, handler.Router, sig)
 
 	if errors.Is(err, http.ErrServerClosed) {

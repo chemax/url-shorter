@@ -42,7 +42,7 @@ func (h *handlers) getUserURLsHandler(res http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (h *handlers) getHandler(res http.ResponseWriter, r *http.Request) {
+func (h *handlers) unshortHandler(res http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	parsedURL, err := h.storage.GetURL(id)
 	if err != nil {

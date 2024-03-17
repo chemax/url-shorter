@@ -243,8 +243,8 @@ func (db *managerDB) SetCon(mockCon PgxIface) {
 func (db *managerDB) GetStats() (m models.Stats, err error) {
 	var URLs, users int
 	defer func() {
-		m.Users = users
-		m.URLs = URLs
+		m.Users = int64(users)
+		m.URLs = int64(URLs)
 	}()
 	err = db.conn.QueryRow(context.Background(), `SELECT count(*) FROM urls`).Scan(&URLs)
 	if err != nil {

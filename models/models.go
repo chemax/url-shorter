@@ -25,8 +25,8 @@ type URLForBatchResponse struct {
 
 // Stats структура статистики сервиса
 type Stats struct {
-	URLs  int `json:"urls"`
-	Users int `json:"users"`
+	URLs  int64 `json:"urls"`
+	Users int64 `json:"users"`
 }
 
 // UserIDStringType User ID String Type
@@ -38,6 +38,8 @@ const (
 	TokenCookieName = "token"
 	// UserID отдельный тип для приведения к нему из контекста
 	UserID = UserIDStringType("userID")
+	// AccessToken название токена для спелчекра
+	AccessToken = UserIDStringType("access-token")
 	// ServerAddressEnv Server Address Env
 	ServerAddressEnv = "SERVER_ADDRESS"
 	// BaseURLEnv Base URL Env

@@ -45,7 +45,7 @@ func getBody(req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func (h *handlers) postHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) shortPlainHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -89,7 +89,7 @@ func (h *handlers) postHandler(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (h *handlers) xJSONBatchPostHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) shortJSONBatchHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
@@ -132,7 +132,7 @@ func (h *handlers) xJSONBatchPostHandler(res http.ResponseWriter, req *http.Requ
 }
 
 // todo переименовать нормально
-func (h *handlers) xJSONPostHandler(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) shortJSONHandler(res http.ResponseWriter, req *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
